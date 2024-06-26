@@ -1,6 +1,8 @@
 -- Imports
 local Vec2 = require("Vector2")
 local UI_Hearth = require("Health")
+local Laser = require("Laser")
+local Enemy = require("Enemy")
 
 local Hero = {}
 setmetatable(Hero, Vec2)
@@ -66,17 +68,17 @@ function Hero:MapCollision(hero, dt)
     if hero.x >= w - hero.img:getWidth() then
         hero.x = hero.x - hero.img:getWidth()
         hero.vx = (hero.vx * -1)
-        hero.vx = hero.vx +  (100 * dt)
+        hero.vx = hero.vx + (100 * dt)
     end
     if hero.y <= hero.img:getHeight() then
         hero.y = hero.y + hero.img:getHeight()
         hero.vy = (hero.vy * -1)
-        hero.vy = hero.vy -  (100 * dt)
+        hero.vy = hero.vy - (100 * dt)
     end
     if hero.y >= h - hero.img:getHeight() then
         hero.y = hero.y - hero.img:getHeight()
         hero.vy = (hero.vy * -1)
-        hero.vy = hero.vy +  (100 * dt)
+        hero.vy = hero.vy + (100 * dt)
     end
 end
 
@@ -91,8 +93,8 @@ function Hero:KeysControl(hero, engine, dt)
     if love.keyboard.isDown("space") then
         local angX = math.cos(shipAngRad)
         local angY = math.sin(shipAngRad)
-        hero.vx = hero.vx + angX * (dt/20)
-        hero.vy = hero.vy + angY * (dt/20)
+        hero.vx = hero.vx + angX * (dt / 20)
+        hero.vy = hero.vy + angY * (dt / 20)
         engine.bEngine = true
     else
         engine.bEngine = false
@@ -146,12 +148,58 @@ end
 function Hero:Update(dt)
     -- Ship Start animation
     if not Vec2.bStart then
-        love.audio.play(startSound) 
+        love.audio.play(startSound)
         iStart = iStart - dt
         hero.y = hero.y - (dt * 100)
         if iStart <= 0 then
             startSound:stop()
             Vec2.bStart = true
+        end
+    end
+
+    local nearest = GetNearest(Enemy.list, Hero.hero)
+    if OnScreen(nearest) then
+        nearOnScreen = nearest
+        heroSpawnCDR = heroSpawnCDR - dt
+        if heroSpawnCDR <= 0 then
+            Laser:NewEnemy("hero", Hero.hero.x, Hero.hero.y, Hero.hero.r)
+            heroSpawnCDR = maxSpawnCDR
+        end
+    end
+
+        -- TODO LASER UPDATE LOGIC FUCKED UP BETWEEN ENEMY LASER AND HERO LASER
+    -- Set Velocity of laser
+    if Laser.list then
+        for i = #Laser.list, 1, -1 do
+            local laser = Laser.list[i]
+
+            if laser.type == "hero" then
+                if nearOnScreen then
+
+                    if laser.state == "noTarget" then
+                        laser.target = nearest
+                        laser.state = "Attack"
+                    end
+
+                    if laser.state == "Attack" then
+                        Laser:SetVelocity(laser, dt)
+                    end
+
+                    if Vec2:IsCollide(laser, nearest) then
+                        nearest.hp = nearest.hp - 1
+                        laser.target.hp = laser.target.hp - 1
+                        laser.bDelete = true
+                    end
+
+                    if laser.target.hp < 1 and laser.state == "Attack" then
+                        laser.state = nil
+                        if laser.state == nil then
+                            laser.x = laser.x * dt
+                            laser.y = laser.y * dt
+                        end
+                    end
+                end
+            end
         end
     end
 
@@ -169,19 +217,20 @@ function Hero:Update(dt)
 end
 
 function Hero:Draw()
+    UI_Hearth:Draw(hero.hp)
+
     love.graphics.draw(hero.img, hero.x, hero.y, math.rad(hero.r), hero.sx, hero.sy, hero.img:getWidth() / 2,
         hero.img:getHeight() / 2)
-
 
     if engine.bEngine then
         love.graphics.draw(engine.img, hero.x, hero.y, math.rad(hero.r), engine.sx, engine.sy,
             engine.img:getWidth() / 2, engine.img:getHeight() / 2)
     end
 
- --   love.graphics.print("iDash: " .. hero.iDash, w / 2, 400)
---    love.graphics.print("bDash: " .. tostring(hero.bDash), w / 2, 800)
- --   love.graphics.print("dist: " .. dist, w / 2, 100)
-  --  love.graphics.print("dashCDR: " .. dashCDR, w / 4, 500)
+    --   love.graphics.print("iDash: " .. hero.iDash, w / 2, 400)
+    --    love.graphics.print("bDash: " .. tostring(hero.bDash), w / 2, 800)
+    --   love.graphics.print("dist: " .. dist, w / 2, 100)
+    --  love.graphics.print("dashCDR: " .. dashCDR, w / 4, 500)
 end
 
 return Hero

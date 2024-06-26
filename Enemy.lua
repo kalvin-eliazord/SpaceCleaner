@@ -1,5 +1,5 @@
 local Vec2 = require("Vector2")
-local Hero = require("Hero")
+local Laser = require("Laser")
 
 local Enemy = {}
 Enemy.__index = Enemy
@@ -66,22 +66,64 @@ function Enemy:Update(dt)
 
     -- Set Velocity
     if Enemy.list then
+
         for i = #Enemy.list, 1, -1 do
             local enem = Enemy.list[i]
+
             -- if enemy type 1 or 2
-            if enem.type == 6 then
-                Vec2:PursueTarget(enem, Hero.hero, dt, 100)
-            elseif enem.type == 4 then
-                Vec2:PursueTarget(enem, Hero.hero, dt, 0)
-            end
-            if enem.hp <= 0 then
-                -- explosion creation
-                for j = 1, 3 do
-                    Enemy:NewExplosion(enem.x+love.math.random(-15, 15), enem.y+love.math.random(-10, 10))
+            for l, enem in ipairs(Enemy.list) do
+                if Vec2:IsCollide(enem, Hero.hero) then
+                    Hero.hero.hp = Hero.hero.hp - 1
+                    enem.hp = enem.hp - 1
+                    Enemy:NewExplosion(Hero.hero.x + math.random(-5, 5), Hero.hero.y + math.random(-5, 5), dt)
                 end
-                table.remove(Enemy.list, i)
+
+                if enem.type == 4 or enem.type == 2 then
+                    enemSpawnCDR = enemSpawnCDR - dt
+
+                    if enemSpawnCDR <= 0 then
+                        Laser:NewEnemy(enem, Hero.hero, enem.r)
+                        enemSpawnCDR = maxSpawnCDR
+                    end
+                end
+
+                -- Set Velocity of laser
+                if Laser.list then
+                    for i = #Laser.list, 1, -1 do
+                        local laser = Laser.list[i]
+                    end
+
+                    if Vec2:IsCollide(laser, Hero.hero) then
+                        laser.bDelete = true
+                        Hero.hero.hp = Hero.hero.hp - 1
+                    end
+                end
             end
         end
+
+        laser.x = laser.x + laser.vx * dt
+        laser.y = laser.y + laser.vy * dt
+    end
+
+    if Vec2:IsOutScreen(laser) then
+        laser.bDelete = true
+    end
+
+    if laser.bDelete then
+        table.remove(Laser.list, i)
+    end
+
+    if enem.type == 6 then
+        Vec2:PursueTarget(enem, Hero.hero, dt, 100)
+    elseif enem.type == 4 then
+        Vec2:PursueTarget(enem, Hero.hero, dt, 0)
+    end
+    if enem.hp <= 0 then
+        -- explosion creation
+        for j = 1, 3 do
+            Enemy:NewExplosion(enem.x + love.math.random(-15, 15), enem.y + love.math.random(-10, 10))
+        end
+        table.remove(Enemy.list, i)
     end
 
     -- Explosion

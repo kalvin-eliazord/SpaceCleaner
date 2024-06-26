@@ -20,11 +20,18 @@ function SoundsInit(pScreens)
 
         Sound.list[state] = NewSound(state, volume, "stream")
     end
+
+    Sound.list["curr"] = nil
 end
 
 function PlayStream(pState)
     if not Sound.list[pState]:isPlaying() then
+        if Sound.list["curr"] and Sound.list["curr"]:isPlaying() then
+            Sound.list["curr"]:stop()
+        end
+
         love.audio.play(Sound.list[pState])
+        Sound.list["curr"] = Sound.list[pState]
     end
 end
 

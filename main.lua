@@ -106,7 +106,6 @@ function love.draw()
     Waste:Draw()
     if Game.currScreen == "inGame" then
         Hero:Draw()
-        Health:Draw()
     end
 
     Laser:Draw()
