@@ -9,69 +9,39 @@ setmetatable(Laser, {
 local w = 1024
 local h = 768
 
-function Laser:NewHero(pHero, r)
-    if not Laser.list then
-        Laser.list = {}
-    end
-
-    local laser = Vec2:New(pHero.x, pHero.y)
-    laser.r = r
-    laser.sx = 1
-    laser.sy = 1
-    laser.vx = 0
-    laser.vy = 0
-    laser.target = {}
-    laser.state = "noTarget"
-    laser.type = pType
-
-    laser.img = love.graphics.newImage("images/lasers/laser1.png")
-
-    local offsetX = math.cos(math.rad(r))
-    local offsetY = math.sin(math.rad(r))
-    laser.x = x + offsetX
-    laser.y = y + offsetY
-
-    setmetatable(laser, self)
-    table.insert(Laser.list, laser)
+function GetAngle(pVec1, pVec2)
+    return math.atan2(pVec2.y - pVec1.y, pVec2.x - pVec1.x)
 end
 
-function Laser:NewEnemy(pEnem, pHero, r)
+function Laser:New(pType, pSrc, pDst)
     if not Laser.list then
         Laser.list = {}
     end
 
-    local laser = Vec2:New(pEnem.x, pEnem.y)
-    laser.r = r
+    local laser = Vec2:New(pSrc.x, pSrc.y)
+    laser.r = pSrc.r
     laser.sx = 1
     laser.sy = 1
     laser.vx = 0
     laser.vy = 0
     laser.target = {}
     laser.state = "noTarget"
-    laser.type = pType
 
-    local dist = math.sqrt((laser.x - pHero.x) ^ 2 + (laser.y - pHero.y) ^ 2)
-    local toEnemyAng = math.angle(laser.x, laser.y, pHero.x, pHero.y)
-
+    local dstAngle = GetAngle(laser, pDst)
     local heroSpeed = 300
-    local angX = math.cos(toEnemyAng)
-    local angY = math.sin(toEnemyAng)
-
+    local angX = math.cos(dstAngle)
+    local angY = math.sin(dstAngle)
     laser.vx = angX * heroSpeed
     laser.vy = angY * heroSpeed
-    laser.img = love.graphics.newImage("images/lasers/laser2.png")
 
-    local offsetX = math.cos(math.rad(r))
-    local offsetY = math.sin(math.rad(r))
-    laser.x = x + offsetX
-    laser.y = y + offsetY
+    laser.img = love.graphics.newImage("images/lasers/laser"..pType..".png")
+    local offsetX = math.cos(math.rad(laser.r))
+    local offsetY = math.sin(math.rad(laser.r))
+    laser.x = laser.vx + offsetX
+    laser.y = laser.vy + offsetY
 
     setmetatable(laser, self)
     table.insert(Laser.list, laser)
-end
-
-function math.angle(x1, y1, x2, y2)
-    return math.atan2(y2 - y1, x2 - x1)
 end
 
 function GetNearest(pList, pLaser)
@@ -93,11 +63,11 @@ end
 
 function Laser:SetVelocity(pLaser, dt)
     local dist = math.sqrt((pLaser.x - pLaser.target.x) ^ 2 + (pLaser.y - pLaser.target.y) ^ 2)
-    local toEnemyAng = math.angle(pLaser.x, pLaser.y, pLaser.target.x, pLaser.target.y)
+    local toTargetAng = GetAngle(pLaser, pLaser.target)
 
     local heroSpeed = 300
-    local angX = math.cos(toEnemyAng)
-    local angY = math.sin(toEnemyAng)
+    local angX = math.cos(toTargetAng)
+    local angY = math.sin(toTargetAng)
 
     pLaser.vx = angX * heroSpeed
     pLaser.vy = angY * heroSpeed

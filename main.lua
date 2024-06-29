@@ -10,7 +10,6 @@ local Enemy = require("Enemy")
 local Sound = require("Sound")
 local Map = require("Map")
 
-
 local Game = {}
 
 function GameInit()
@@ -19,7 +18,7 @@ function GameInit()
     game.screens = {}
     game.screens[1] = "menu"
     game.screens[2] = "inGame"
-    --game.screens[3] = "gameOver" TODO
+    -- game.screens[3] = "gameOver" TODO
     game.currScreen = game.screens[1]
 
     game.gSizes = {}
@@ -38,7 +37,7 @@ function love.load()
     love.window.setMode(Game.gSizes.w, Game.gSizes.h)
     Sound.Load(Game.screens)
     Map.Load(Game.screens)
-    
+
     Hero:Load(Game.gSizes)
     Waste:Load()
     Laser:Load()
@@ -46,27 +45,20 @@ function love.load()
 end
 
 function love.update(dt)
---    if not Game.bPause then
+    --    if not Game.bPause then
     Sound.Update(Game.currScreen)
     Map.Update(dt)
     Waste:Update(dt)
 
     if Game.currScreen == "inGame" then
-            Sound.streamState = Game.currScreen
-            Hero:Update(dt)
-            Laser:Update(dt)
-
-            if Vec2.bStart then
-                Waste:Update(dt)
-                Enemy:Update(dt)
-            end
-
-            
+        Sound.streamState = Game.currScreen
+        Hero:Update(dt)
+        Enemy:Update(dt)
     elseif Game.currScreen == "menu" then
         Map.TitleUpdate(dt)
-      --  Waste:Update(dt)  make it dissapear in inGame? TODO ?
+        --  Waste:Update(dt)  make it dissapear in inGame? TODO ?
     end
--- end
+    -- end
 end
 
 function love.keypressed(pKey)

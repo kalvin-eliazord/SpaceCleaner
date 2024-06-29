@@ -146,7 +146,7 @@ function Hero:SetDash(hero, engine, dt)
 end
 
 function Hero:Update(dt)
-    -- Ship Start animation
+    -- Ship Start animation => GameState 
     if not Vec2.bStart then
         love.audio.play(startSound)
         iStart = iStart - dt
@@ -157,46 +157,38 @@ function Hero:Update(dt)
         end
     end
 
-    local nearest = GetNearest(Enemy.list, Hero.hero)
+    -- Hero laser New
+    local nearest = GetNearest(Enemy.list, hero)
     if OnScreen(nearest) then
-        nearOnScreen = nearest
         heroSpawnCDR = heroSpawnCDR - dt
         if heroSpawnCDR <= 0 then
-            Laser:NewEnemy("hero", Hero.hero.x, Hero.hero.y, Hero.hero.r)
+            Laser:New(1, hero, nearest)
             heroSpawnCDR = maxSpawnCDR
         end
-    end
 
-        -- TODO LASER UPDATE LOGIC FUCKED UP BETWEEN ENEMY LASER AND HERO LASER
-    -- Set Velocity of laser
-    if Laser.list then
-        for i = #Laser.list, 1, -1 do
-            local laser = Laser.list[i]
+        -- Set Velocity of laser
+        if Laser.list then
+            for i = #Laser.list, 1, -1 do
+                local laser = Laser.list[i]
 
-            if laser.type == "hero" then
-                if nearOnScreen then
+                if laser.state == "noTarget" then
+                    laser.target = nearest
+                    laser.state = "Attack"
+                elseif laser.state == "Attack" then
+                    Laser:SetVelocity(laser, dt)
+                end
 
-                    if laser.state == "noTarget" then
-                        laser.target = nearest
-                        laser.state = "Attack"
-                    end
+                if Hero:IsCollide(laser, nearest) then
+                    nearest.hp = nearest.hp - 1
+                    laser.target.hp = laser.target.hp - 1
+                    laser.bDelete = true
+                end
 
-                    if laser.state == "Attack" then
-                        Laser:SetVelocity(laser, dt)
-                    end
-
-                    if Vec2:IsCollide(laser, nearest) then
-                        nearest.hp = nearest.hp - 1
-                        laser.target.hp = laser.target.hp - 1
-                        laser.bDelete = true
-                    end
-
-                    if laser.target.hp < 1 and laser.state == "Attack" then
-                        laser.state = nil
-                        if laser.state == nil then
-                            laser.x = laser.x * dt
-                            laser.y = laser.y * dt
-                        end
+                if laser.target.hp < 1 and laser.state == "Attack" then
+                    laser.state = nil
+                    if laser.state == nil then
+                        laser.x = laser.x * dt
+                        laser.y = laser.y * dt
                     end
                 end
             end
