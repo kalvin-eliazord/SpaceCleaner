@@ -62,7 +62,7 @@ function GetNearest(pList, pLaser)
 end
 
 function Laser:SetVelocity(pLaser, dt)
-    local dist = math.sqrt((pLaser.x - pLaser.target.x) ^ 2 + (pLaser.y - pLaser.target.y) ^ 2)
+    --local dist = math.sqrt((pLaser.x - pLaser.target.x) ^ 2 + (pLaser.y - pLaser.target.y) ^ 2)
     local toTargetAng = GetAngle(pLaser, pLaser.target)
 
     local heroSpeed = 300
@@ -106,7 +106,7 @@ end
 function Laser:Draw()
     if Laser.list then
         for i, laser in ipairs(Laser.list) do
-            love.graphics.draw(laser.img, laser.x, laser.y, laser.r, laser.sx, laser.sy)
+            love.graphics.draw(laser.img, laser.x, laser.y, 0, laser.sx, laser.sy)
             --     love.graphics.print("nearest" .. tostring(nearest), 0, 200)
             --   love.graphics.print("laserState   : " .. tostring(laser.state), 0, 300)
             -- love.graphics.print("laser.target.hp   : " .. tostring(laser.target.hp), 0, 600)

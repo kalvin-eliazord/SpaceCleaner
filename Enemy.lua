@@ -58,9 +58,6 @@ function Enemy:NewExplosion(x, y)
 end
 
 function Enemy:Update(dt)
-    local seed = os.time()
-    math.randomseed(seed)
-
     -- Enemy Spawn
     spawnCDR = spawnCDR - dt
     if spawnCDR <= 0 then
@@ -74,7 +71,6 @@ function Enemy:Update(dt)
             local enem = Enemy.list[i]
 
             -- if enemy type 1 or 2
-            -- for l, enem in ipairs(Enemy.list) do
             local hero = require("Hero").hero
             if Enemy:IsCollide(enem, hero) then
                 hero.hp = hero.hp - 1

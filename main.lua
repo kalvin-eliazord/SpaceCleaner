@@ -51,7 +51,7 @@ function love.update(dt)
     Waste:Update(dt)
 
     if Game.currScreen == "inGame" then
-        Sound.streamState = Game.currScreen
+      --  Sound.streamState = Game.currScreen
         Hero:Update(dt)
         Enemy:Update(dt)
     elseif Game.currScreen == "menu" then
@@ -102,5 +102,4 @@ function love.draw()
 
     Laser:Draw()
     Enemy:Draw()
-
 end
