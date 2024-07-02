@@ -24,8 +24,8 @@ function Vector2:SetImage(pImgName)
 end
 
 function Vector2:IsCollide(pVec1, pVec2)
-    if pVec1 == nil or pVec2 == nil then
-        return false
+    if not pVec1 or not pVec2 then
+        return
     end
     if pVec1 == pVec2 then
         return false

@@ -6,11 +6,15 @@ setmetatable(Laser, {
     __index = Vec2
 })
 
+-- Recode ev. about laser, new should be the same but the set Velocity should be different for hero and enemies
+
 local w = 1024
 local h = 768
 
 function GetAngle(pVec1, pVec2)
-    return math.atan2(pVec2.y - pVec1.y, pVec2.x - pVec1.x)
+    if pVec1 and pVec2 then
+        return math.atan2(pVec2.y - pVec1.y, pVec2.x - pVec1.x)
+    end
 end
 
 function Laser:New(pType, pSrc, pDst)
@@ -26,19 +30,9 @@ function Laser:New(pType, pSrc, pDst)
     laser.vy = 0
     laser.target = {}
     laser.state = "noTarget"
+    laser.type = pType
 
-    local dstAngle = GetAngle(laser, pDst)
-    local heroSpeed = 300
-    local angX = math.cos(dstAngle)
-    local angY = math.sin(dstAngle)
-    laser.vx = angX * heroSpeed
-    laser.vy = angY * heroSpeed
-
-    laser.img = love.graphics.newImage("images/lasers/laser"..pType..".png")
-    local offsetX = math.cos(math.rad(laser.r))
-    local offsetY = math.sin(math.rad(laser.r))
-    laser.x = laser.vx + offsetX
-    laser.y = laser.vy + offsetY
+    laser.img = love.graphics.newImage("images/lasers/laser" .. pType .. ".png")
 
     setmetatable(laser, self)
     table.insert(Laser.list, laser)
@@ -62,7 +56,8 @@ function GetNearest(pList, pLaser)
 end
 
 function Laser:SetVelocity(pLaser, dt)
-    --local dist = math.sqrt((pLaser.x - pLaser.target.x) ^ 2 + (pLaser.y - pLaser.target.y) ^ 2)
+    if not pLaser.target then return end
+    -- local dist = math.sqrt((pLaser.x - pLaser.target.x) ^ 2 + (pLaser.y - pLaser.target.y) ^ 2)
     local toTargetAng = GetAngle(pLaser, pLaser.target)
 
     local heroSpeed = 300

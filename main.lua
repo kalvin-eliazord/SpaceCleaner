@@ -54,6 +54,7 @@ function love.update(dt)
       --  Sound.streamState = Game.currScreen
         Hero:Update(dt)
         Enemy:Update(dt)
+  --      Laser:Update(dt)
     elseif Game.currScreen == "menu" then
         Map.TitleUpdate(dt)
         --  Waste:Update(dt)  make it dissapear in inGame? TODO ?

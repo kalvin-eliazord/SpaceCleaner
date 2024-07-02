@@ -160,8 +160,9 @@ function Hero:Update(dt)
     -- Hero laser New
     local nearest = GetNearest(Enemy.list, hero)
     -- if OnScreen(nearest) then
+
     heroSpawnCDR = heroSpawnCDR - dt
-    if heroSpawnCDR <= 0 then
+    if heroSpawnCDR <= 0 and nearest then
         Laser:New(1, hero, nearest)
         heroSpawnCDR = maxSpawnCDR
     end
@@ -170,27 +171,29 @@ function Hero:Update(dt)
     if Laser.list then
         for i = #Laser.list, 1, -1 do
             local laser = Laser.list[i]
+            if laser.type ~= 1 then
 
-            if laser.state == "noTarget" then
-                laser.target = nearest
-                laser.state = "Attack"
-            end
+                if laser.state == "noTarget" then
+                    laser.target = nearest
+                    laser.state = "Attack"
+                end
 
-            if laser.state == "Attack" then
-                Laser:SetVelocity(laser, dt)
-            end
+                if laser.state == "Attack" then
+                    Laser:SetVelocity(laser, dt)
+                end
 
-            if Hero:IsCollide(laser, laser.target) then
-                -- nearest.hp = nearest.hp - 1
-                laser.target.hp = laser.target.hp - 1
-                laser.bDelete = true
-            end
+                if Hero:IsCollide(laser, laser.target) then
+                    -- nearest.hp = nearest.hp - 1
+                    laser.target.hp = laser.target.hp - 1
+                    laser.bDelete = true
+                end
 
-            if laser.target.hp < 1 and laser.state == "Attack" then
-                laser.state = nil
-                if laser.state == nil then
-                    laser.x = laser.x * dt
-                    laser.y = laser.y * dt
+                if laser.target and laser.target.hp < 1 and laser.state == "Attack" then
+                    laser.state = nil
+                    if laser.state == nil then
+                        laser.x = laser.x * dt
+                        laser.y = laser.y * dt
+                    end
                 end
             end
         end
