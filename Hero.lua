@@ -3,6 +3,7 @@ local Vec2 = require("Vector2")
 local UI_Hearth = require("Health")
 local Laser = require("Laser")
 local Enemy = require("Enemy")
+local Waste = require("Waste")
 
 local Hero = {}
 setmetatable(Hero, Vec2)
@@ -39,15 +40,14 @@ function Hero:NewEngine(x, y)
     return engine
 end
 
-function Hero:Load(pGameSizes)
-    gSizes = pGameSizes
+function Hero:Load(pMapList)
     UI_Hearth:Load()
 
     iStart = 2
     -- sound shi TODO
     startSound = love.audio.newSource("music/ship_start.mp3", "static")
     startSound:setVolume(0.5)
-    Hero.hero = Hero:New(gSizes.w / 2, gSizes.h + 200)
+    Hero.hero = Hero:New(pMapList["inGame"].img:getWidth() / 2, pMapList["inGame"].img:getHeight() + 200)
     hero = Hero.hero
     hero.y = h
     engine = Hero:NewEngine(hero.x, hero.y)
@@ -141,6 +141,7 @@ function Hero:SetDash(hero, engine, dt)
             dist = 0
             hero.bDash = true
         end
+        
         hero.bDash = false
     end
 end
@@ -171,7 +172,7 @@ function Hero:Update(dt)
     if Laser.list then
         for i = #Laser.list, 1, -1 do
             local laser = Laser.list[i]
-            if laser.type ~= 1 then
+            if laser.type == 1 then
 
                 if laser.state == "noTarget" then
                     laser.target = nearest
@@ -199,6 +200,29 @@ function Hero:Update(dt)
         end
     end
 
+    if Waste.list then
+        for i = #Waste.list, 1, -1 do
+            local waste = Waste.list[i]
+            local dist = math.sqrt((waste.x - Hero.hero.x) ^ 2 + (waste.y - Hero.hero.y) ^ 2)
+
+            if math.abs(dist) < waste.dist then
+                Vec2:PursueTarget(waste, Hero.hero, dt, 250)
+                waste.bSwallow = true
+
+                -- swallow animation
+                if waste.bSwallow then
+                    waste.sx = waste.sx - dt
+                    waste.sy = waste.sy - dt
+                end
+                if waste.bSwallow and Vec2:IsCollide(waste, Hero.hero) then
+                    waste.bDelete = true
+                    score = score + 1
+                end
+            end
+            --     waste.bSwallow = false
+        end
+    end
+
     -- Hero ship process
     if Vec2.bStart then
         Hero:KeysControl(hero, engine, dt)
@@ -207,7 +231,7 @@ function Hero:Update(dt)
 
         Hero:SetDash(hero, engine, dt)
 
-        Hero:MapCollision(hero, dt)
+   --     Hero:MapCollision(hero, dt)
     end
 
 end
@@ -223,6 +247,9 @@ function Hero:Draw()
             engine.img:getWidth() / 2, engine.img:getHeight() / 2)
     end
 
+    if hero.bDash then
+        love.graphics.draw(love.graphics.newImage("dust.png"), hero.x, hero.y)
+    end
     --   love.graphics.print("iDash: " .. hero.iDash, w / 2, 400)
     --    love.graphics.print("bDash: " .. tostring(hero.bDash), w / 2, 800)
     --   love.graphics.print("dist: " .. dist, w / 2, 100)

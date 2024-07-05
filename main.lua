@@ -9,6 +9,7 @@ local Vec2 = require("Vector2")
 local Enemy = require("Enemy")
 local Sound = require("Sound")
 local Map = require("Map")
+local Camera = require("lib/camera")
 
 local Game = {}
 
@@ -16,10 +17,15 @@ function GameInit()
     local game = {}
 
     game.screens = {}
-    game.screens[1] = "menu"
+    game.screens[1] = "title"
     game.screens[2] = "inGame"
+    game.screens[3] = "menu"
     -- game.screens[3] = "gameOver" TODO
     game.currScreen = game.screens[1]
+
+    game.sounds = {}
+    game.sounds[1] = "title"
+    game.sounds[2] = "inGame"
 
     game.gSizes = {}
     game.gSizes.w = 1024
@@ -32,13 +38,14 @@ function GameInit()
 end
 
 function love.load()
+    cam = Camera()
     Game = GameInit()
     love.window.setTitle(Game.title)
     love.window.setMode(Game.gSizes.w, Game.gSizes.h)
-    Sound.Load(Game.screens)
+    Sound.Load(Game.sounds)
     Map.Load(Game.screens)
 
-    Hero:Load(Game.gSizes)
+    Hero:Load(Map.list)
     Waste:Load()
     Laser:Load()
     Enemy:Load()
@@ -51,11 +58,16 @@ function love.update(dt)
     Waste:Update(dt)
 
     if Game.currScreen == "inGame" then
-      --  Sound.streamState = Game.currScreen
+        --  Sound.streamState = Game.currScreen
         Hero:Update(dt)
         Enemy:Update(dt)
-  --      Laser:Update(dt)
-    elseif Game.currScreen == "menu" then
+        cam:lookAt(Hero.hero.x, Hero.hero.y)
+        if cam.x < Map.list[Game.currScreen].img:getWidth() / 2 then
+            print("ho")
+            cam.x = cam.x
+        end
+        --      Laser:Update(dt)
+    elseif Game.currScreen == "title" then
         Map.TitleUpdate(dt)
         --  Waste:Update(dt)  make it dissapear in inGame? TODO ?
     end
@@ -95,6 +107,9 @@ function love.keypressed(pKey)
 end
 
 function love.draw()
+    if Game.currScreen == "inGame" then
+        cam:attach()
+    end
     Map.Draw(Game.currScreen)
     Waste:Draw()
     if Game.currScreen == "inGame" then
@@ -103,4 +118,7 @@ function love.draw()
 
     Laser:Draw()
     Enemy:Draw()
+    if Game.currScreen == "inGame" then
+        cam:detach()
+    end
 end

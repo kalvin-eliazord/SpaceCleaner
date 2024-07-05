@@ -1,6 +1,5 @@
 local Vec2 = require("Vector2")
 local Laser = require("Laser")
--- local Hero = require("Hero")
 
 local Enemy = {}
 Enemy.__index = Enemy
@@ -117,23 +116,25 @@ function Enemy:Update(dt)
         if Laser.list then
             for i = #Laser.list, 1, -1 do
                 local laser = Laser.list[i]
+                if laser.type == 2 then
+                    local hero = require("Hero").hero
+                    laser.target = hero
+                    Laser:SetVelocity(laser, dt)
+                    if Vec2:IsCollide(laser, hero) then
+                        laser.bDelete = true
+                        Enemy:NewExplosion(hero.x + love.math.random(-2, 2), hero.y + love.math.random(-2, 2))
+                        hero.hp = hero.hp - 1
+                    end
 
-                laser.x = laser.x + laser.vx * dt
-                laser.y = laser.y + laser.vy * dt
+                    if Vec2:IsOutScreen(laser) then
+                        laser.bDelete = true
+                    end
 
-                local hero = require("Hero").hero
-                if Vec2:IsCollide(laser, hero) then
-                    laser.bDelete = true
-                    hero.hp = hero.hp - 1
+                    if laser.bDelete then
+                        table.remove(Laser.list, i)
+                    end
                 end
 
-                if Vec2:IsOutScreen(laser) then
-                    laser.bDelete = true
-                end
-
-                if laser.bDelete then
-                    table.remove(Laser.list, i)
-                end
             end
         end
     end

@@ -1,5 +1,4 @@
 local Vec2 = require("Vector2")
-local Hero = require("Hero")
 
 local Waste = {}
 Waste.__index = Waste
@@ -101,32 +100,6 @@ function Waste:Update(dt)
             end
 
             waste.r = waste.r + (waste.vr * dt)
-
-            -- Should be on hero, hero know about the wastes, not the contrary TODO
-            if Hero.hero then
-                local TODO = false -- DEBUG: activate the swallow only on inGame screen
-                if TODO then
-                    local dist = math.sqrt((waste.x - Hero.hero.x) ^ 2 + (waste.y - Hero.hero.y) ^ 2)
-
-                    if math.abs(dist) < waste.dist then
-                        Vec2:PursueTarget(waste, Hero.hero, dt, 250)
-                        waste.bSwallow = true
-
-                        -- swallow animation
-                        if waste.bSwallow then
-                            waste.sx = waste.sx - dt
-                            waste.sy = waste.sy - dt
-                        end
-                        if waste.bSwallow and Vec2:IsCollide(waste, Hero.hero) then
-                            waste.bDelete = true
-                            score = score + 1
-                        end
-                    end
-                end
-
-            else
-                waste.bSwallow = false
-            end
 
             if waste ~= nil then
 

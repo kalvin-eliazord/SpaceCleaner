@@ -3,13 +3,14 @@ Sound.list = {}
 
 function NewSound(pName, pVolume, pType)
     local source = love.audio.newSource("music/" .. pName .. ".mp3", pType)
-    source:setVolume(pVolume)
-
-    return source
+    if source then
+        source:setVolume(pVolume)
+        return source
+    end
 end
 
 function SoundsInit(pScreens)
-    for i, state in ipairs (pScreens) do 
+    for i, state in ipairs(pScreens) do
         local volume = 1
 
         if state == "menu" then
