@@ -49,6 +49,8 @@ function love.load()
     Waste:Load()
     Laser:Load()
     Enemy:Load()
+    oldX = 0
+    oldY = 0
 end
 
 function love.update(dt)
@@ -61,11 +63,19 @@ function love.update(dt)
         --  Sound.streamState = Game.currScreen
         Hero:Update(dt)
         Enemy:Update(dt)
-        cam:lookAt(Hero.hero.x, Hero.hero.y)
-        if cam.x < Map.list[Game.currScreen].img:getWidth() / 2 then
-            print("ho")
+        if cam.x < Map.list[Game.currScreen].img:getWidth() / 4 then
+            oldX = Hero.hero.x
+            oldY = Hero.hero.y
+
+            print("MapX : ", Map.list[Game.currScreen].img:getWidth())
+            print("camX : ", cam.x)
+            cam:lookAt(oldX, oldY)
+            -- check vid
             cam.x = cam.x
+        else
+          cam:lookAt(Hero.hero.x, Hero.hero.y)
         end
+
         --      Laser:Update(dt)
     elseif Game.currScreen == "title" then
         Map.TitleUpdate(dt)
