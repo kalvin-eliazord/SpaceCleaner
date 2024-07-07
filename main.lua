@@ -44,13 +44,11 @@ function love.load()
     love.window.setMode(Game.gSizes.w, Game.gSizes.h)
     Sound.Load(Game.sounds)
     Map.Load(Game.screens)
-
+    Health:Load(cam)
     Hero:Load(Map.list)
     Waste:Load()
     Laser:Load()
     Enemy:Load()
-    oldX = 0
-    oldY = 0
 end
 
 function love.update(dt)
@@ -63,17 +61,24 @@ function love.update(dt)
         --  Sound.streamState = Game.currScreen
         Hero:Update(dt)
         Enemy:Update(dt)
-        if cam.x < Map.list[Game.currScreen].img:getWidth() / 4 then
-            oldX = Hero.hero.x
-            oldY = Hero.hero.y
 
-            print("MapX : ", Map.list[Game.currScreen].img:getWidth())
-            print("camX : ", cam.x)
-            cam:lookAt(oldX, oldY)
-            -- check vid
-            cam.x = cam.x
-        else
-          cam:lookAt(Hero.hero.x, Hero.hero.y)
+        cam:lookAt(Hero.hero.x, Hero.hero.y)
+
+        -- cam collisions
+        if cam.x < Map.list[Game.currScreen].img:getWidth() / 5  then
+            cam.x = Map.list[Game.currScreen].img:getWidth() / 5
+        end
+
+        if cam.x > Map.list[Game.currScreen].img:getWidth() / 1.3 then
+           cam.x = Map.list[Game.currScreen].img:getWidth() / 1.3
+        end
+
+        if cam.y < Map.list[Game.currScreen].img:getHeight() / 5  then
+            cam.y = Map.list[Game.currScreen].img:getHeight() / 5
+        end
+
+        if cam.y > Map.list[Game.currScreen].img:getHeight() / 1.3  then
+            cam.y = Map.list[Game.currScreen].img:getHeight() / 1.3
         end
 
         --      Laser:Update(dt)

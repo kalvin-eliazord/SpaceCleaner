@@ -8,9 +8,6 @@ local Waste = require("Waste")
 local Hero = {}
 setmetatable(Hero, Vec2)
 
-local w = 1024
-local h = 768
-
 function Hero:New(x, y)
     local hero = Vec2:New(x, y)
     hero.img = love.graphics.newImage("images/hero.png")
@@ -40,9 +37,12 @@ function Hero:NewEngine(x, y)
     return engine
 end
 
+
+
 function Hero:Load(pMapList)
     UI_Hearth:Load()
-
+    w = pMapList["inGame"].img:getWidth()
+    h = pMapList["inGame"].img:getHeight()
     iStart = 2
     -- sound shi TODO
     startSound = love.audio.newSource("music/ship_start.mp3", "static")
@@ -231,7 +231,7 @@ function Hero:Update(dt)
 
         Hero:SetDash(hero, engine, dt)
 
-   --     Hero:MapCollision(hero, dt)
+        Hero:MapCollision(hero, dt)
     end
 
 end

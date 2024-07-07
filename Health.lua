@@ -13,14 +13,14 @@ function Health:New(x, y)
     return health
 end
 
-function Health:Load()
+function Health:Load(pCam)
     heroHp = Health:New(0, 0)
-
+    -- cam = pCam??
 end
 
 function Health:Draw(pHeroHp)
     for i = 1, pHeroHp do
-        love.graphics.draw(heroHp.img, (i-1)*(heroHp.img:getWidth()/10), 0, 0,heroHp.sx, heroHp.sy)
+        love.graphics.draw(heroHp.img, (i-1)*(heroHp.img:getWidth()/10), 0, 0, heroHp.sx, heroHp.sy)
     end
 end
 
