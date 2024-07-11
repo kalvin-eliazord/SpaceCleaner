@@ -81,13 +81,38 @@ function Enemy:Update(dt)
                 enemSpawnCDR = enemSpawnCDR - dt
 
                 if enemSpawnCDR <= 0 then
-                    Laser:New(2, enem, hero)
+                --    Laser:New(2, enem, hero)
                     enemSpawnCDR = maxSpawnCDR
                 end
             elseif enem.type == 6 then
                 Enemy:PursueTarget(enem, hero, dt, 100)
             elseif enem.type == 4 then
                 Enemy:PursueTarget(enem, hero, dt, 0)
+            end
+
+            -- Set Velocity of laser
+            if Laser.list then
+                for i = #Laser.list, 1, -1 do
+                    local laser = Laser.list[i]
+                    if laser.type == 2 then
+                        Laser:SetGuidedLaser(laser, dt)
+
+                        if Vec2:IsCollide(laser, hero) then
+                            laser.bDelete = true
+                            Enemy:NewExplosion(hero.x + love.math.random(-2, 2), hero.y + love.math.random(-2, 2))
+                            hero.hp = hero.hp - 1
+                        end
+
+                        if Vec2:IsOutScreen(laser) then
+                            laser.bDelete = true
+                        end
+
+                        if laser.bDelete then
+                            table.remove(Laser.list, i)
+                        end
+                    end
+
+                end
             end
 
             if enem.hp <= 0 then
@@ -112,31 +137,6 @@ function Enemy:Update(dt)
 
         end
 
-        -- Set Velocity of laser
-        if Laser.list then
-            for i = #Laser.list, 1, -1 do
-                local laser = Laser.list[i]
-                if laser.type == 2 then
-                    local hero = require("Hero").hero
-                    laser.target = hero
-                    Laser:SetVelocity(laser, dt)
-                    if Vec2:IsCollide(laser, hero) then
-                        laser.bDelete = true
-                        Enemy:NewExplosion(hero.x + love.math.random(-2, 2), hero.y + love.math.random(-2, 2))
-                        hero.hp = hero.hp - 1
-                    end
-
-                    if Vec2:IsOutScreen(laser) then
-                        laser.bDelete = true
-                    end
-
-                    if laser.bDelete then
-                        table.remove(Laser.list, i)
-                    end
-                end
-
-            end
-        end
     end
 
 end

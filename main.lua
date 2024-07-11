@@ -106,8 +106,8 @@ function love.keypressed(pKey)
             end
         end
 
-        if pKey == "space" then
-            Hero.hero.iDash = Hero.hero.iDash + 1
+        if pKey == "space" then -- NOT USED
+    --        Hero.hero.iDash = Hero.hero.iDash + 1
 
             if Hero.hero.iDash >= 2 then
                 Hero.hero.iDash = 0

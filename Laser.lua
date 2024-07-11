@@ -28,8 +28,7 @@ function Laser:New(pType, pSrc, pDst)
     laser.sy = 1
     laser.vx = 0
     laser.vy = 0
-    laser.target = {}
-    laser.state = "noTarget"
+    laser.target = pDst
     laser.type = pType
 
     laser.img = love.graphics.newImage("images/lasers/laser" .. pType .. ".png")
@@ -55,7 +54,22 @@ function GetNearest(pList, pLaser)
     return nearest
 end
 
-function Laser:SetVelocity(pLaser, dt)
+function Laser:SetGuidedLaser(pLaser, dt)
+    if not pLaser.target then return end
+    -- local dist = math.sqrt((pLaser.x - pLaser.target.x) ^ 2 + (pLaser.y - pLaser.target.y) ^ 2)
+    local toTargetAng = GetAngle(pLaser, pLaser.target)
+
+    local heroSpeed = 300
+    local angX = math.cos(toTargetAng)
+    local angY = math.sin(toTargetAng)
+
+    pLaser.vx = angX * heroSpeed
+    pLaser.vy = angY * heroSpeed
+    pLaser.x = pLaser.x + pLaser.vx * dt
+    pLaser.y = pLaser.y + pLaser.vy * dt
+end
+
+function Laser:SetLaser(pLaser, dt)
     if not pLaser.target then return end
     -- local dist = math.sqrt((pLaser.x - pLaser.target.x) ^ 2 + (pLaser.y - pLaser.target.y) ^ 2)
     local toTargetAng = GetAngle(pLaser, pLaser.target)
@@ -95,7 +109,6 @@ end
 function Laser:Update(dt)
     -- Laser Spawn based on enemy on screen
     local nearOnScreen = nil
-
 end
 
 function Laser:Draw()
