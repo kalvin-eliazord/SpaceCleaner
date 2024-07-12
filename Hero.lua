@@ -60,6 +60,7 @@ function Hero:Load(pMapList)
     -- sound shi TODO
     startSound = love.audio.newSource("music/ship_start.mp3", "static")
     startSound:setVolume(0.5)
+
     Hero.hero = Hero:New(pMapList["inGame"].img:getWidth() / 2, pMapList["inGame"].img:getHeight() + 200)
     hero = Hero.hero
     hero.y = h
@@ -104,18 +105,18 @@ function Hero:KeysControl(hero, engine, dt)
     elseif love.keyboard.isDown("left") then
         hero.r = hero.r - hero.vr * dt
     end
-    
+
     Vec2:SetVelocity(hero)
 
-  --  if love.keyboard.isDown("space") then
+    --  if love.keyboard.isDown("space") then
     --    local angX = math.cos(shipAngRad)
-      --  local angY = math.sin(shipAngRad)
-        --hero.vx = hero.vx + angX * (dt / 20)
-        --hero.vy = hero.vy + angY * (dt / 20)
-        --engine.bEngine = true
-    --else
-        --engine.bEngine = false
-    --end
+    --  local angY = math.sin(shipAngRad)
+    -- hero.vx = hero.vx + angX * (dt / 20)
+    -- hero.vy = hero.vy + angY * (dt / 20)
+    -- engine.bEngine = true
+    -- else
+    -- engine.bEngine = false
+    -- end
 
 end
 
@@ -138,21 +139,21 @@ end
 function Hero:SetVelocity(hero, engine, dt)
     local shipAngRad = math.rad(hero.r)
 
-        local angX = math.cos(shipAngRad)
-        local angY = math.sin(shipAngRad)
-        hero.vx = hero.vx + angX * (dt * 100)
-        hero.vy = hero.vy + angY * (dt * 100)
+    local angX = math.cos(shipAngRad)
+    local angY = math.sin(shipAngRad)
+    hero.vx = hero.vx + angX * (dt * 100)
+    hero.vy = hero.vy + angY * (dt * 100)
 
-        engine.bEngine = true
+    engine.bEngine = true
 
-        local iRand = math.random(2, 3)
-        for i = 1, iRand do
-            NewDust(hero.x + math.random(-6, 6), hero.y, hero.r)
-        end
+    local iRand = math.random(2, 3)
+    for i = 1, iRand do
+        NewDust(hero.x + math.random(-6, 6), hero.y, hero.r)
+    end
 
-    --if hero.bDash and dashCDR > 0 then
+    -- if hero.bDash and dashCDR > 0 then
 
-    --end
+    -- end
 end
 
 function Hero:Update(dt)
@@ -166,115 +167,106 @@ function Hero:Update(dt)
             Vec2.bStart = true
         end
     end
-
-    -- Hero laser New
-    local nearest = GetNearest(Enemy.list, hero)
-    -- if OnScreen(nearest) then
-
-    heroSpawnCDR = heroSpawnCDR - dt
-    if heroSpawnCDR <= 0 and nearest then
-        Laser:New(1, hero, nearest)
-        heroSpawnCDR = maxSpawnCDR
-    end
-
-    -- Set Velocity of laser
-    if Laser.list then
-        for i = #Laser.list, 1, -1 do
-            local laser = Laser.list[i]
-            if laser.type == 1 then -- hero type
-
-                Laser:SetGuidedLaser(laser, dt)
-
-                if Hero:IsCollide(laser, laser.target) then
-                    -- nearest.hp = nearest.hp - 1
-                    laser.target.hp = laser.target.hp - 1
-                    laser.bDelete = true
-                end
-
-                if laser.target and laser.target.hp < 1 then
-                    laser.state = nil
-                end
-
-                if laser.state == nil then
-                    laser.x = laser.x * dt
-                    laser.y = laser.y * dt
-                end
-            end
-        end
-    end
-
-    if #DustList > 0 then
-        for i = #DustList, 1, -1 do
-            local dust = DustList[i]
-            local iRand = math.random(-1, 1)
-            dust.x = dust.x + ((hero.vx + iRand) * -1) + dt
-            dust.y = dust.y + (hero.vy * -2) + dt
-            dust.r = dust.r + dt
-            dust.timer = dust.timer - dt
-            if dust.timer <= 0 then
-                table.remove(DustList, i)
-            end
-        end
-
-    end
-
-    if Waste.list then
-        for i = #Waste.list, 1, -1 do
-            local waste = Waste.list[i]
-            local dist = math.sqrt((waste.x - Hero.hero.x) ^ 2 + (waste.y - Hero.hero.y) ^ 2)
-
-            if math.abs(dist) < waste.dist then
-                Vec2:PursueTarget(waste, Hero.hero, dt, 250)
-                waste.bSwallow = true
-
-                -- swallow animation
-                if waste.bSwallow then
-                    waste.sx = waste.sx - dt
-                    waste.sy = waste.sy - dt
-                end
-                if waste.bSwallow and Vec2:IsCollide(waste, Hero.hero) then
-                    waste.bDelete = true
-                    score = score + 1
-                end
-            end
-            --     waste.bSwallow = false
-        end
-    end
-
+    
     -- Hero ship process
     if Vec2.bStart then
         Hero:KeysControl(hero, engine, dt)
         Hero:SetMaxSpeed(hero)
         Hero:SetVelocity(hero, engine, dt)
         Hero:MapCollision(hero, dt)
+
+        -- Hero laser New
+        local nearest = GetNearest(Enemy.list, hero)
+
+        heroSpawnCDR = heroSpawnCDR - dt
+        if heroSpawnCDR <= 0 and nearest then
+            Laser:New(1, hero, nearest)
+            heroSpawnCDR = maxSpawnCDR
+        end
+
+        -- Set Velocity of laser
+        if Laser.list then
+            for i = #Laser.list, 1, -1 do
+                local laser = Laser.list[i]
+                if laser.type == 1 then -- hero type
+
+                    Laser:SetGuidedLaser(laser, dt)
+
+                    if Hero:IsCollide(laser, laser.target) then
+                        laser.target.hp = laser.target.hp - 1
+                        laser.bDelete = true
+                    end
+
+                    if laser.target and laser.target.hp < 1 then
+                        laser.state = nil
+                    end
+
+                end
+            end
+        end
+
+        if #DustList > 0 then
+            for i = #DustList, 1, -1 do
+                local dust = DustList[i]
+                local iRand = math.random(-1, 1)
+                dust.x = dust.x + ((hero.vx + iRand) * -1) + dt
+                dust.y = dust.y + (hero.vy * -2) + dt
+                dust.r = dust.r + dt
+                dust.timer = dust.timer - dt
+                if dust.timer <= 0 then
+                    table.remove(DustList, i)
+                end
+            end
+
+        end
+
+        if Waste.list then
+            for i = #Waste.list, 1, -1 do
+                local waste = Waste.list[i]
+                local dist = math.sqrt((waste.x - Hero.hero.x) ^ 2 + (waste.y - Hero.hero.y) ^ 2)
+
+                if math.abs(dist) < waste.dist then
+                    Vec2:PursueTarget(waste, Hero.hero, dt, 250)
+                    waste.bSwallow = true
+
+                    -- swallow animation
+                    if waste.bSwallow then
+                        waste.sx = waste.sx - dt
+                        waste.sy = waste.sy - dt
+                    end
+                    if waste.bSwallow and Vec2:IsCollide(waste, Hero.hero) then
+                        waste.bDelete = true
+                        score = score + 1
+                    end
+                end
+                --     waste.bSwallow = false
+            end
+        end
     end
 
 end
 
 function Hero:Draw()
     UI_Hearth:Draw(hero.hp)
-    
-        if hero.bDash then
-         --   love.graphics.setColor(1, 0, 0)
-            print("test")
+
+    if hero.bDash then
+        --   love.graphics.setColor(1, 0, 0)
+        print("test")
+    end
+
+    if DustList then
+        for i, dust in ipairs(DustList) do
+            love.graphics.draw(dust.img, dust.x, dust.y, dust.r, dust.sx, dust.sy, dust.img:getWidth() / 2,
+                dust.img:getHeight() / 4)
         end
+    end
 
-        if DustList then
-            for i, dust in ipairs(DustList) do
-                love.graphics.draw(dust.img, dust.x, dust.y, dust.r, dust.sx, dust.sy, dust.img:getWidth() / 2,
-                    dust.img:getHeight() / 4)
-            end
-        end
+    love.graphics.draw(hero.img, hero.x, hero.y, math.rad(hero.r), hero.sx, hero.sy, hero.img:getWidth() / 2,
+        hero.img:getHeight() / 2)
 
-        love.graphics.draw(hero.img, hero.x, hero.y, math.rad(hero.r), hero.sx, hero.sy, hero.img:getWidth() / 2,
-            hero.img:getHeight() / 2)
-
-            if hero.bDash then
-                --love.graphics.setColor(1, 1, 1)
-            end
-
- 
-
+    if hero.bDash then
+        -- love.graphics.setColor(1, 1, 1)
+    end
 
     --   love.graphics.print("iDash: " .. hero.iDash, w / 2, 400)
     --    love.graphics.print("bDash: " .. tostring(hero.bDash), w / 2, 800)

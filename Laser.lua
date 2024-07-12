@@ -37,14 +37,14 @@ function Laser:New(pType, pSrc, pDst)
     table.insert(Laser.list, laser)
 end
 
-function GetNearest(pList, pLaser)
-    if not pList or not pLaser then
+function GetNearest(pListDst, pSrc)
+    if not pListDst or not pSrc then
         return false
     end
-    local nearest = pList[1]
+    local nearest = pListDst[1]
     local oldDist = 99999
-    for i, curr in ipairs(pList) do
-        local currDist = math.sqrt((pLaser.x - curr.x) ^ 2 + (pLaser.y - curr.y) ^ 2)
+    for i, curr in ipairs(pListDst) do
+        local currDist = math.sqrt((pSrc.x - curr.x) ^ 2 + (pSrc.y - curr.y) ^ 2)
         if currDist < oldDist then
             oldDist = currDist
             nearest = curr
@@ -55,7 +55,7 @@ function GetNearest(pList, pLaser)
 end
 
 function Laser:SetGuidedLaser(pLaser, dt)
-    if not pLaser.target then return end
+  --  if not pLaser.target then return end
     -- local dist = math.sqrt((pLaser.x - pLaser.target.x) ^ 2 + (pLaser.y - pLaser.target.y) ^ 2)
     local toTargetAng = GetAngle(pLaser, pLaser.target)
 
@@ -107,18 +107,20 @@ function table.clear(t)
 end
 
 function Laser:Update(dt)
-    -- Laser Spawn based on enemy on screen
-    local nearOnScreen = nil
+    if Laser.list then
+        for i = #Laser.list, 1, -1 do
+            local laser = Laser.list[i]
+            if laser.bDelete then
+                table.remove(Laser.list, i)
+            end
+        end
+    end
 end
 
 function Laser:Draw()
     if Laser.list then
         for i, laser in ipairs(Laser.list) do
-            love.graphics.draw(laser.img, laser.x, laser.y, 0, laser.sx, laser.sy)
-            --     love.graphics.print("nearest" .. tostring(nearest), 0, 200)
-            --   love.graphics.print("laserState   : " .. tostring(laser.state), 0, 300)
-            -- love.graphics.print("laser.target.hp   : " .. tostring(laser.target.hp), 0, 600)
-
+            love.graphics.draw(laser.img, laser.x, laser.y, laser.r, laser.sx, laser.sy)
         end
     end
 

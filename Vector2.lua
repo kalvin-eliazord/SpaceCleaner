@@ -9,7 +9,6 @@ function Vector2:New(x, y)
     vec2.x = x
     vec2.y = x
     vec2.r = 0
-    vec2.img = nil
     vec2.hp = 1
     vec2.vx = 0
     vec2.vy = 0

@@ -81,7 +81,7 @@ function love.update(dt)
             cam.y = Map.list[Game.currScreen].img:getHeight() / 1.3
         end
 
-        --      Laser:Update(dt)
+         Laser:Update(dt)
     elseif Game.currScreen == "title" then
         Map.TitleUpdate(dt)
         --  Waste:Update(dt)  make it dissapear in inGame? TODO ?
@@ -115,6 +115,7 @@ function love.keypressed(pKey)
             end
         end
     else
+        -- Start game
         if pKey == "space" then
             Game.currScreen = "inGame"
         end
@@ -125,14 +126,16 @@ function love.draw()
     if Game.currScreen == "inGame" then
         cam:attach()
     end
+
     Map.Draw(Game.currScreen)
     Waste:Draw()
+
     if Game.currScreen == "inGame" then
         Hero:Draw()
+        Enemy:Draw()
+        Laser.Draw()
     end
 
-    Laser:Draw()
-    Enemy:Draw()
     if Game.currScreen == "inGame" then
         cam:detach()
     end

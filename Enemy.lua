@@ -95,7 +95,7 @@ function Enemy:Update(dt)
                 for i = #Laser.list, 1, -1 do
                     local laser = Laser.list[i]
                     if laser.type == 2 then
-                        Laser:SetGuidedLaser(laser, dt)
+                       -- Laser:SetGuidedLaser(laser, dt)
 
                         if Vec2:IsCollide(laser, hero) then
                             laser.bDelete = true
@@ -104,7 +104,7 @@ function Enemy:Update(dt)
                         end
 
                         if Vec2:IsOutScreen(laser) then
-                            laser.bDelete = true
+                     --       laser.bDelete = true
                         end
 
                         if laser.bDelete then
