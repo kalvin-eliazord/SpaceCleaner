@@ -7,9 +7,6 @@ setmetatable(Enemy, {
     __index = Vec2
 })
 
-local w = 1024
-local h = 768
-
 function Enemy:New()
     if not Enemy.list then
         Enemy.list = {}
@@ -32,27 +29,28 @@ function Enemy:New()
 end
 
 function Enemy:Load()
-    self.exploImgList = {}
+    exploImgList = {}
     for i = 1, 5 do
-        self.exploImgList[i] = love.graphics.newImage("images/explosions/explosion" .. i .. ".png")
+        exploImgList[i] = love.graphics.newImage("images/explosions/explosion" .. i .. ".png")
     end
 
     maxSpawnCDR = 2
     spawnCDR = maxSpawnCDR
 end
 
-function Enemy:NewExplosion(x, y)
+function NewExplosion(x, y)
     if not Enemy.exploList then
         Enemy.exploList = {}
     end
 
-    local explosion = Vec2:New(x, y)
+    local explosion = {}
+    explosion.x = x
+    explosion.y = y
+
     explosion.sx = 1
     explosion.sy = 1
-    explosion.img = self.exploImgList
+    explosion.img = exploImgList
     explosion.indexImg = 1
-    setmetatable(explosion, self)
-    -- Vec2:AddEnt(explosion)
     table.insert(Enemy.exploList, explosion)
 end
 
@@ -74,51 +72,27 @@ function Enemy:Update(dt)
             if Enemy:IsCollide(enem, hero) then
                 hero.hp = hero.hp - 1
                 enem.hp = enem.hp - 1
-                Enemy:NewExplosion(hero.x, hero.y, dt)
+                NewExplosion(hero.x, hero.y, dt)
             end
 
+            -- enemy logic based on type
             if enem.type == 5 or enem.type == 2 then
                 enemSpawnCDR = enemSpawnCDR - dt
 
                 if enemSpawnCDR <= 0 then
-                --    Laser:New(2, enem, hero)
+                    Laser.New(2, enem, hero)
                     enemSpawnCDR = maxSpawnCDR
                 end
             elseif enem.type == 6 then
-                Enemy:PursueTarget(enem, hero, dt, 100)
+                Enemy:PursueTarget(enem, hero, dt, 200)
             elseif enem.type == 4 then
                 Enemy:PursueTarget(enem, hero, dt, 0)
             end
 
-            -- Set Velocity of laser
-            if Laser.list then
-                for i = #Laser.list, 1, -1 do
-                    local laser = Laser.list[i]
-                    if laser.type == 2 then
-                       -- Laser:SetGuidedLaser(laser, dt)
-
-                        if Vec2:IsCollide(laser, hero) then
-                            laser.bDelete = true
-                            Enemy:NewExplosion(hero.x + love.math.random(-2, 2), hero.y + love.math.random(-2, 2))
-                            hero.hp = hero.hp - 1
-                        end
-
-                        if Vec2:IsOutScreen(laser) then
-                     --       laser.bDelete = true
-                        end
-
-                        if laser.bDelete then
-                            table.remove(Laser.list, i)
-                        end
-                    end
-
-                end
-            end
-
+            -- explosion creation
             if enem.hp <= 0 then
-                -- explosion creation
                 for j = 1, 3 do
-                    Enemy:NewExplosion(enem.x + love.math.random(-15, 15), enem.y + love.math.random(-10, 10))
+                    NewExplosion(enem.x + love.math.random(-15, 15), enem.y + love.math.random(-10, 10))
                 end
                 table.remove(Enemy.list, i)
             end
@@ -137,6 +111,31 @@ function Enemy:Update(dt)
 
         end
 
+    end
+
+    -- Set Velocity of laser
+    if Laser.list then
+        for i = #Laser.list, 1, -1 do
+            local laser = Laser.list[i]
+            if laser.type == 2 then -- enemy type
+                Laser.SetLaser(laser, dt)
+
+                if Vec2:IsCollide(laser, hero) then
+                    laser.bDelete = true
+                    NewExplosion(hero.x + love.math.random(-2, 2), hero.y + love.math.random(-2, 2))
+                    hero.hp = hero.hp - 1
+                end
+
+                if Vec2:IsOutScreen(laser) then
+                    --       laser.bDelete = true
+                end
+
+                if laser.bDelete then
+                    table.remove(Laser.list, i)
+                end
+            end
+
+        end
     end
 
 end

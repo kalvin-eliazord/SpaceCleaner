@@ -29,10 +29,12 @@ function Vector2:IsCollide(pVec1, pVec2)
     if pVec1 == pVec2 then
         return false
     end
+    
     local deltaX = pVec1.x - pVec2.x
     local deltaY = pVec1.y - pVec2.y
-    if math.abs(deltaX) < pVec1.img:getWidth() + pVec2.img:getWidth() and math.abs(deltaY) < pVec1.img:getHeight() +
-        pVec2.img:getHeight() then
+
+    if math.abs(deltaX) < (pVec1.img:getWidth() + pVec2.img:getWidth()) - 20 
+     and math.abs(deltaY) < (pVec1.img:getHeight() + pVec2.img:getHeight()) - 20 then
         return true
     end
 

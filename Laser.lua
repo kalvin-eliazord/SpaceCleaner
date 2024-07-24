@@ -1,15 +1,4 @@
-local Vec2 = require("Vector2")
-
 local Laser = {}
-Laser.__index = Laser
-setmetatable(Laser, {
-    __index = Vec2
-})
-
--- Recode ev. about laser, new should be the same but the set Velocity should be different for hero and enemies
-
-local w = 1024
-local h = 768
 
 function GetAngle(pVec1, pVec2)
     if pVec1 and pVec2 then
@@ -17,12 +6,15 @@ function GetAngle(pVec1, pVec2)
     end
 end
 
-function Laser:New(pType, pSrc, pDst)
+function Laser.New(pType, pSrc, pDst)
     if not Laser.list then
         Laser.list = {}
     end
 
-    local laser = Vec2:New(pSrc.x, pSrc.y)
+    local laser = {}
+    laser.x = pSrc.x
+    laser.y = pSrc.y
+
     laser.r = pSrc.r
     laser.sx = 1
     laser.sy = 1
@@ -30,10 +22,9 @@ function Laser:New(pType, pSrc, pDst)
     laser.vy = 0
     laser.target = pDst
     laser.type = pType
+    laser.bDist = false
 
     laser.img = love.graphics.newImage("images/lasers/laser" .. pType .. ".png")
-
-    setmetatable(laser, self)
     table.insert(Laser.list, laser)
 end
 
@@ -54,37 +45,41 @@ function GetNearest(pListDst, pSrc)
     return nearest
 end
 
-function Laser:SetGuidedLaser(pLaser, dt)
+function Laser.SetGuidedLaser(pLaser, dt)
   --  if not pLaser.target then return end
     -- local dist = math.sqrt((pLaser.x - pLaser.target.x) ^ 2 + (pLaser.y - pLaser.target.y) ^ 2)
     local toTargetAng = GetAngle(pLaser, pLaser.target)
 
-    local heroSpeed = 300
+    local heroSpeed = 400
     local angX = math.cos(toTargetAng)
     local angY = math.sin(toTargetAng)
 
-    pLaser.vx = angX * heroSpeed
-    pLaser.vy = angY * heroSpeed
-    pLaser.x = pLaser.x + pLaser.vx * dt
-    pLaser.y = pLaser.y + pLaser.vy * dt
+    pLaser.vx = angX * heroSpeed * dt
+    pLaser.vy = angY * heroSpeed * dt
+    pLaser.x = pLaser.x + pLaser.vx 
+    pLaser.y = pLaser.y + pLaser.vy 
 end
 
-function Laser:SetLaser(pLaser, dt)
+function Laser.SetLaser(pLaser, dt)
     if not pLaser.target then return end
-    -- local dist = math.sqrt((pLaser.x - pLaser.target.x) ^ 2 + (pLaser.y - pLaser.target.y) ^ 2)
-    local toTargetAng = GetAngle(pLaser, pLaser.target)
+    local currDist = math.sqrt((pLaser.x - pLaser.target.x) ^ 2 + (pLaser.y - pLaser.target.y) ^ 2)
+    local heroSpeed = 400
 
-    local heroSpeed = 300
-    local angX = math.cos(toTargetAng)
-    local angY = math.sin(toTargetAng)
+    if currDist > 200 and not pLaser.bDist then
+        local toTargetAng = GetAngle(pLaser, pLaser.target)
+        local angX = math.cos(toTargetAng)
+        local angY = math.sin(toTargetAng)
+        pLaser.vx = angX * heroSpeed
+        pLaser.vy = angY * heroSpeed
+    else
+        pLaser.bDist = true
+    end
 
-    pLaser.vx = angX * heroSpeed
-    pLaser.vy = angY * heroSpeed
     pLaser.x = pLaser.x + pLaser.vx * dt
     pLaser.y = pLaser.y + pLaser.vy * dt
 end
 
-function Laser:Load()
+function Laser.Load()
     maxSpawnCDR = 3
     heroSpawnCDR = maxSpawnCDR
     enemSpawnCDR = maxSpawnCDR
@@ -106,7 +101,7 @@ function table.clear(t)
     end
 end
 
-function Laser:Update(dt)
+function Laser.Update(dt)
     if Laser.list then
         for i = #Laser.list, 1, -1 do
             local laser = Laser.list[i]
@@ -117,7 +112,7 @@ function Laser:Update(dt)
     end
 end
 
-function Laser:Draw()
+function Laser.Draw()
     if Laser.list then
         for i, laser in ipairs(Laser.list) do
             love.graphics.draw(laser.img, laser.x, laser.y, laser.r, laser.sx, laser.sy)

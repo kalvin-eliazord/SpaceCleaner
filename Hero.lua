@@ -177,20 +177,17 @@ function Hero:Update(dt)
 
         -- Hero laser New
         local nearest = GetNearest(Enemy.list, hero)
-
         heroSpawnCDR = heroSpawnCDR - dt
         if heroSpawnCDR <= 0 and nearest then
-            Laser:New(1, hero, nearest)
+            Laser.New(1, hero, nearest)
             heroSpawnCDR = maxSpawnCDR
         end
 
         -- Set Velocity of laser
         if Laser.list then
-            for i = #Laser.list, 1, -1 do
-                local laser = Laser.list[i]
+            for i, laser in ipairs(Laser.list) do
                 if laser.type == 1 then -- hero type
-
-                    Laser:SetGuidedLaser(laser, dt)
+                    Laser.SetGuidedLaser(laser, dt)
 
                     if Hero:IsCollide(laser, laser.target) then
                         laser.target.hp = laser.target.hp - 1
