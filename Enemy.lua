@@ -1,5 +1,7 @@
+-- Imports
 local Vec2 = require("Vector2")
 local Laser = require("Laser")
+local Waste = require("Waste")
 
 local Enemy = {}
 Enemy.__index = Enemy
@@ -12,17 +14,15 @@ function Enemy:New()
         Enemy.list = {}
     end
 
-    local enemType = math.random(1, 6)
-    local enemX = math.random(0, w)
-    local enemY = math.random(0, h)
-
-    local enem = Vec2:New(enemX, enemY)
-    enem.type = enemType
+    local enem = Vec2:New(math.random(10, w), math.random(10, h))
+    enem.type = math.random(1, 6)
     enem.vx = math.random(-200, 200)
     enem.vy = math.random(-200, 200)
     enem.sx = 1
     enem.sy = 1
-    enem.img = love.graphics.newImage("images/enemies/enemy" .. enemType .. ".png")
+    enem.img = love.graphics.newImage("images/enemies/enemy" .. enem.type .. ".png")
+    enem.wasteSpawn = 1
+    enem.wasteMaxSpawn = math.random(1, 3)
 
     setmetatable(enem, self)
     table.insert(Enemy.list, enem)
@@ -66,6 +66,13 @@ function Enemy:Update(dt)
     if Enemy.list then
         for i = #Enemy.list, 1, -1 do
             local enem = Enemy.list[i]
+
+            -- Waste Spawn
+            enem.wasteSpawn = enem.wasteSpawn - dt
+            if enem.wasteSpawn <= 0 then
+                Waste:New(enem.x, enem.y)
+                enem.wasteSpawn = enem.wasteMaxSpawn
+            end
 
             -- if enemy type 1 or 2
             local hero = require("Hero").hero

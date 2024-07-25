@@ -13,9 +13,8 @@ function Health:New(x, y)
     return health
 end
 
-function Health:Load(pCam)
+function Health:Load()
     heroHp = Health:New(0, 0)
-    -- cam = pCam??
 end
 
 function Health:Draw(pHeroHp)

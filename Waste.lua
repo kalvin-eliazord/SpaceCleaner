@@ -1,3 +1,4 @@
+-- Imports
 local Vec2 = require("Vector2")
 
 local Waste = {}
@@ -6,12 +7,9 @@ setmetatable(Waste, {
     __index = Vec2
 })
 
-local w = 1024
-local h = 768
-
 local WasteImgList = {}
 
-function Waste:New()
+function Waste:New(pX, pY)
     if not Waste.list then
         Waste.list = {}
     end
@@ -19,7 +17,7 @@ function Waste:New()
     local type = love.math.random(1, 14)
     local randX = love.math.random(0, w)
     local randY = love.math.random(0, h)
-    local waste = Vec2:New(randX, randY)
+    local waste = Vec2:New(pX + math.random(-10, 10), pY + math.random(-10, 10))
 
     if waste.x < w / 2 then
         waste.vx = love.math.random(0, 200)
@@ -72,13 +70,6 @@ function Waste:Load()
 end
 
 function Waste:Update(dt)
-    -- Waste Spawn
-    spawnCDR = spawnCDR - dt
-    if spawnCDR <= 0 then
-        Waste:New()
-        spawnCDR = maxSpawnCDR
-    end
-
     -- Set Velocity
     if Waste.list then
         for i = #Waste.list, 1, -1 do
@@ -115,23 +106,6 @@ function Waste:Update(dt)
     end
 end
 
-function GetNearest(pList, pLaser)
-    if not pList or not pLaser then
-        return false
-    end
-    local nearest = pList[1]
-    local oldDist = 99999
-    for i, curr in ipairs(pList) do
-        local currDist = math.sqrt((pLaser.x - curr.x) ^ 2 + (pLaser.y - curr.y) ^ 2)
-        if currDist < oldDist then
-            oldDist = currDist
-            nearest = curr
-        end
-    end
-
-    return nearest
-end
-
 function Waste:Draw()
 
     if Waste.list then
@@ -141,7 +115,6 @@ function Waste:Draw()
             --      love.graphics.print("astSwallow " .. i .. " : " .. tostring(waste.bSwallow), 0, 200 + (i * 50))
         end
 
-        --  local waste = GetNearest(Waste.list, Hero.hero)
         -- dist = math.sqrt((waste.x - Hero.hero.x) ^ 2 + (waste.y - Hero.hero.y) ^ 2)
 
         -- love.graphics.print("AstDist:  " .. dist, 0, 200)

@@ -28,25 +28,8 @@ function Laser.New(pType, pSrc, pDst)
     table.insert(Laser.list, laser)
 end
 
-function GetNearest(pListDst, pSrc)
-    if not pListDst or not pSrc then
-        return false
-    end
-    local nearest = pListDst[1]
-    local oldDist = 99999
-    for i, curr in ipairs(pListDst) do
-        local currDist = math.sqrt((pSrc.x - curr.x) ^ 2 + (pSrc.y - curr.y) ^ 2)
-        if currDist < oldDist then
-            oldDist = currDist
-            nearest = curr
-        end
-    end
-
-    return nearest
-end
-
 function Laser.SetGuidedLaser(pLaser, dt)
-  --  if not pLaser.target then return end
+    --  if not pLaser.target then return end
     -- local dist = math.sqrt((pLaser.x - pLaser.target.x) ^ 2 + (pLaser.y - pLaser.target.y) ^ 2)
     local toTargetAng = GetAngle(pLaser, pLaser.target)
 
@@ -56,12 +39,14 @@ function Laser.SetGuidedLaser(pLaser, dt)
 
     pLaser.vx = angX * heroSpeed * dt
     pLaser.vy = angY * heroSpeed * dt
-    pLaser.x = pLaser.x + pLaser.vx 
-    pLaser.y = pLaser.y + pLaser.vy 
+    pLaser.x = pLaser.x + pLaser.vx
+    pLaser.y = pLaser.y + pLaser.vy
 end
 
 function Laser.SetLaser(pLaser, dt)
-    if not pLaser.target then return end
+    if not pLaser.target then
+        return
+    end
     local currDist = math.sqrt((pLaser.x - pLaser.target.x) ^ 2 + (pLaser.y - pLaser.target.y) ^ 2)
     local heroSpeed = 400
 
@@ -105,6 +90,11 @@ function Laser.Update(dt)
     if Laser.list then
         for i = #Laser.list, 1, -1 do
             local laser = Laser.list[i]
+
+            if laser.vx == 0 or laser.vy == 0 then
+                laser.bDelete = true
+            end
+            
             if laser.bDelete then
                 table.remove(Laser.list, i)
             end

@@ -1,6 +1,5 @@
 -- Imports
 local Vec2 = require("Vector2")
-local UI_Hearth = require("Health")
 local Laser = require("Laser")
 local Enemy = require("Enemy")
 local Waste = require("Waste")
@@ -53,7 +52,6 @@ function NewDust(x, y, r)
 end
 
 function Hero:Load(pMapList)
-    UI_Hearth:Load()
     w = pMapList["inGame"].img:getWidth()
     h = pMapList["inGame"].img:getHeight()
     iStart = 2
@@ -156,6 +154,26 @@ function Hero:SetVelocity(hero, engine, dt)
     -- end
 end
 
+function GetNearest(pListDst, pSrc)
+    if not pListDst or not pSrc then
+        return false
+    end
+    local nearest = false
+    local oldDist = 99999
+    for i, curr in ipairs(pListDst) do
+        local currDist = math.sqrt((pSrc.x - curr.x) ^ 2 + (pSrc.y - curr.y) ^ 2)
+        if currDist < 400 then -- shoot enemy only when they are visible
+            if currDist < oldDist then
+                oldDist = currDist
+                nearest = curr
+            end
+        end
+    end
+
+    return nearest
+end
+
+
 function Hero:Update(dt)
     -- Ship Start animation
     if not Vec2.bStart then
@@ -244,8 +262,6 @@ function Hero:Update(dt)
 end
 
 function Hero:Draw()
-    UI_Hearth:Draw(hero.hp)
-
     if hero.bDash then
         --   love.graphics.setColor(1, 0, 0)
         print("test")

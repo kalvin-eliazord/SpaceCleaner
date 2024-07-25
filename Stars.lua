@@ -1,3 +1,4 @@
+-- Imports
 local Vec2 = require("Vector2")
 
 local Stars = {}

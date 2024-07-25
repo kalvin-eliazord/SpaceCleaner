@@ -65,23 +65,24 @@ function Map.TitleUpdate(dt)
 end
 
 function Map.CameraShake(pDuration, pOffset)
-    Map.list["inGame"].x = Map.list["inGame"].x + math.random(-pOffset, pOffset)
-    Map.list["inGame"].y = Map.list["inGame"].y + math.random(-pOffset, pOffset)
+  -- TODO
 end
 
 function Map.Draw(pMap)
     Stars:Draw()
 
     if pMap == "title" then
+        -- Background img
         love.graphics.draw(Map.list["menu"].img, Map.list["menu"].x, Map.list["menu"].y)
-
-        love.graphics.draw(Map.list[pMap].img, love.graphics.getWidth() / 2 + 5, love.graphics.getHeight() / 2 + 75, 0,
-            Map.list[pMap].sx, Map.list[pMap].sy, Map.list[pMap].img:getWidth() / 2, Map.list[pMap].img:getHeight() / 2)
+        
+        love.graphics.draw(Map.list["title"].img, love.graphics.getWidth() / 2 + 5, love.graphics.getHeight() / 2 + 75, 0,
+            Map.list["title"].sx, Map.list["title"].sy, Map.list["title"].img:getWidth() / 2, Map.list["title"].img:getHeight() / 2)
 
         love.graphics.draw(Map.list["press_space"].img, love.graphics.getWidth() / 2 + 5,
             love.graphics.getHeight() / 2 + 130, 0, Map.list["press_space"].sx, Map.list["press_space"].sy,
             Map.list["press_space"].img:getWidth() / 2, Map.list["press_space"].img:getHeight() / 2)
     else
+        Map.current = Map.list[pMap]
         love.graphics.draw(Map.list[pMap].img, Map.list[pMap].x, Map.list[pMap].y)
     end
 end

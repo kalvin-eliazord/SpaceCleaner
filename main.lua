@@ -1,8 +1,9 @@
 io.stdout:setvbuf('no')
 love.graphics.setDefaultFilter("nearest")
 
+-- Imports
 local Hero = require("Hero")
-local Health = require("Health")
+local UI_Hearth = require("Health")
 local Waste = require("Waste")
 local Laser = require("Laser")
 local Vec2 = require("Vector2")
@@ -42,9 +43,9 @@ function love.load()
     Game = GameInit()
     love.window.setTitle(Game.title)
     love.window.setMode(Game.gSizes.w, Game.gSizes.h)
+    UI_Hearth:Load()
     Sound.Load(Game.sounds)
     Map.Load(Game.screens)
-    Health:Load(cam)
     Hero:Load(Map.list)
     Waste:Load()
     Laser:Load()
@@ -65,23 +66,23 @@ function love.update(dt)
         cam:lookAt(Hero.hero.x, Hero.hero.y)
 
         -- cam collisions
-        if cam.x < Map.list[Game.currScreen].img:getWidth() / 5  then
+        if cam.x < Map.list[Game.currScreen].img:getWidth() / 5 then
             cam.x = Map.list[Game.currScreen].img:getWidth() / 5
         end
 
         if cam.x > Map.list[Game.currScreen].img:getWidth() / 1.3 then
-           cam.x = Map.list[Game.currScreen].img:getWidth() / 1.3
+            cam.x = Map.list[Game.currScreen].img:getWidth() / 1.3
         end
 
-        if cam.y < Map.list[Game.currScreen].img:getHeight() / 5  then
+        if cam.y < Map.list[Game.currScreen].img:getHeight() / 5 then
             cam.y = Map.list[Game.currScreen].img:getHeight() / 5
         end
 
-        if cam.y > Map.list[Game.currScreen].img:getHeight() / 1.3  then
+        if cam.y > Map.list[Game.currScreen].img:getHeight() / 1.3 then
             cam.y = Map.list[Game.currScreen].img:getHeight() / 1.3
         end
 
-         Laser:Update(dt)
+        Laser:Update(dt)
     elseif Game.currScreen == "title" then
         Map.TitleUpdate(dt)
         --  Waste:Update(dt)  make it dissapear in inGame? TODO ?
@@ -107,7 +108,7 @@ function love.keypressed(pKey)
         end
 
         if pKey == "space" then -- NOT USED
-    --        Hero.hero.iDash = Hero.hero.iDash + 1
+            --        Hero.hero.iDash = Hero.hero.iDash + 1
 
             if Hero.hero.iDash >= 2 then
                 Hero.hero.iDash = 0
@@ -139,4 +140,9 @@ function love.draw()
     if Game.currScreen == "inGame" then
         cam:detach()
     end
+
+    if Game.currScreen == "inGame" then
+        UI_Hearth:Draw(Hero.hero.hp)
+    end
+
 end
