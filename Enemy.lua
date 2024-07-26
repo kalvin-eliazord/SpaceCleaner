@@ -9,12 +9,12 @@ setmetatable(Enemy, {
     __index = Vec2
 })
 
-function Enemy:New()
+function Enemy:New(x, y)
     if not Enemy.list then
         Enemy.list = {}
     end
 
-    local enem = Vec2:New(math.random(10, w), math.random(10, h))
+    local enem = Vec2:New(x, y)
     enem.type = math.random(1, 6)
     enem.vx = math.random(-200, 200)
     enem.vy = math.random(-200, 200)
@@ -22,8 +22,8 @@ function Enemy:New()
     enem.sy = 1
     enem.img = love.graphics.newImage("images/enemies/enemy" .. enem.type .. ".png")
     enem.wasteSpawn = 1
-    enem.wasteMaxSpawn = math.random(1, 3)
-
+    enem.wasteMaxSpawn = math.random(1, 5)
+    enem.bArrow = false
     setmetatable(enem, self)
     table.insert(Enemy.list, enem)
 end
@@ -57,24 +57,25 @@ end
 function Enemy:Update(dt)
     -- Enemy Spawn
     spawnCDR = spawnCDR - dt
-    if spawnCDR <= 0 then
-        Enemy:New()
+
+    if math.floor(spawnCDR) < 0 then
+        local Map = require("Map").current.img
+        Enemy:New(math.random(20, Map:getWidth() - 100), math.random(20, Map:getHeight() - 300))
         spawnCDR = maxSpawnCDR
     end
 
-    -- Set Velocity
     if Enemy.list then
         for i = #Enemy.list, 1, -1 do
             local enem = Enemy.list[i]
 
-            -- Waste Spawn
+            -- Waste Spawn by Enemy
             enem.wasteSpawn = enem.wasteSpawn - dt
             if enem.wasteSpawn <= 0 then
-                Waste:New(enem.x, enem.y)
+                Waste.New(enem.x, enem.y)
                 enem.wasteSpawn = enem.wasteMaxSpawn
             end
 
-            -- if enemy type 1 or 2
+            -- Enemy collision w/ Hero
             local hero = require("Hero").hero
             if Enemy:IsCollide(enem, hero) then
                 hero.hp = hero.hp - 1
@@ -82,29 +83,34 @@ function Enemy:Update(dt)
                 NewExplosion(hero.x, hero.y, dt)
             end
 
-            -- enemy logic based on type
+            -- Enemy logic based on type
             if enem.type == 5 or enem.type == 2 then
                 enemSpawnCDR = enemSpawnCDR - dt
-
                 if enemSpawnCDR <= 0 then
                     Laser.New(2, enem, hero)
                     enemSpawnCDR = maxSpawnCDR
                 end
+
             elseif enem.type == 6 then
                 Enemy:PursueTarget(enem, hero, dt, 200)
             elseif enem.type == 4 then
                 Enemy:PursueTarget(enem, hero, dt, 0)
             end
 
-            -- explosion creation
+            -- New Explosion
             if enem.hp <= 0 then
                 for j = 1, 3 do
                     NewExplosion(enem.x + love.math.random(-15, 15), enem.y + love.math.random(-10, 10))
                 end
+                enem.bDelete = true
+            end
+
+            -- Delete Enemy
+            if enem.bDelete and not enem.bArrow then
                 table.remove(Enemy.list, i)
             end
 
-            -- Explosion
+            -- Delete Explosion
             if Enemy.exploList then
                 for k = #Enemy.exploList, 1, -1 do
                     local explo = Enemy.exploList[k]
@@ -133,10 +139,6 @@ function Enemy:Update(dt)
                     hero.hp = hero.hp - 1
                 end
 
-                if Vec2:IsOutScreen(laser) then
-                    --       laser.bDelete = true
-                end
-
                 if laser.bDelete then
                     table.remove(Laser.list, i)
                 end
@@ -156,7 +158,7 @@ function Enemy:Draw()
         end
     end
 
-    -- Explosion
+    -- Explosions
     if Enemy.exploList then
         for k, explo in ipairs(Enemy.exploList) do
             local index = math.floor(explo.indexImg)
@@ -164,7 +166,6 @@ function Enemy:Draw()
                 explo.img[index]:getWidth() / 2, explo.img[index]:getHeight() / 2)
         end
     end
-
 end
 
 return Enemy

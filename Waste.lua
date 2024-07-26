@@ -1,31 +1,25 @@
--- Imports
-local Vec2 = require("Vector2")
-
 local Waste = {}
-Waste.__index = Waste
-setmetatable(Waste, {
-    __index = Vec2
-})
-
 local WasteImgList = {}
 
-function Waste:New(pX, pY)
+function Waste.New(pX, pY)
     if not Waste.list then
         Waste.list = {}
     end
 
-    local type = love.math.random(1, 14)
-    local randX = love.math.random(0, w)
-    local randY = love.math.random(0, h)
-    local waste = Vec2:New(pX + math.random(-10, 10), pY + math.random(-10, 10))
+    local waste = {}
+    waste.x = pX + math.random(-10, 10)
+    waste.y = pY + math.random(-10, 10)
+    waste.r = 0
 
-    if waste.x < w / 2 then
+    local Map = require("Map").current.img
+
+    if waste.x < Map:getWidth() / 2 then
         waste.vx = love.math.random(0, 200)
     else
         waste.vx = love.math.random(-200, 0)
     end
 
-    if waste.y < h / 2 then
+    if waste.y < Map:getHeight() / 2 then
         waste.vy = love.math.random(0, 200)
     else
         waste.vy = love.math.random(-200, 0)
@@ -33,6 +27,8 @@ function Waste:New(pX, pY)
 
     waste.sx = 0.01
     waste.sy = 0.01
+
+    local type = love.math.random(1, 14)
 
     if type == 1 then
         waste.dist = 90
@@ -49,7 +45,6 @@ function Waste:New(pX, pY)
     waste.type = "asteroid"
     waste.img = WasteImgList[type]
     waste.vr = love.math.random(-9, 9)
-    setmetatable(waste, self)
 
     table.insert(Waste.list, waste)
 end
@@ -60,7 +55,7 @@ function WasteInit()
     end
 end
 
-function Waste:Load()
+function Waste.Load()
     WasteInit()
 
     score = 0
@@ -69,7 +64,7 @@ function Waste:Load()
     spawnCDR = maxSpawnCDR
 end
 
-function Waste:Update(dt)
+function Waste.Update(dt)
     -- Set Velocity
     if Waste.list then
         for i = #Waste.list, 1, -1 do
@@ -78,8 +73,8 @@ function Waste:Update(dt)
             waste.y = waste.y + waste.vy * dt
 
             if waste.sx < 1 then
-                waste.sx = waste.sx + (dt * 20)
-                waste.sy = waste.sy + (dt * 20)
+                waste.sx = waste.sx + (dt * 50)
+                waste.sy = waste.sy + (dt * 50)
             end
 
             if waste.sx > 1.5 then
@@ -91,12 +86,11 @@ function Waste:Update(dt)
             end
 
             waste.r = waste.r + (waste.vr * dt)
-
             if waste ~= nil then
 
-                if Waste:IsOutScreen(waste) then
-                    waste.bDelete = true
-                end
+                --    if Waste:IsOutScreen(waste) then TODO
+                --          waste.bDelete = true
+                --       end
             end
 
             if waste.bDelete then

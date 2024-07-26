@@ -3,7 +3,7 @@ love.graphics.setDefaultFilter("nearest")
 
 -- Imports
 local Hero = require("Hero")
-local UI_Hearth = require("Health")
+local UI = require("UI")
 local Waste = require("Waste")
 local Laser = require("Laser")
 local Vec2 = require("Vector2")
@@ -43,11 +43,11 @@ function love.load()
     Game = GameInit()
     love.window.setTitle(Game.title)
     love.window.setMode(Game.gSizes.w, Game.gSizes.h)
-    UI_Hearth:Load()
+    UI:Load()
     Sound.Load(Game.sounds)
     Map.Load(Game.screens)
     Hero:Load(Map.list)
-    Waste:Load()
+    Waste.Load()
     Laser:Load()
     Enemy:Load()
 end
@@ -56,16 +56,17 @@ function love.update(dt)
     --    if not Game.bPause then
     Sound.Update(Game.currScreen)
     Map.Update(dt)
-    Waste:Update(dt)
+    Waste.Update(dt)
 
     if Game.currScreen == "inGame" then
         --  Sound.streamState = Game.currScreen
         Hero:Update(dt)
         Enemy:Update(dt)
+        UI:Update(dt)
 
         cam:lookAt(Hero.hero.x, Hero.hero.y)
 
-        -- cam collisions
+        -- Cam collisions
         if cam.x < Map.list[Game.currScreen].img:getWidth() / 5 then
             cam.x = Map.list[Game.currScreen].img:getWidth() / 5
         end
@@ -129,20 +130,19 @@ function love.draw()
     end
 
     Map.Draw(Game.currScreen)
-    Waste:Draw()
+    Waste.Draw()
 
     if Game.currScreen == "inGame" then
         Hero:Draw()
         Enemy:Draw()
         Laser.Draw()
     end
-
+    
     if Game.currScreen == "inGame" then
         cam:detach()
     end
 
     if Game.currScreen == "inGame" then
-        UI_Hearth:Draw(Hero.hero.hp)
+        UI:Draw()
     end
-
 end

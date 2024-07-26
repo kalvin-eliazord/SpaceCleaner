@@ -46,7 +46,7 @@ function NewDust(x, y, r)
     dust.sx = 0.5
     dust.sy = 0.5
     dust.r = r
-    dust.timer = 0.2
+    dust.timer = 0.3
     table.insert(DustList, dust)
     return dust
 end
@@ -73,30 +73,34 @@ function Hero:Load(pMapList)
 end
 
 function Hero:MapCollision(hero, dt)
-    if hero.x <= hero.img:getWidth() then
-        hero.x = hero.x + hero.img:getWidth()
-        hero.vx = (hero.vx * -1)
-        hero.vx = hero.vx - (100 * dt)
+    local Map = require("Map").current.img
+
+    if hero.x < 0 then
+        hero.x = Map:getWidth()
+        hero.bSpeedMap = true
+    elseif hero.x > Map:getWidth() then
+        hero.x = 0
+        hero.bSpeedMap = true
+
+    elseif hero.y < 0 then
+        hero.y = Map:getHeight()
+        hero.bSpeedMap = true
+
+    elseif hero.y > Map:getHeight() then
+        hero.y = 10
+        hero.bSpeedMap = true
     end
-    if hero.x >= w - hero.img:getWidth() then
-        hero.x = hero.x - hero.img:getWidth()
-        hero.vx = (hero.vx * -1)
-        hero.vx = hero.vx + (100 * dt)
-    end
-    if hero.y <= hero.img:getHeight() then
-        hero.y = hero.y + hero.img:getHeight()
-        hero.vy = (hero.vy * -1)
-        hero.vy = hero.vy - (100 * dt)
-    end
-    if hero.y >= h - hero.img:getHeight() then
-        hero.y = hero.y - hero.img:getHeight()
-        hero.vy = (hero.vy * -1)
-        hero.vy = hero.vy + (100 * dt)
+
+    if hero.bSpeedMap then
+        hero.vx = hero.vx + dt
+        hero.vy = hero.vy + dt
+
+        -- create a timer for each boost and temporary things
     end
 end
 
 function Hero:KeysControl(hero, engine, dt)
-    local shipAngRad = math.rad(hero.r)
+   -- local shipAngRad = math.rad(hero.r)
 
     if love.keyboard.isDown("right") then
         hero.r = hero.r + hero.vr * dt
@@ -162,7 +166,8 @@ function GetNearest(pListDst, pSrc)
     local oldDist = 99999
     for i, curr in ipairs(pListDst) do
         local currDist = math.sqrt((pSrc.x - curr.x) ^ 2 + (pSrc.y - curr.y) ^ 2)
-        if currDist < 400 then -- shoot enemy only when they are visible
+        -- Shoot enemy only when they are visible
+        if currDist < 400 then 
             if currDist < oldDist then
                 oldDist = currDist
                 nearest = curr
@@ -172,7 +177,6 @@ function GetNearest(pListDst, pSrc)
 
     return nearest
 end
-
 
 function Hero:Update(dt)
     -- Ship Start animation
@@ -220,6 +224,7 @@ function Hero:Update(dt)
             end
         end
 
+        -- Speed boost animation
         if #DustList > 0 then
             for i = #DustList, 1, -1 do
                 local dust = DustList[i]
@@ -232,9 +237,9 @@ function Hero:Update(dt)
                     table.remove(DustList, i)
                 end
             end
-
         end
 
+        -- Waste cleaning process
         if Waste.list then
             for i = #Waste.list, 1, -1 do
                 local waste = Waste.list[i]
@@ -244,11 +249,14 @@ function Hero:Update(dt)
                     Vec2:PursueTarget(waste, Hero.hero, dt, 250)
                     waste.bSwallow = true
 
-                    -- swallow animation
+                    -- Swallow animation
                     if waste.bSwallow then
-                        waste.sx = waste.sx - dt
-                        waste.sy = waste.sy - dt
+                        waste.sx = waste.sx - (dt*5)
+                        waste.sy = waste.sy - (dt*5)
+                    -- Sound Effect
+
                     end
+
                     if waste.bSwallow and Vec2:IsCollide(waste, Hero.hero) then
                         waste.bDelete = true
                         score = score + 1
