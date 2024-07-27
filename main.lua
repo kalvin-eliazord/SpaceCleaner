@@ -9,6 +9,7 @@ local Laser = require("Laser")
 local Vec2 = require("Vector2")
 local Enemy = require("Enemy")
 local Sound = require("Sound")
+local Explosion = require("Explosion")
 local Map = require("Map")
 local Camera = require("lib/camera")
 
@@ -47,7 +48,7 @@ function love.load()
     Sound.Load(Game.sounds)
     Map.Load(Game.screens)
     Hero:Load(Map.list)
-    Waste.Load()
+    Waste:Load()
     Laser:Load()
     Enemy:Load()
 end
@@ -56,14 +57,14 @@ function love.update(dt)
     --    if not Game.bPause then
     Sound.Update(Game.currScreen)
     Map.Update(dt)
-    Waste.Update(dt)
+    Waste:Update(dt)
 
     if Game.currScreen == "inGame" then
         --  Sound.streamState = Game.currScreen
         Hero:Update(dt)
         Enemy:Update(dt)
         UI:Update(dt)
-
+        Explosion:Update(dt)
         cam:lookAt(Hero.hero.x, Hero.hero.y)
 
         -- Cam collisions
@@ -108,13 +109,13 @@ function love.keypressed(pKey)
             end
         end
 
-        if pKey == "space" then -- NOT USED
-            --        Hero.hero.iDash = Hero.hero.iDash + 1
-
+        if pKey == "space" then
+            --        Hero.hero.iDash = Hero.hero.iDash + 1 NOT USED
             if Hero.hero.iDash >= 2 then
                 Hero.hero.iDash = 0
                 Hero.hero.bDash = true
             end
+            --
         end
     else
         -- Start game
@@ -130,14 +131,15 @@ function love.draw()
     end
 
     Map.Draw(Game.currScreen)
-    Waste.Draw()
+    Waste:Draw()
 
     if Game.currScreen == "inGame" then
         Hero:Draw()
         Enemy:Draw()
         Laser.Draw()
+        Explosion:Draw()
     end
-    
+
     if Game.currScreen == "inGame" then
         cam:detach()
     end

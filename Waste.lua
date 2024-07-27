@@ -1,18 +1,23 @@
-local Waste = {}
-local WasteImgList = {}
+-- Imports
+local Vec2 = require("Vector2")
 
-function Waste.New(pX, pY)
+local Waste = {}
+Waste.__index = Waste
+setmetatable(Waste, {
+    __index = Vec2
+})
+
+function Waste:New(pX, pY)
     if not Waste.list then
         Waste.list = {}
     end
 
-    local waste = {}
-    waste.x = pX + math.random(-10, 10)
-    waste.y = pY + math.random(-10, 10)
+    local waste = Vec2:New(pX + math.random(-10, 10), pY + math.random(-10, 10))
     waste.r = 0
 
     local Map = require("Map").current.img
 
+    -- Waste direction based on coordinates
     if waste.x < Map:getWidth() / 2 then
         waste.vx = love.math.random(0, 200)
     else
@@ -25,10 +30,16 @@ function Waste.New(pX, pY)
         waste.vy = love.math.random(-200, 0)
     end
 
-    waste.sx = 0.01
-    waste.sy = 0.01
+    waste.sxMax = 0.01
+    waste.syMax = 0.01
+    waste.sx = waste.sxMax
+    waste.sy = waste.syMax
+    waste.sxMin = 0.01
+    waste.syMin = 0.01
+    waste.vr = love.math.random(-9, 9)
 
     local type = love.math.random(1, 14)
+    waste.img = Waste.imgList[type]
 
     if type == 1 then
         waste.dist = 90
@@ -42,20 +53,21 @@ function Waste.New(pX, pY)
         waste.dist = 150
     end
 
-    waste.type = "asteroid"
-    waste.img = WasteImgList[type]
-    waste.vr = love.math.random(-9, 9)
 
     table.insert(Waste.list, waste)
 end
 
 function WasteInit()
+    if not Waste.imgList then
+        Waste.imgList = {}
+    end
+
     for i = 1, 14 do
-        WasteImgList[i] = love.graphics.newImage("images/wastes/ast" .. i .. ".png")
+        Waste.imgList[i] = love.graphics.newImage("images/wastes/ast" .. i .. ".png")
     end
 end
 
-function Waste.Load()
+function Waste:Load()
     WasteInit()
 
     score = 0
@@ -64,11 +76,14 @@ function Waste.Load()
     spawnCDR = maxSpawnCDR
 end
 
-function Waste.Update(dt)
-    -- Set Velocity
+function Waste:Update(dt)
     if Waste.list then
         for i = #Waste.list, 1, -1 do
             local waste = Waste.list[i]
+
+            --Waste:SetShrink(waste, dt)
+
+            -- Set Velocity
             waste.x = waste.x + waste.vx * dt
             waste.y = waste.y + waste.vy * dt
 
@@ -86,13 +101,8 @@ function Waste.Update(dt)
             end
 
             waste.r = waste.r + (waste.vr * dt)
-            if waste ~= nil then
 
-                --    if Waste:IsOutScreen(waste) then TODO
-                --          waste.bDelete = true
-                --       end
-            end
-
+            -- Delete Waste
             if waste.bDelete then
                 table.remove(Waste.list, i)
             end
@@ -101,20 +111,14 @@ function Waste.Update(dt)
 end
 
 function Waste:Draw()
-
     if Waste.list then
         for i, waste in ipairs(Waste.list) do
             love.graphics.draw(waste.img, waste.x, waste.y, waste.r, waste.sx, waste.sy, waste.img:getWidth() / 2,
                 waste.img:getHeight() / 2)
-            --      love.graphics.print("astSwallow " .. i .. " : " .. tostring(waste.bSwallow), 0, 200 + (i * 50))
         end
 
-        -- dist = math.sqrt((waste.x - Hero.hero.x) ^ 2 + (waste.y - Hero.hero.y) ^ 2)
-
-        -- love.graphics.print("AstDist:  " .. dist, 0, 200)
-
+        print(#Waste.list)
         --      love.graphics.print("Score: " .. score, w / 2, 10)
-
     end
 end
 

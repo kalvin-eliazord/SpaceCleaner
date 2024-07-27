@@ -23,7 +23,7 @@ function Laser.New(pType, pSrc, pDst)
     laser.target = pDst
     laser.type = pType
     laser.bDist = false
-
+    laser.bShine= false
     laser.img = love.graphics.newImage("images/lasers/laser" .. pType .. ".png")
     table.insert(Laser.list, laser)
 end
@@ -102,9 +102,29 @@ function Laser.Update(dt)
     end
 end
 
+function SetColor(pVec2, dt)
+    -- Enlarge
+    if not pVec2.bShine then
+        love.graphics.setColor( 50 )
+
+        pVec2.sx = pVec2.sx + dt
+        pVec2.sy = pVec2.sy + dt
+    end
+
+    -- Shrink
+    if pVec2.bShrink == true then
+        if pVec2.sx < pVec2.sxMin then
+            pVec2.bShrink = false
+        end
+        pVec2.sx = pVec2.sx - dt
+        pVec2.sy = pVec2.sy - dt
+    end
+end
+
 function Laser.Draw()
     if Laser.list then
         for i, laser in ipairs(Laser.list) do
+            love.graphics.setColor( 50 ,40,1)
             love.graphics.draw(laser.img, laser.x, laser.y, laser.r, laser.sx, laser.sy)
         end
     end

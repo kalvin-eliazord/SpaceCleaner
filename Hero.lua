@@ -99,31 +99,15 @@ function Hero:MapCollision(hero, dt)
     end
 end
 
-function Hero:KeysControl(hero, engine, dt)
-   -- local shipAngRad = math.rad(hero.r)
-
+function SetHeroAngle(hero, dt)
     if love.keyboard.isDown("right") then
         hero.r = hero.r + hero.vr * dt
     elseif love.keyboard.isDown("left") then
         hero.r = hero.r - hero.vr * dt
     end
-
-    Vec2:SetVelocity(hero)
-
-    --  if love.keyboard.isDown("space") then
-    --    local angX = math.cos(shipAngRad)
-    --  local angY = math.sin(shipAngRad)
-    -- hero.vx = hero.vx + angX * (dt / 20)
-    -- hero.vy = hero.vy + angY * (dt / 20)
-    -- engine.bEngine = true
-    -- else
-    -- engine.bEngine = false
-    -- end
-
 end
 
-function Hero:SetMaxSpeed(hero)
-    -- max Acceleration
+function SetHeroMaxSpeed(hero)
     if not hero.bDash then
         if hero.vx >= hero.vMax then
             hero.vx = hero.vMax
@@ -138,24 +122,20 @@ function Hero:SetMaxSpeed(hero)
     end
 end
 
-function Hero:SetVelocity(hero, engine, dt)
+function SetVelocity(hero, dt)
     local shipAngRad = math.rad(hero.r)
-
     local angX = math.cos(shipAngRad)
     local angY = math.sin(shipAngRad)
     hero.vx = hero.vx + angX * (dt * 100)
     hero.vy = hero.vy + angY * (dt * 100)
 
-    engine.bEngine = true
+    Hero:SetVelocity(hero, dt)
 
+    -- Engine Particles
     local iRand = math.random(2, 3)
     for i = 1, iRand do
         NewDust(hero.x + math.random(-6, 6), hero.y, hero.r)
     end
-
-    -- if hero.bDash and dashCDR > 0 then
-
-    -- end
 end
 
 function GetNearest(pListDst, pSrc)
@@ -190,18 +170,20 @@ function Hero:Update(dt)
         end
     end
     
-    -- Hero ship process
+    -- Hero process
     if Vec2.bStart then
-        Hero:KeysControl(hero, engine, dt)
-        Hero:SetMaxSpeed(hero)
-        Hero:SetVelocity(hero, engine, dt)
+        SetHeroAngle(hero, dt)
+        SetHeroMaxSpeed(hero)
+        SetVelocity(hero, dt)
         Hero:MapCollision(hero, dt)
 
-        -- Hero laser New
+        -- New Laser
         local nearest = GetNearest(Enemy.list, hero)
         heroSpawnCDR = heroSpawnCDR - dt
         if heroSpawnCDR <= 0 and nearest then
             Laser.New(1, hero, nearest)
+            -- When hero shoot there is an halo (yellow spaceship sprite glowing for 0.5s below the hero)
+            -- boolean shooting state w/timer
             heroSpawnCDR = maxSpawnCDR
         end
 

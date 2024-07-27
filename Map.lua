@@ -1,17 +1,24 @@
 -- Imports
+local Vec2 = require("Vector2")
 local Stars = require("Stars")
 
 local Map = {}
+Map.__index = Map
+setmetatable(Map, {
+    __index = Vec2
+})
 Map.list = {}
 Map.current = nil
 
-function NewMap(pName)
-    local map = {}
+function Map:New(pName)
+    local map = Vec2:New(0, 0)
     map.img = love.graphics.newImage("images/maps/" .. pName .. ".png")
-    map.x = 0
-    map.y = 0
 
     if pName == "title" then
+        map.sxMin = 1.8
+        map.syMin = 1.8
+        map.sxMax = 2
+        map.syMax = 2
         map.sx = 1.5
         map.sy = 1.5
         map.bShrink = true
@@ -20,12 +27,13 @@ function NewMap(pName)
         map.sy = 1
     end
 
+    setmetatable(map, self)
     return map
 end
 
-function MapsInit(pMaps)
+function InitMapList(pMaps)
     for i, level in ipairs(pMaps) do
-        Map.list[level] = NewMap(level)
+        Map.list[level] = Map:New(level)
     end
 end
 
@@ -34,7 +42,7 @@ function ChangeMap(pLvl)
 end
 
 function Map.Load(pMaps)
-    MapsInit(pMaps)
+    InitMapList(pMaps)
     Map.list["press_space"] = {}
     Map.list["press_space"].img = love.graphics.newImage("images/maps/press_space.png")
     Map.current = Map.list["menu"]
@@ -42,32 +50,15 @@ function Map.Load(pMaps)
     Stars:Load()
 end
 
+function NewParticles(pSrc, dt)
+end
+
 function Map.Update(dt)
     Stars:Update(dt)
 end
 
 function Map.TitleUpdate(dt)
-    if Map.list["title"].bShrink then
-        Map.list["title"].sx = Map.list["title"].sx - dt
-        Map.list["title"].sy = Map.list["title"].sy - dt
-
-        -- Min title size
-        if Map.list["title"].sx <= 1.8 then
-            Map.list["title"].bShrink = false
-        end
-    else
-        Map.list["title"].sx = Map.list["title"].sx + dt
-        Map.list["title"].sy = Map.list["title"].sy + dt
-
-        -- Max title size
-        if Map.list["title"].sx >= 2 then
-            Map.list["title"].bShrink = true
-        end
-    end
-end
-
-function Map.CameraShake(pDuration, pOffset)
-    -- TODO
+    Map:SetShrink(Map.list["title"], dt)
 end
 
 function Map.Draw(pMap)

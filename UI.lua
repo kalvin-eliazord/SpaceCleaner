@@ -1,17 +1,25 @@
 -- Imports
+local Vec2 = require("Vector2")
 local Hero = require("Hero")
 local Enemy = require("Enemy")
 
 local UI = {}
-setmetatable(UI, Vec2)
+UI.__index = UI
+setmetatable(UI, {
+    __index = Vec2
+})
 
 function UI:New(x, y, pImg, sx, sy)
-    local ui = {}
-    ui.x = x
-    ui.y = y
+    local ui = Vec2:New(x, y)
     ui.img = love.graphics.newImage("images/" .. pImg .. ".png")
-    ui.sx = sx
-    ui.sy = sy
+
+    ui.sxMin = sx
+    ui.syMin = sy
+    ui.sx = ui.sxMin
+    ui.sy = ui.syMin
+    ui.sxMax = ui.sxMin * 2.5
+    ui.syMax = ui.sxMin * 2.5
+
     ui.r = 0
 
     if pImg == "arrow" then
@@ -29,6 +37,7 @@ function UI:New(x, y, pImg, sx, sy)
         table.insert(listArrow, ui)
     end
 
+    setmetatable(ui, self)
     return ui
 end
 
@@ -48,14 +57,14 @@ function UI:Update(dt)
             -- New Arrow
             if not enem.bArrow then
                 enem.bArrow = true
-                enem.arrowUI = UI:New(500, 50, "arrow", 0.07, 0.07)
+                enem.arrowUI = UI:New(500, 50, "arrow", 0.06, 0.06)
             else
                 local hero = Hero.hero
                 local deltaArrow = {}
                 deltaArrow.x = hero.x - enem.x
                 deltaArrow.y = hero.y - enem.y
 
-                -- Arrow Position / Rotation
+                -- Arrow Position 
                 if math.abs(deltaArrow.x) > math.abs(deltaArrow.y) then
                     if enem.x < hero.x then
                         if listArrow.iLeft > 3 then
@@ -94,7 +103,11 @@ function UI:Update(dt)
                     end
                 end
 
+                -- Arrow Rotation
                 enem.arrowUI.r = GetAngle(hero, enem)
+
+                -- Arrow Shrinking
+                UI:SetShrink(enem.arrowUI, dt)
 
                 -- bDormant Check
                 local currDist = math.sqrt(deltaArrow.x ^ 2 + deltaArrow.y ^ 2)
@@ -146,10 +159,12 @@ function UI:Draw()
             healthUI.sy)
     end
 
+    -- Arrow UI
     if listArrow then
         for i, arrow in ipairs(listArrow) do
             local padding = nil
-
+            love.graphics.setColor(1, 0, 0, 0.7)
+            -- Padded drawing based on arrow Side 
             if arrow.side == "up" or arrow.side == "down" then
                 padding = (i * arrow.img:getWidth() / 5)
                 if padding ~= nil and not arrow.bDormant then
@@ -159,12 +174,11 @@ function UI:Draw()
             elseif arrow.side == "right" or arrow.side == "left" then
                 padding = (i * arrow.img:getHeight() / 5)
                 if padding ~= nil and not arrow.bDormant then
-                    print(arrow.bDormant)
                     love.graphics.draw(arrow.img, arrow.x, arrow.y + padding, arrow.r, arrow.sx, arrow.sy,
                         arrow.img:getWidth() / 2, arrow.img:getHeight() / 2)
                 end
-
             end
+            love.graphics.setColor(255, 255, 255)
 
         end
     end
