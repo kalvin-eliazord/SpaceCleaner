@@ -61,7 +61,7 @@ function love.update(dt)
 
     if Game.currScreen == "inGame" then
         --  Sound.streamState = Game.currScreen
-        Hero:Update(dt)
+        Hero:Update(dt, cam)
         Enemy:Update(dt)
         UI:Update(dt)
         Explosion:Update(dt)

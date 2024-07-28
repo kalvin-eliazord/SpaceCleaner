@@ -147,7 +147,7 @@ function GetNearest(pListDst, pSrc)
     for i, curr in ipairs(pListDst) do
         local currDist = math.sqrt((pSrc.x - curr.x) ^ 2 + (pSrc.y - curr.y) ^ 2)
         -- Shoot enemy only when they are visible
-        if currDist < 400 then 
+        if currDist < 400 then
             if currDist < oldDist then
                 oldDist = currDist
                 nearest = curr
@@ -158,7 +158,7 @@ function GetNearest(pListDst, pSrc)
     return nearest
 end
 
-function Hero:Update(dt)
+function Hero:Update(dt, cam)
     -- Ship Start animation
     if not Vec2.bStart then
         love.audio.play(startSound)
@@ -169,7 +169,7 @@ function Hero:Update(dt)
             Vec2.bStart = true
         end
     end
-    
+
     -- Hero process
     if Vec2.bStart then
         SetHeroAngle(hero, dt)
@@ -182,6 +182,8 @@ function Hero:Update(dt)
         heroSpawnCDR = heroSpawnCDR - dt
         if heroSpawnCDR <= 0 and nearest then
             Laser.New(1, hero, nearest)
+            local test = cam:move(200, 400)
+            test.x = test.x + 20
             -- When hero shoot there is an halo (yellow spaceship sprite glowing for 0.5s below the hero)
             -- boolean shooting state w/timer
             heroSpawnCDR = maxSpawnCDR
@@ -233,9 +235,9 @@ function Hero:Update(dt)
 
                     -- Swallow animation
                     if waste.bSwallow then
-                        waste.sx = waste.sx - (dt*5)
-                        waste.sy = waste.sy - (dt*5)
-                    -- Sound Effect
+                        waste.sx = waste.sx - (dt * 5)
+                        waste.sy = waste.sy - (dt * 5)
+                        -- Sound Effect
 
                     end
 
@@ -252,7 +254,7 @@ function Hero:Update(dt)
 end
 
 function Hero:Draw()
-    if hero.bDash then
+    if hero.bDash then -- TODO
         --   love.graphics.setColor(1, 0, 0)
         print("test")
     end
@@ -263,6 +265,10 @@ function Hero:Draw()
                 dust.img:getHeight() / 4)
         end
     end
+
+    --if hero.bDmgTaken then -- TODO
+      --  love.graphics.setColor(0, 255, 255) HOW TO DO WHITE ???
+    --end
 
     love.graphics.draw(hero.img, hero.x, hero.y, math.rad(hero.r), hero.sx, hero.sy, hero.img:getWidth() / 2,
         hero.img:getHeight() / 2)

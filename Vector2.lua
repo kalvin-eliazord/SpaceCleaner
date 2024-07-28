@@ -65,6 +65,18 @@ function Vector2:IsCollide(pVec1, pVec2)
     return false
 end
 
+function Vector2:SetTempEffect(pListEffect, pEffect)
+    local effect = pListEffect[pEffect]
+
+    if effect ~= nil then
+        effect.iCurr = effect.iCurr - dt
+        if pSrc_iCurr <= 0 then
+            effect.bool = not effect.bool
+            effect.iCurr = effect.iMax
+        end
+    end
+end
+
 function Vector2:PursueTarget(pSrc, pDst, dt, pSpeed)
     function math.angle(x1, y1, x2, y2)
         return math.atan2(y2 - y1, x2 - x1)
