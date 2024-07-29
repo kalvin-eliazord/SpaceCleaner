@@ -38,21 +38,10 @@ function Waste:New(pX, pY)
     waste.syMin = 0.01
     waste.vr = love.math.random(-9, 9)
 
-    local type = love.math.random(1, 14)
+    -- Type process
+    local type = love.math.random(1, 9)
     waste.img = Waste.imgList[type]
-
-    if type == 1 then
-        waste.dist = 90
-    elseif type == 2 then
-        waste.dist = 70
-    elseif type == 3 then
-        waste.dist = 90
-    elseif type == 4 then
-        waste.dist = 100
-    else
-        waste.dist = 150
-    end
-
+    waste.dist = 150
 
     table.insert(Waste.list, waste)
 end
@@ -62,26 +51,34 @@ function WasteInit()
         Waste.imgList = {}
     end
 
-    for i = 1, 14 do
-        Waste.imgList[i] = love.graphics.newImage("images/wastes/ast" .. i .. ".png")
+    for i = 1, 9 do
+        Waste.imgList[i] = love.graphics.newImage("images/wastes/waste (" .. i .. ").png")
     end
 end
 
 function Waste:Load()
     WasteInit()
 
-    score = 0
-
     maxSpawnCDR = 0.2
     spawnCDR = maxSpawnCDR
+    score = 0
 end
 
-function Waste:Update(dt)
+function Waste:Update(pGame, dt)
+    if pGame.currScreen == "title" then
+        spawnCDR = spawnCDR - dt
+        if spawnCDR < 0 then
+            local Map = require("Map").current.img
+            Waste:New(math.random(10, Map:getWidth()), math.random(10, Map:getHeight()))
+            spawnCDR = maxDashCDR
+        end
+    end
+
     if Waste.list then
         for i = #Waste.list, 1, -1 do
             local waste = Waste.list[i]
 
-            --Waste:SetShrink(waste, dt)
+            --Waste:SetShrink(waste, dt) need to fix
 
             -- Set Velocity
             waste.x = waste.x + waste.vx * dt
@@ -102,6 +99,10 @@ function Waste:Update(dt)
 
             waste.r = waste.r + (waste.vr * dt)
 
+            if Waste:IsOutScreen(waste) then
+                waste.bDelete = true
+            end
+
             -- Delete Waste
             if waste.bDelete then
                 table.remove(Waste.list, i)
@@ -117,7 +118,7 @@ function Waste:Draw()
                 waste.img:getHeight() / 2)
         end
 
-        print(#Waste.list)
+        --print("wasteList: ",#Waste.list)
         --      love.graphics.print("Score: " .. score, w / 2, 10)
     end
 end

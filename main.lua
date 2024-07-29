@@ -3,6 +3,7 @@ love.graphics.setDefaultFilter("nearest")
 
 -- Imports
 local Hero = require("Hero")
+local Asteroid = require("Asteroid")
 local UI = require("UI")
 local Waste = require("Waste")
 local Laser = require("Laser")
@@ -51,45 +52,48 @@ function love.load()
     Waste:Load()
     Laser:Load()
     Enemy:Load()
+    Asteroid:Load()
 end
 
 function love.update(dt)
-    --    if not Game.bPause then
-    Sound.Update(Game.currScreen)
-    Map.Update(dt)
-    Waste:Update(dt)
+    if not Game.bPause then
+        Sound.Update(Game.currScreen)
+        Map.Update(dt)
+        Waste:Update(Game, dt)
+        Asteroid:Update(dt)
 
-    if Game.currScreen == "inGame" then
-        --  Sound.streamState = Game.currScreen
-        Hero:Update(dt, cam)
-        Enemy:Update(dt)
-        UI:Update(dt)
-        Explosion:Update(dt)
-        cam:lookAt(Hero.hero.x, Hero.hero.y)
+        if Game.currScreen == "inGame" then
+            Vec2:Update(dt)
 
-        -- Cam collisions
-        if cam.x < Map.list[Game.currScreen].img:getWidth() / 5 then
-            cam.x = Map.list[Game.currScreen].img:getWidth() / 5
+            --  Sound.streamState = Game.currScreen
+            Hero:Update(dt, cam)
+            Enemy:Update(dt)
+            UI:Update(dt)
+            Explosion:Update(dt)
+            cam:lookAt(Hero.hero.x, Hero.hero.y)
+
+            -- Cam collisions
+            if cam.x < Map.list[Game.currScreen].img:getWidth() / 5 then
+                cam.x = Map.list[Game.currScreen].img:getWidth() / 5
+            end
+
+            if cam.x > Map.list[Game.currScreen].img:getWidth() / 1.3 then
+                cam.x = Map.list[Game.currScreen].img:getWidth() / 1.3
+            end
+
+            if cam.y < Map.list[Game.currScreen].img:getHeight() / 5 then
+                cam.y = Map.list[Game.currScreen].img:getHeight() / 5
+            end
+
+            if cam.y > Map.list[Game.currScreen].img:getHeight() / 1.3 then
+                cam.y = Map.list[Game.currScreen].img:getHeight() / 1.3
+            end
+
+            Laser:Update(dt)
+        elseif Game.currScreen == "title" then
+            --  Waste:Update(dt)  make it dissapear in inGame? TODO ?
         end
-
-        if cam.x > Map.list[Game.currScreen].img:getWidth() / 1.3 then
-            cam.x = Map.list[Game.currScreen].img:getWidth() / 1.3
-        end
-
-        if cam.y < Map.list[Game.currScreen].img:getHeight() / 5 then
-            cam.y = Map.list[Game.currScreen].img:getHeight() / 5
-        end
-
-        if cam.y > Map.list[Game.currScreen].img:getHeight() / 1.3 then
-            cam.y = Map.list[Game.currScreen].img:getHeight() / 1.3
-        end
-
-        Laser:Update(dt)
-    elseif Game.currScreen == "title" then
-        Map.TitleUpdate(dt)
-        --  Waste:Update(dt)  make it dissapear in inGame? TODO ?
     end
-    -- end
 end
 
 function love.keypressed(pKey)
@@ -131,6 +135,7 @@ function love.draw()
     end
 
     Map.Draw(Game.currScreen)
+    Asteroid:Draw()
     Waste:Draw()
 
     if Game.currScreen == "inGame" then
@@ -138,6 +143,7 @@ function love.draw()
         Enemy:Draw()
         Laser.Draw()
         Explosion:Draw()
+        Vec2:Draw()
     end
 
     if Game.currScreen == "inGame" then

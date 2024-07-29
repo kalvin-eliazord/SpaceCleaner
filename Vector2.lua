@@ -106,20 +106,98 @@ function Vector2:SetVelocity(pVec, dt)
     pVec.y = pVec.y + pVec.vy + dt
 end
 
+function Vector2:NewParticle(pSrc, vx, vy, dt)
+    if pSrc == nil then return end 
+    if not Vector2.particleList then
+        Vector2.particleList = {}
+    end
+
+    local particle = {}
+    particle.x = pSrc.x + math.random(-10, 10)
+    particle.y = pSrc.y + math.random(-10, 10)
+    particle.w = math.random(2, 5)
+    particle.h = particle.w
+    particle.duration = math.random(1, 3)
+    particle.vx = vx
+    particle.vy = vy
+    particle.r = 0
+    table.insert(Vector2.particleList, particle)
+end
+
+function Vector2:Update(dt)
+    if Vector2.particleList then
+        for i, particle in ipairs(Vector2.particleList) do
+            Vector2:SetVelocity(particle, dt)
+            particle.w = particle.w - dt
+            particle.h = particle.h - dt
+            particle.duration = particle.duration - dt
+            if particle.duration < 0 then
+                particle.bDelete = true
+            end
+        end
+
+        for i = #Vector2.particleList, 1, - 1 do
+            local particle = Vector2.particleList[i]
+            if particle.bDelete then
+                table.remove(Vector2.particleList, i)
+            end
+        end
+    end
+end
+
 function Vector2:Load()
     Vector2.bStart = false
 end
 
+function Vector2:MapCollision(pVec2, dt)
+    if pVec2 == nil then return end
+
+    local Map = require("Map").current.img
+    local iMax = 15
+    if pVec2.x < 0 then
+        pVec2.x = Map:getWidth() - 100
+        for i = 1, iMax do
+            Vector2:NewParticle(pVec2, 0, math.random(-20, 20),dt)
+        end
+    elseif pVec2.x > Map:getWidth() then
+        pVec2.x = 10
+        for i = 1, iMax do
+            Vector2:NewParticle(pVec2, 0, math.random(-20, 20),dt)
+        end
+    elseif pVec2.y < 0 then
+        pVec2.y = Map:getHeight() - 90
+        for i = 1, iMax do
+            Vector2:NewParticle(pVec2, math.random(-20, 20), 0,dt)
+        end
+    elseif pVec2.y > Map:getHeight() then
+        pVec2.y = 10
+        for i = 1, iMax do
+            Vector2:NewParticle(pVec2, math.random(-20, 20), 0,dt)
+        end
+    end
+end
+
 function Vector2:IsOutScreen(pVec)
-    if pVec.x < 0 or pVec.x > w or pVec.y < 0 or pVec.y > h then
+    local Map = require("Map").current.img
+    if pVec.x < 0 or pVec.x > Map:getWidth() or pVec.y < 0 or pVec.y > Map:getHeight() then
         return true
     end
 
     return false
 end
 
-function Vector2:Destroy(pIndex)
+function Vector2:Destroy(pIndex) -- NOT USED
     table.remove(self.list, pIndex)
+end
+
+function Vector2:Draw()
+    if Vector2.particleList then
+        for i, particle in ipairs(Vector2.particleList) do
+            love.graphics.setColor(200,255,0)
+            love.graphics.rectangle("fill", particle.x, particle.y, particle.w, particle.h)
+            love.graphics.setColor(255,255,255)
+        end
+    end
 end
 
 return Vector2

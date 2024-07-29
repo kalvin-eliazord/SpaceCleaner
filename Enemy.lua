@@ -28,18 +28,19 @@ function Enemy:New(x, y)
 end
 
 function Enemy:Load()
-    maxSpawnCDR = 2
+    maxSpawnCDR = 4
     spawnCDR = maxSpawnCDR
 end
 
 function Enemy:Update(dt)
-    -- Enemy Spawn
     spawnCDR = spawnCDR - dt
 
+    -- Enemy Spawn
     if math.floor(spawnCDR) < 0 then
         local Map = require("Map").current.img
+        --print(Map.current.name)
         Enemy:New(math.random(20, Map:getWidth() - 100), math.random(20, Map:getHeight() - 300))
-        spawnCDR = maxSpawnCDR
+        spawnCDR = maxSpawnCDR + math.random(4, 6)
     end
 
     if Enemy.list then
@@ -64,6 +65,9 @@ function Enemy:Update(dt)
             -- Enemy Shrinking
             Enemy:SetShrink(enem, dt)
 
+            -- Enemy rotation
+            enem.r = GetAngle(enem, hero)
+
             -- Enemy logic based on type
             if enem.type == 5 or enem.type == 2 then
                 enemSpawnCDR = enemSpawnCDR - dt
@@ -77,6 +81,8 @@ function Enemy:Update(dt)
             elseif enem.type == 4 then
                 Enemy:PursueTarget(enem, hero, dt, 0)
             end
+
+            Enemy:MapCollision(enem, dt)
 
             -- New Explosion
             if enem.hp <= 0 then

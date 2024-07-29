@@ -3,6 +3,7 @@ local Vec2 = require("Vector2")
 local Laser = require("Laser")
 local Enemy = require("Enemy")
 local Waste = require("Waste")
+local Asteroid = require("Asteroid")
 
 local Hero = {}
 setmetatable(Hero, Vec2)
@@ -74,27 +75,38 @@ end
 
 function Hero:MapCollision(hero, dt)
     local Map = require("Map").current.img
-
+    local iMax = 15
     if hero.x < 0 then
-        hero.x = Map:getWidth()
+        hero.x = Map:getWidth() - 100
+        for i = 1, iMax do
+            Vec2:NewParticle(hero, 0, math.random(-20, 20),dt)
+        end
         hero.bSpeedMap = true
     elseif hero.x > Map:getWidth() then
-        hero.x = 0
+        hero.x = 10
+        for i = 1, iMax do
+            Vec2:NewParticle(hero, 0, math.random(-20, 20),dt)
+        end
         hero.bSpeedMap = true
 
     elseif hero.y < 0 then
-        hero.y = Map:getHeight()
+        hero.y = Map:getHeight() - 90
+        for i = 1, iMax do
+            Vec2:NewParticle(hero, math.random(-20, 20), 0,dt)
+        end
         hero.bSpeedMap = true
 
     elseif hero.y > Map:getHeight() then
         hero.y = 10
+        for i = 1, iMax do
+            Vec2:NewParticle(hero, math.random(-20, 20), 0,dt)
+        end
         hero.bSpeedMap = true
     end
 
     if hero.bSpeedMap then
-        hero.vx = hero.vx + dt
-        hero.vy = hero.vy + dt
-
+     --   hero.vx = hero.vx + dt
+     --   hero.vy = hero.vy + dt
         -- create a timer for each boost and temporary things
     end
 end
@@ -238,7 +250,6 @@ function Hero:Update(dt, cam)
                         waste.sx = waste.sx - (dt * 5)
                         waste.sy = waste.sy - (dt * 5)
                         -- Sound Effect
-
                     end
 
                     if waste.bSwallow and Vec2:IsCollide(waste, Hero.hero) then
@@ -246,17 +257,38 @@ function Hero:Update(dt, cam)
                         score = score + 1
                     end
                 end
-                --     waste.bSwallow = false
+            end
+        end
+
+        -- Asteroid cleaning process
+        if Asteroid.list then
+            for i = #Asteroid.list, 1, -1 do
+                local asteroid = Asteroid.list[i]
+                local dist = math.sqrt((asteroid.x - Hero.hero.x) ^ 2 + (asteroid.y - Hero.hero.y) ^ 2)
+
+                if math.abs(dist) < asteroid.dist then
+                    Vec2:PursueTarget(asteroid, Hero.hero, dt, 250)
+                    asteroid.bSwallow = true
+
+                    -- Swallow animation
+                    if asteroid.bSwallow then
+                        asteroid.sx = asteroid.sx - (dt * 5)
+                        asteroid.sy = asteroid.sy - (dt * 5)
+                        -- Sound Effect
+                    end
+
+                    if asteroid.bSwallow and Vec2:IsCollide(asteroid, Hero.hero) then
+                        asteroid.bDelete = true
+                    end
+                end
             end
         end
     end
-
 end
 
 function Hero:Draw()
     if hero.bDash then -- TODO
         --   love.graphics.setColor(1, 0, 0)
-        print("test")
     end
 
     if DustList then

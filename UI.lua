@@ -85,7 +85,7 @@ function UI:Update(dt)
                     end
                 else
                     if enem.y < hero.y then
-                        if listArrow.iRight > 3 then
+                        if listArrow.iUp > 3 then
                             enem.arrowUI.bDormant = true
                         end
                         listArrow.iUp = listArrow.iUp + 1
