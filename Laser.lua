@@ -23,7 +23,7 @@ function Laser.New(pType, pSrc, pDst)
     laser.target = pDst
     laser.type = pType
     laser.bDist = false
-    laser.bShine= false
+    laser.bShine = false
     laser.img = love.graphics.newImage("images/lasers/laser" .. pType .. ".png")
     table.insert(Laser.list, laser)
 end
@@ -94,7 +94,7 @@ function Laser.Update(dt)
             if laser.vx == 0 or laser.vy == 0 then
                 laser.bDelete = true
             end
-            
+
             if laser.bDelete then
                 table.remove(Laser.list, i)
             end
@@ -105,7 +105,7 @@ end
 function SetColor(pVec2, dt)
     -- Enlarge
     if not pVec2.bShine then
-        love.graphics.setColor( 50 )
+        love.graphics.setColor(50)
 
         pVec2.sx = pVec2.sx + dt
         pVec2.sy = pVec2.sy + dt
@@ -124,8 +124,9 @@ end
 function Laser.Draw()
     if Laser.list then
         for i, laser in ipairs(Laser.list) do
-            love.graphics.setColor( 50 ,40,1)
+            --love.graphics.setColor(0, 200, 255)
             love.graphics.draw(laser.img, laser.x, laser.y, laser.r, laser.sx, laser.sy)
+            love.graphics.setColor(255, 255, 255)
         end
     end
 

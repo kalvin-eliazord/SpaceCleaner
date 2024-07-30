@@ -79,34 +79,34 @@ function Hero:MapCollision(hero, dt)
     if hero.x < 0 then
         hero.x = Map:getWidth() - 100
         for i = 1, iMax do
-            Vec2:NewParticle(hero, 0, math.random(-20, 20),dt)
+            Vec2:NewParticle(hero, "rect", 0, math.random(-20, 20), dt)
         end
         hero.bSpeedMap = true
     elseif hero.x > Map:getWidth() then
         hero.x = 10
         for i = 1, iMax do
-            Vec2:NewParticle(hero, 0, math.random(-20, 20),dt)
+            Vec2:NewParticle(hero, "rect", 0, math.random(-20, 20), dt)
         end
         hero.bSpeedMap = true
 
     elseif hero.y < 0 then
         hero.y = Map:getHeight() - 90
         for i = 1, iMax do
-            Vec2:NewParticle(hero, math.random(-20, 20), 0,dt)
+            Vec2:NewParticle(hero, "rect", math.random(-20, 20), 0, dt)
         end
         hero.bSpeedMap = true
 
     elseif hero.y > Map:getHeight() then
         hero.y = 10
         for i = 1, iMax do
-            Vec2:NewParticle(hero, math.random(-20, 20), 0,dt)
+            Vec2:NewParticle(hero, "rect", math.random(-20, 20), 0, dt)
         end
         hero.bSpeedMap = true
     end
 
     if hero.bSpeedMap then
-     --   hero.vx = hero.vx + dt
-     --   hero.vy = hero.vy + dt
+        --   hero.vx = hero.vx + dt
+        --   hero.vy = hero.vy + dt
         -- create a timer for each boost and temporary things
     end
 end
@@ -298,9 +298,9 @@ function Hero:Draw()
         end
     end
 
-    --if hero.bDmgTaken then -- TODO
-      --  love.graphics.setColor(0, 255, 255) HOW TO DO WHITE ???
-    --end
+    -- if hero.bDmgTaken then -- TODO
+    --  love.graphics.setColor(0, 255, 255) HOW TO DO WHITE ???
+    -- end
 
     love.graphics.draw(hero.img, hero.x, hero.y, math.rad(hero.r), hero.sx, hero.sy, hero.img:getWidth() / 2,
         hero.img:getHeight() / 2)

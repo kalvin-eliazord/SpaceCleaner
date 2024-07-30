@@ -106,8 +106,10 @@ function Vector2:SetVelocity(pVec, dt)
     pVec.y = pVec.y + pVec.vy + dt
 end
 
-function Vector2:NewParticle(pSrc, vx, vy, dt)
-    if pSrc == nil then return end 
+function Vector2:NewParticle(pSrc, pType, vx, vy, dt)
+    if pSrc == nil then
+        return
+    end
     if not Vector2.particleList then
         Vector2.particleList = {}
     end
@@ -121,7 +123,9 @@ function Vector2:NewParticle(pSrc, vx, vy, dt)
     particle.vx = vx
     particle.vy = vy
     particle.r = 0
+    particle.type = pType
     table.insert(Vector2.particleList, particle)
+    return particle
 end
 
 function Vector2:Update(dt)
@@ -136,7 +140,7 @@ function Vector2:Update(dt)
             end
         end
 
-        for i = #Vector2.particleList, 1, - 1 do
+        for i = #Vector2.particleList, 1, -1 do
             local particle = Vector2.particleList[i]
             if particle.bDelete then
                 table.remove(Vector2.particleList, i)
@@ -150,29 +154,31 @@ function Vector2:Load()
 end
 
 function Vector2:MapCollision(pVec2, dt)
-    if pVec2 == nil then return end
+    if pVec2 == nil then
+        return
+    end
 
     local Map = require("Map").current.img
     local iMax = 15
     if pVec2.x < 0 then
         pVec2.x = Map:getWidth() - 100
         for i = 1, iMax do
-            Vector2:NewParticle(pVec2, 0, math.random(-20, 20),dt)
+            Vector2:NewParticle(pVec2, 0, math.random(-20, 20), dt)
         end
     elseif pVec2.x > Map:getWidth() then
         pVec2.x = 10
         for i = 1, iMax do
-            Vector2:NewParticle(pVec2, 0, math.random(-20, 20),dt)
+            Vector2:NewParticle(pVec2, 0, math.random(-20, 20), dt)
         end
     elseif pVec2.y < 0 then
         pVec2.y = Map:getHeight() - 90
         for i = 1, iMax do
-            Vector2:NewParticle(pVec2, math.random(-20, 20), 0,dt)
+            Vector2:NewParticle(pVec2, math.random(-20, 20), 0, dt)
         end
     elseif pVec2.y > Map:getHeight() then
         pVec2.y = 10
         for i = 1, iMax do
-            Vector2:NewParticle(pVec2, math.random(-20, 20), 0,dt)
+            Vector2:NewParticle(pVec2, math.random(-20, 20), 0, dt)
         end
     end
 end
@@ -193,9 +199,17 @@ end
 function Vector2:Draw()
     if Vector2.particleList then
         for i, particle in ipairs(Vector2.particleList) do
-            love.graphics.setColor(200,255,0)
-            love.graphics.rectangle("fill", particle.x, particle.y, particle.w, particle.h)
-            love.graphics.setColor(255,255,255)
+            if particle.type == "rect" then
+                if particle.bExplosion then
+                    love.graphics.setColor(200, 255, 0)
+                end
+
+                love.graphics.rectangle("fill", particle.x, particle.y, particle.w, particle.h)
+                love.graphics.setColor(255, 255, 255)
+            else
+                love.graphics.circle("fill", particle.x, particle.y, particle.w, particle.h)
+            end
+
         end
     end
 end

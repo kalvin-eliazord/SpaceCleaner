@@ -78,7 +78,7 @@ function Waste:Update(pGame, dt)
         for i = #Waste.list, 1, -1 do
             local waste = Waste.list[i]
 
-            --Waste:SetShrink(waste, dt) need to fix
+            -- Waste:SetShrink(waste, dt) need to fix
 
             -- Set Velocity
             waste.x = waste.x + waste.vx * dt
@@ -114,11 +114,15 @@ end
 function Waste:Draw()
     if Waste.list then
         for i, waste in ipairs(Waste.list) do
+            love.graphics.draw(waste.img, waste.x, waste.y, waste.r, waste.sx + 0.2, waste.sy + 0.2,
+                waste.img:getWidth() / 2, waste.img:getHeight() / 2)
+            --love.graphics.setColor(255, 255, 255)
+
             love.graphics.draw(waste.img, waste.x, waste.y, waste.r, waste.sx, waste.sy, waste.img:getWidth() / 2,
                 waste.img:getHeight() / 2)
         end
 
-        --print("wasteList: ",#Waste.list)
+        -- print("wasteList: ",#Waste.list)
         --      love.graphics.print("Score: " .. score, w / 2, 10)
     end
 end
