@@ -11,7 +11,9 @@ local DustList = {}
 
 function Hero:New(x, y)
     local hero = Vec2:New(x, y)
+    hero.img = {}
     hero.img = love.graphics.newImage("images/hero.png")
+    hero.imgYellow = love.graphics.newImage("images/yellow_hero.png")
     hero.hp = 3
     hero.vx = 0
     hero.vy = 0.2
@@ -23,16 +25,22 @@ function Hero:New(x, y)
     hero.type = "hero"
     hero.iDash = 0
     hero.bDashCDR = false
+
     setmetatable(hero, self)
+
     return hero
 end
 
 function Hero:NewEngine(x, y)
     local engine = Vec2:New(x, y)
-    engine.bEngine = false
     engine.img = love.graphics.newImage("images/engine3.png")
-    engine.sx = 1.5
-    engine.sy = 1.5
+    engine.sxMax = 1.5
+    engine.syMax = 1.5
+    engine.sxMin = 1.3
+    engine.syMin = 1.3
+    engine.sx = engine.sxMin
+    engine.sy = engine.syMin
+
     engine.r = -90
     setmetatable(engine, self)
     return engine
@@ -62,8 +70,15 @@ function Hero:Load(pMapList)
 
     Hero.hero = Hero:New(pMapList["inGame"].img:getWidth() / 2, pMapList["inGame"].img:getHeight() + 200)
     hero = Hero.hero
+
+    Hero:NewEffect(hero, "SpeedMap", 1, 1, 4)
+    Hero:NewEffect(hero, "Dash", 1, 1, 4)
+    Hero:NewEffect(hero, "StartEntrance", 1, 1, 0)
+    Hero:NewEffect(hero, "Shooting", 0.2, 0.2, 0)
+    Hero:NewEffect(hero, "Dodge", 1, 1, 4)
     hero.y = h
     engine = Hero:NewEngine(hero.x, hero.y)
+
     oldX = nil
     oldY = nil
     dist = 0
@@ -81,33 +96,32 @@ function Hero:MapCollision(hero, dt)
         for i = 1, iMax do
             Vec2:NewParticle(hero, "rect", 0, math.random(-20, 20), dt)
         end
-        hero.bSpeedMap = true
+        hero.listEffect["SpeedMap"].bActive = true
     elseif hero.x > Map:getWidth() then
         hero.x = 10
         for i = 1, iMax do
             Vec2:NewParticle(hero, "rect", 0, math.random(-20, 20), dt)
         end
-        hero.bSpeedMap = true
+        hero.listEffect["SpeedMap"].bActive = true
 
     elseif hero.y < 0 then
         hero.y = Map:getHeight() - 90
         for i = 1, iMax do
             Vec2:NewParticle(hero, "rect", math.random(-20, 20), 0, dt)
         end
-        hero.bSpeedMap = true
+        hero.listEffect["SpeedMap"].bActive = true
 
     elseif hero.y > Map:getHeight() then
         hero.y = 10
         for i = 1, iMax do
             Vec2:NewParticle(hero, "rect", math.random(-20, 20), 0, dt)
         end
-        hero.bSpeedMap = true
+        hero.listEffect["SpeedMap"].bActive = true
     end
 
-    if hero.bSpeedMap then
-        --   hero.vx = hero.vx + dt
-        --   hero.vy = hero.vy + dt
-        -- create a timer for each boost and temporary things
+    if hero.listEffect["SpeedMap"].bActive then
+        hero.vx = hero.vx + dt
+        hero.vy = hero.vy + dt
     end
 end
 
@@ -144,10 +158,13 @@ function SetVelocity(hero, dt)
     Hero:SetVelocity(hero, dt)
 
     -- Engine Particles
-    local iRand = math.random(2, 3)
-    for i = 1, iRand do
-        NewDust(hero.x + math.random(-6, 6), hero.y, hero.r)
+    if hero.listEffect["Dash"].bActive then
+        local iRand = math.random(2, 3)
+        for i = 1, iRand do
+            NewDust(hero.x + math.random(-6, 6), hero.y, hero.r)
+        end
     end
+
 end
 
 function GetNearest(pListDst, pSrc)
@@ -171,6 +188,11 @@ function GetNearest(pListDst, pSrc)
 end
 
 function Hero:Update(dt, cam)
+    -- Engine process
+    engine.x = hero.x
+    engine.y = hero.y
+    Vec2:SetShrink(engine, dt)
+
     -- Ship Start animation
     if not Vec2.bStart then
         love.audio.play(startSound)
@@ -193,12 +215,28 @@ function Hero:Update(dt, cam)
         local nearest = GetNearest(Enemy.list, hero)
         heroSpawnCDR = heroSpawnCDR - dt
         if heroSpawnCDR <= 0 and nearest then
-            Laser.New(1, hero, nearest)
+         --   Laser.New(1, hero, nearest)
+            hero.listEffect["Shooting"].bActive = true
+       --     Vec2:NewParticle(hero, "rect", math.random(-1, 1), math.random(-1, 1), dt)
             local test = cam:move(200, 400)
             test.x = test.x + 20
             -- When hero shoot there is an halo (yellow spaceship sprite glowing for 0.5s below the hero)
             -- boolean shooting state w/timer
             heroSpawnCDR = maxSpawnCDR
+        end
+
+        -- Dodging animation
+        if hero.listEffect["Dodge"].bActive then
+            hero.bDodge = true
+            hero.sx = hero.sx + dt
+            hero.sy = hero.sy + dt
+        else
+            if hero.sx > 1 then
+                hero.sx = hero.sx - dt
+                hero.sy = hero.sy - dt
+            else
+                hero.bDodge = false
+            end
         end
 
         -- Set Velocity of laser
@@ -283,14 +321,16 @@ function Hero:Update(dt, cam)
                 end
             end
         end
+
+        -- Hero Effect process
+        for i, effectName in pairs(hero.listEffectName) do
+            local effect = hero.listEffect[effectName]
+            Vec2:SetTempEffect(effect, dt)
+        end
     end
 end
 
 function Hero:Draw()
-    if hero.bDash then -- TODO
-        --   love.graphics.setColor(1, 0, 0)
-    end
-
     if DustList then
         for i, dust in ipairs(DustList) do
             love.graphics.draw(dust.img, dust.x, dust.y, dust.r, dust.sx, dust.sy, dust.img:getWidth() / 2,
@@ -298,16 +338,22 @@ function Hero:Draw()
         end
     end
 
+    if not hero.listEffect["Dash"].bActive then
+        love.graphics.draw(engine.img, engine.x, engine.y, math.rad(hero.r), engine.sx, engine.sy,
+            engine.img:getWidth() / 2, engine.img:getHeight() / 2)
+    end
+
     -- if hero.bDmgTaken then -- TODO
-    --  love.graphics.setColor(0, 255, 255) HOW TO DO WHITE ???
+    --  love.graphics.setColor(0, 255, 255) TO DO WHITE 
     -- end
+
+    if hero.listEffect["Shooting"].bActive then
+        love.graphics.draw(hero.imgYellow, hero.x, hero.y, math.rad(hero.r), hero.sx, hero.sy,
+            hero.imgYellow:getWidth() / 2, hero.imgYellow:getHeight() / 2)
+    end
 
     love.graphics.draw(hero.img, hero.x, hero.y, math.rad(hero.r), hero.sx, hero.sy, hero.img:getWidth() / 2,
         hero.img:getHeight() / 2)
-
-    if hero.bDash then
-        -- love.graphics.setColor(1, 1, 1)
-    end
 
     --   love.graphics.print("iDash: " .. hero.iDash, w / 2, 400)
     --    love.graphics.print("bDash: " .. tostring(hero.bDash), w / 2, 800)

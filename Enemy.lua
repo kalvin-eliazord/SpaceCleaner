@@ -38,7 +38,6 @@ function Enemy:Update(dt)
     -- Enemy Spawn
     if math.floor(spawnCDR) < 0 then
         local Map = require("Map").current.img
-        --print(Map.current.name)
         Enemy:New(math.random(20, Map:getWidth() - 100), math.random(20, Map:getHeight() - 300))
         spawnCDR = maxSpawnCDR + math.random(4, 6)
     end
@@ -56,7 +55,7 @@ function Enemy:Update(dt)
 
             -- Enemy collision w/ Hero
             local hero = require("Hero").hero
-            if Enemy:IsCollide(enem, hero) then
+            if Enemy:IsCollide(enem, hero) and not hero.bDodge then
                 hero.hp = hero.hp - 1
                 enem.hp = enem.hp - 1
                 Explosion:New(hero.x, hero.y, dt)
@@ -72,14 +71,14 @@ function Enemy:Update(dt)
             if enem.type == 5 or enem.type == 2 then
                 enemSpawnCDR = enemSpawnCDR - dt
                 if enemSpawnCDR <= 0 then
-                    Laser.New(2, enem, hero)
+                  --  Laser.New(2, enem, hero)
                     enemSpawnCDR = maxSpawnCDR
                 end
 
             elseif enem.type == 6 then
-                Enemy:PursueTarget(enem, hero, dt, 200)
+            --    Enemy:PursueTarget(enem, hero, dt, 200)
             elseif enem.type == 4 then
-                Enemy:PursueTarget(enem, hero, dt, 0)
+           --     Enemy:PursueTarget(enem, hero, dt, 0)
             end
 
             Enemy:MapCollision(enem, dt)
@@ -108,7 +107,7 @@ function Enemy:Update(dt)
                 Laser.SetLaser(laser, dt)
 
                 -- Enemy Laser to Hero explosion
-                if Enemy:IsCollide(laser, hero) then
+                if Enemy:IsCollide(laser, hero) and not hero.bDodge then
                     laser.bDelete = true
                     Explosion:New(hero.x + love.math.random(-2, 2), hero.y + love.math.random(-2, 2))
                     hero.hp = hero.hp - 1

@@ -25,6 +25,7 @@ function Laser.New(pType, pSrc, pDst)
     laser.bDist = false
     laser.bShine = false
     laser.img = love.graphics.newImage("images/lasers/laser" .. pType .. ".png")
+    laser.imgGlow = love.graphics.newImage("images/lasers/laser" .. pType .. "_glow.png")
     table.insert(Laser.list, laser)
 end
 
@@ -91,6 +92,9 @@ function Laser.Update(dt)
         for i = #Laser.list, 1, -1 do
             local laser = Laser.list[i]
 
+            if laser.type == 1 then
+                
+            end
             if laser.vx == 0 or laser.vy == 0 then
                 laser.bDelete = true
             end
@@ -124,7 +128,11 @@ end
 function Laser.Draw()
     if Laser.list then
         for i, laser in ipairs(Laser.list) do
-            --love.graphics.setColor(0, 200, 255)
+            --  love.graphics.setColor(255, 255, 0, 10)
+            if laser.type == 1 then
+                love.graphics.draw(laser.imgGlow, laser.x, laser.y, laser.r, laser.sx, laser.sy)
+            end
+
             love.graphics.draw(laser.img, laser.x, laser.y, laser.r, laser.sx, laser.sy)
             love.graphics.setColor(255, 255, 255)
         end

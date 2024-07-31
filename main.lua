@@ -103,6 +103,7 @@ function love.keypressed(pKey)
         love.window.setFullscreen(fullscreen, "exclusive")
     end
 
+    -- IN GAME
     if Game.currScreen == "inGame" then
         -- Pause the game
         if pKey == "p" then
@@ -112,16 +113,23 @@ function love.keypressed(pKey)
                 Game.bPause = false
             end
         end
-
-        if pKey == "space" then
-            --        Hero.hero.iDash = Hero.hero.iDash + 1 NOT USED
-            if Hero.hero.iDash >= 2 then
-                Hero.hero.iDash = 0
-                Hero.hero.bDash = true
+        if Vec2.bStart then
+            if pKey == "space" and Hero.hero.listEffect["Dodge"].cdr == Hero.hero.listEffect["Dodge"].cdrMax then
+                Hero.hero.listEffect["Dodge"].bActive = true
+            elseif pKey == "a" then
+                hero.listEffect["Dash"].bActive = true
+                --        Hero.hero.iDash = Hero.hero.iDash + 1 NOT USED
+                if Hero.hero.iDash >= 2 then
+                    Hero.hero.iDash = 0
+                    Hero.hero.bDash = true
+                end
+                --
             end
-            --
         end
+
     else
+        -- MENU
+
         -- Start game
         if pKey == "space" then
             Game.currScreen = "inGame"
@@ -139,11 +147,11 @@ function love.draw()
     Waste:Draw()
 
     if Game.currScreen == "inGame" then
-        Hero:Draw()
         Enemy:Draw()
         Laser.Draw()
         Explosion:Draw()
         Vec2:Draw()
+        Hero:Draw()
     end
 
     if Game.currScreen == "inGame" then

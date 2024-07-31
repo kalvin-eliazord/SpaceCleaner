@@ -18,8 +18,24 @@ function Vector2:New(x, y)
     vec2.sx = vec2.sxMin
     vec2.sy = vec2.syMin
     vec2.bDelete = false
+    vec2.listEffect = {}
+    vec2.listEffectName = {}
+    vec2.listEffect.iMax = 0
+    vec2.listEffect.iCurr = 0
+    vec2.listEffect.cdr = 0
+    vec2.listEffect.cdrMax = 0
+    vec2.listEffect.bActive = false
     setmetatable(vec2, self)
     return vec2
+end
+
+function Vector2:NewEffect(pVec2, pEffect, pCurr, pMax, pCdrMax)
+    table.insert(pVec2.listEffectName, pEffect)
+    pVec2.listEffect[pEffect] = {}
+    pVec2.listEffect[pEffect].iCurr = pCurr
+    pVec2.listEffect[pEffect].iMax = pMax
+    pVec2.listEffect[pEffect].cdrMax = pCdrMax
+    pVec2.listEffect[pEffect].cdr = pCdrMax
 end
 
 function Vector2:SetShrink(pVec2, dt)
@@ -65,14 +81,24 @@ function Vector2:IsCollide(pVec1, pVec2)
     return false
 end
 
-function Vector2:SetTempEffect(pListEffect, pEffect)
-    local effect = pListEffect[pEffect]
+function Vector2:SetTempEffect(effect, dt)
+    if effect == nil then
+        print("Effect doesn't exist")
+        return
+    end
 
-    if effect ~= nil then
+    if effect.bActive and effect.cdr == effect.cdrMax then
         effect.iCurr = effect.iCurr - dt
-        if pSrc_iCurr <= 0 then
-            effect.bool = not effect.bool
+        if effect.iCurr < 0 then
+            effect.bActive = false
             effect.iCurr = effect.iMax
+            effect.cdr = 0
+        end
+    else
+        if math.floor(effect.cdr) ~= effect.cdrMax then
+            effect.cdr = effect.cdr + dt
+        else
+            effect.cdr = effect.cdrMax
         end
     end
 end
@@ -106,7 +132,7 @@ function Vector2:SetVelocity(pVec, dt)
     pVec.y = pVec.y + pVec.vy + dt
 end
 
-function Vector2:NewParticle(pSrc, pType, vx, vy, dt)
+function Vector2:NewParticle(pSrc, pType, vx, vy, dt) -- change pType by pColor
     if pSrc == nil then
         return
     end

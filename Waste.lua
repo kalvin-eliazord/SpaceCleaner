@@ -114,9 +114,9 @@ end
 function Waste:Draw()
     if Waste.list then
         for i, waste in ipairs(Waste.list) do
-            love.graphics.draw(waste.img, waste.x, waste.y, waste.r, waste.sx + 0.2, waste.sy + 0.2,
-                waste.img:getWidth() / 2, waste.img:getHeight() / 2)
-            --love.graphics.setColor(255, 255, 255)
+            --   love.graphics.draw(waste.img, waste.x, waste.y, waste.r, waste.sx + 0.2, waste.sy + 0.2,
+            --     waste.img:getWidth() / 2, waste.img:getHeight() / 2)
+            -- love.graphics.setColor(255, 255, 255)
 
             love.graphics.draw(waste.img, waste.x, waste.y, waste.r, waste.sx, waste.sy, waste.img:getWidth() / 2,
                 waste.img:getHeight() / 2)
