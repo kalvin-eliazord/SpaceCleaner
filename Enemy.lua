@@ -71,14 +71,14 @@ function Enemy:Update(dt)
             if enem.type == 5 or enem.type == 2 then
                 enemSpawnCDR = enemSpawnCDR - dt
                 if enemSpawnCDR <= 0 then
-                  --  Laser.New(2, enem, hero)
+                    Laser.New(2, enem, hero)
                     enemSpawnCDR = maxSpawnCDR
                 end
 
             elseif enem.type == 6 then
-            --    Enemy:PursueTarget(enem, hero, dt, 200)
+                Enemy:PursueTarget(enem, hero, dt, 200)
             elseif enem.type == 4 then
-           --     Enemy:PursueTarget(enem, hero, dt, 0)
+                Enemy:PursueTarget(enem, hero, dt, 0)
             end
 
             Enemy:MapCollision(enem, dt)

@@ -183,6 +183,9 @@ function UI:Draw()
         end
     end
 
+    -- Score UI 
+    love.graphics.print("Score:"..Hero.hero.score, 0, 200)
+
 end
 
 return UI

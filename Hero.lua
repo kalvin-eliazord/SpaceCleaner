@@ -25,6 +25,7 @@ function Hero:New(x, y)
     hero.type = "hero"
     hero.iDash = 0
     hero.bDashCDR = false
+    hero.score = 0
 
     setmetatable(hero, self)
 
@@ -215,11 +216,11 @@ function Hero:Update(dt, cam)
         local nearest = GetNearest(Enemy.list, hero)
         heroSpawnCDR = heroSpawnCDR - dt
         if heroSpawnCDR <= 0 and nearest then
-         --   Laser.New(1, hero, nearest)
+            Laser.New(1, hero, nearest)
             hero.listEffect["Shooting"].bActive = true
-       --     Vec2:NewParticle(hero, "rect", math.random(-1, 1), math.random(-1, 1), dt)
-            local test = cam:move(200, 400)
-            test.x = test.x + 20
+            Vec2:NewParticle(hero, "rect", math.random(-0.5, 0.5), math.random(-0.5, 0.5), dt)
+            --local test = cam:move(200, 400)
+            --test.x = test.x + 20
             -- When hero shoot there is an halo (yellow spaceship sprite glowing for 0.5s below the hero)
             -- boolean shooting state w/timer
             heroSpawnCDR = maxSpawnCDR
@@ -245,15 +246,14 @@ function Hero:Update(dt, cam)
                 if laser.type == 1 then -- hero type
                     Laser.SetGuidedLaser(laser, dt)
 
+                    -- Hero Laser collision w/ enemies
                     if Hero:IsCollide(laser, laser.target) then
                         laser.target.hp = laser.target.hp - 1
+                        if laser.target.hp <= 0 then
+                            hero.score = hero.score + 10
+                        end
                         laser.bDelete = true
                     end
-
-                    if laser.target and laser.target.hp < 1 then
-                        laser.state = nil
-                    end
-
                 end
             end
         end
@@ -291,8 +291,8 @@ function Hero:Update(dt, cam)
                     end
 
                     if waste.bSwallow and Vec2:IsCollide(waste, Hero.hero) then
+                        hero.score = hero.score + 20
                         waste.bDelete = true
-                        score = score + 1
                     end
                 end
             end
