@@ -29,11 +29,11 @@ function Vector2:New(x, y)
     return vec2
 end
 
-function Vector2:NewEffect(pVec2, pEffect, pCurr, pMax, pCdrMax)
+function Vector2:NewEffect(pVec2, pEffect, pCurr, pCdrMax)
     table.insert(pVec2.listEffectName, pEffect)
     pVec2.listEffect[pEffect] = {}
     pVec2.listEffect[pEffect].iCurr = pCurr
-    pVec2.listEffect[pEffect].iMax = pMax
+    pVec2.listEffect[pEffect].iMax = pCurr
     pVec2.listEffect[pEffect].cdrMax = pCdrMax
     pVec2.listEffect[pEffect].cdr = pCdrMax
 end

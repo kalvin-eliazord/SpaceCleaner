@@ -56,6 +56,7 @@ function Enemy:Update(dt)
             -- Enemy collision w/ Hero
             local hero = require("Hero").hero
             if Enemy:IsCollide(enem, hero) and not hero.bDodge then
+                hero.listEffect["DamageTaken"].bActive = true
                 hero.hp = hero.hp - 1
                 enem.hp = enem.hp - 1
                 Explosion:New(hero.x, hero.y, dt)
@@ -111,6 +112,7 @@ function Enemy:Update(dt)
                     laser.bDelete = true
                     Explosion:New(hero.x + love.math.random(-2, 2), hero.y + love.math.random(-2, 2))
                     hero.hp = hero.hp - 1
+                    hero.listEffect["DamageTaken"].bActive = true
                 end
 
                 if laser.bDelete then

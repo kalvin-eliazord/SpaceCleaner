@@ -72,11 +72,13 @@ function Hero:Load(pMapList)
     Hero.hero = Hero:New(pMapList["inGame"].img:getWidth() / 2, pMapList["inGame"].img:getHeight() + 200)
     hero = Hero.hero
 
-    Hero:NewEffect(hero, "SpeedMap", 1, 1, 4)
-    Hero:NewEffect(hero, "Dash", 1, 1, 4)
-    Hero:NewEffect(hero, "StartEntrance", 1, 1, 0)
-    Hero:NewEffect(hero, "Shooting", 0.2, 0.2, 0)
+    Hero:NewEffect(hero, "SpeedMap", 1, 4)
+    Hero:NewEffect(hero, "Dash", 1, 4)
+    Hero:NewEffect(hero, "StartEntrance", 1, 0)
+    Hero:NewEffect(hero, "Shooting", 0.2, 0)
     Hero:NewEffect(hero, "Dodge", 1, 1, 4)
+    Hero:NewEffect(hero, "DamageTaken", 1, 0)
+
     hero.y = h
     engine = Hero:NewEngine(hero.x, hero.y)
 
@@ -343,9 +345,9 @@ function Hero:Draw()
             engine.img:getWidth() / 2, engine.img:getHeight() / 2)
     end
 
-    -- if hero.bDmgTaken then -- TODO
-    --  love.graphics.setColor(0, 255, 255) TO DO WHITE 
-    -- end
+     if hero.listEffect["DamageTaken"] then 
+        -- MAKE HIM BLINK
+     end
 
     if hero.listEffect["Shooting"].bActive then
         love.graphics.draw(hero.imgYellow, hero.x, hero.y, math.rad(hero.r), hero.sx, hero.sy,
