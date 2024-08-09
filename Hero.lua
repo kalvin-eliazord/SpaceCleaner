@@ -345,17 +345,20 @@ function Hero:Draw()
             engine.img:getWidth() / 2, engine.img:getHeight() / 2)
     end
 
-     if hero.listEffect["DamageTaken"] then 
-        -- MAKE HIM BLINK
-     end
-
     if hero.listEffect["Shooting"].bActive then
         love.graphics.draw(hero.imgYellow, hero.x, hero.y, math.rad(hero.r), hero.sx, hero.sy,
             hero.imgYellow:getWidth() / 2, hero.imgYellow:getHeight() / 2)
     end
 
+    
+    if hero.listEffect["DamageTaken"].bActive then 
+        love.graphics.setColor(255, 0, 0)
+     end
+
     love.graphics.draw(hero.img, hero.x, hero.y, math.rad(hero.r), hero.sx, hero.sy, hero.img:getWidth() / 2,
         hero.img:getHeight() / 2)
+
+     love.graphics.setColor(255,255,255)
 
     --   love.graphics.print("iDash: " .. hero.iDash, w / 2, 400)
     --    love.graphics.print("bDash: " .. tostring(hero.bDash), w / 2, 800)
