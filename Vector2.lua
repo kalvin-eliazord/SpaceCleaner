@@ -29,15 +29,6 @@ function Vector2:New(x, y)
     return vec2
 end
 
-function Vector2:NewEffect(pVec2, pEffect, pCurr, pCdrMax)
-    table.insert(pVec2.listEffectName, pEffect)
-    pVec2.listEffect[pEffect] = {}
-    pVec2.listEffect[pEffect].iCurr = pCurr
-    pVec2.listEffect[pEffect].iMax = pCurr
-    pVec2.listEffect[pEffect].cdrMax = pCdrMax
-    pVec2.listEffect[pEffect].cdr = pCdrMax
-end
-
 function Vector2:SetShrink(pVec2, dt)
     -- Enlarge
     if not pVec2.bShrink then
@@ -81,6 +72,15 @@ function Vector2:IsCollide(pVec1, pVec2)
     return false
 end
 
+function Vector2:NewEffect(pVec2, pEffect, pCurr, pCdrMax)
+    table.insert(pVec2.listEffectName, pEffect)
+    pVec2.listEffect[pEffect] = {}
+    pVec2.listEffect[pEffect].iCurr = pCurr
+    pVec2.listEffect[pEffect].iMax = pCurr
+    pVec2.listEffect[pEffect].cdrMax = pCdrMax
+    pVec2.listEffect[pEffect].cdr = pCdrMax
+end
+
 function Vector2:SetTempEffect(effect, dt)
     if effect == nil then
         print("Effect doesn't exist")
@@ -89,7 +89,7 @@ function Vector2:SetTempEffect(effect, dt)
 
     if effect.bActive and effect.cdr == effect.cdrMax then
         effect.iCurr = effect.iCurr - dt
-        if effect.iCurr < 0 then
+        if math.floor(effect.iCurr) < 0 then
             effect.bActive = false
             effect.iCurr = effect.iMax
             effect.cdr = 0

@@ -78,6 +78,7 @@ function Hero:Load(pMapList)
     Hero:NewEffect(hero, "Shooting", 0.2, 0)
     Hero:NewEffect(hero, "Dodge", 1, 1, 4)
     Hero:NewEffect(hero, "DamageTaken", 1, 0)
+    Hero:NewEffect(hero, "Shoot", 0, 3)
 
     hero.y = h
     engine = Hero:NewEngine(hero.x, hero.y)
@@ -217,7 +218,10 @@ function Hero:Update(dt, cam)
         -- New Laser
         local nearest = GetNearest(Enemy.list, hero)
         heroSpawnCDR = heroSpawnCDR - dt
-        if heroSpawnCDR <= 0 and nearest then
+        if heroSpawnCDR <= 0 and nearest then 
+  --  hero.listEffect["Shoot"].bActive = true -- TODO TOFIX
+    --print(hero.listEffect["Shoot"].iCurr)
+    --if math.floor(hero.listEffect["Shoot"].cdr) <= 0 and nearest then
             Laser.New(1, hero, nearest)
             hero.listEffect["Shooting"].bActive = true
             Vec2:NewParticle(hero, "rect", math.random(-0.5, 0.5), math.random(-0.5, 0.5), dt)
