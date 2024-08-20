@@ -113,17 +113,47 @@ function love.keypressed(pKey)
                 Game.bPause = false
             end
         end
+
         if Vec2.bStart then
-            if pKey == "space" and Hero.hero.listEffect["Dodge"].cdr == Hero.hero.listEffect["Dodge"].cdrMax then
-                Hero.hero.listEffect["Dodge"].bActive = true
-            elseif pKey == "a" then
-                hero.listEffect["Dash"].bActive = true
-                --        Hero.hero.iDash = Hero.hero.iDash + 1 NOT USED
-                if Hero.hero.iDash >= 2 then
-                    Hero.hero.iDash = 0
-                    Hero.hero.bDash = true
+            -- ROBOT state
+            if hero.bRobot then
+                if pKey == "space" then
+                -- Dodge process ?
+
+                elseif pKey == "a" then
+                    -- Robot sword process
+                    hero.oldState = hero.currState
+                    hero.currState = "RobotSword"
+
+                elseif pKey == "z" then
+                    -- Spaceship transformation process
+                    hero.bRobot = false
+                    hero.listEffect["Transform"].bActive = true
+                    hero.img["Transform"].iFrame = hero.img["Transform"].iFrameMax
+                    hero.currState = "Transform"
                 end
-                --
+            else
+            -- SPACESHIP state
+                if pKey == "space" then
+                    -- Dodge process
+                    hero.listEffect["Dodge"].bActive = true
+                    hero.bDodge = true
+                    hero.oldState = hero.currState
+                    hero.currState = "Dodge"
+                elseif pKey == "a" then
+                    -- Dash process
+                    hero.listEffect["Dash"].bActive = true
+                    --        Hero.hero.iDash = Hero.hero.iDash + 1 NOT USED
+                    if hero.iDash >= 2 then
+                        hero.iDash = 0
+                        hero.bDash = true
+                    end
+                elseif pKey == "z" then
+                    -- Robot transformation process
+                    hero.bRobot = true
+                    hero.listEffect["Transform"].bActive = true
+                    hero.currState = "Transform"
+                end
             end
         end
 

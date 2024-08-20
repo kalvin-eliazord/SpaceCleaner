@@ -32,6 +32,25 @@ function Enemy:Load()
     spawnCDR = maxSpawnCDR
 end
 
+function Enemy:IsCollideHero(pEnem)
+    if not pEnem or not heroImg then
+        return
+    end
+
+    local hero = require("Hero").hero
+    local iFrame = hero.img[hero.currState].iFrame
+    local heroImg = hero.img[hero.currState].frames[math.floor(iFrame)]
+    local deltaX = hero.x - pEnem.x
+    local deltaY = hero.y - pEnem.y
+    
+    if math.abs(deltaX) < (hero.img[hero.currState].w + pEnem.img:getWidth()) - 20 and math.abs(deltaY) <
+        (hero.img[hero.currState].h + pEnem.img:getHeight()) - 20 then
+        return true
+    end
+
+    return false
+end
+
 function Enemy:Update(dt)
     spawnCDR = spawnCDR - dt
 
@@ -55,7 +74,7 @@ function Enemy:Update(dt)
 
             -- Enemy collision w/ Hero
             local hero = require("Hero").hero
-            if Enemy:IsCollide(enem, hero) and not hero.bDodge then
+            if Enemy:IsCollideHero(enem) and not hero.bDodge then
                 hero.hp = hero.hp - 1
                 enem.hp = enem.hp - 1
                 Explosion:New(hero.x, hero.y, dt)
@@ -108,7 +127,7 @@ function Enemy:Update(dt)
                 Laser.SetLaser(laser, dt)
 
                 -- Enemy Laser to Hero explosion
-                if Enemy:IsCollide(laser, hero) and not hero.bDodge then
+                if Enemy:IsCollideHero(laser) and not hero.bDodge then
                     laser.bDelete = true
                     Explosion:New(hero.x + love.math.random(-2, 2), hero.y + love.math.random(-2, 2))
                     hero.hp = hero.hp - 1

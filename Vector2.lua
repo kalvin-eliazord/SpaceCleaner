@@ -10,6 +10,8 @@ function Vector2:New(x, y)
     vec2.vx = 0
     vec2.vy = 0
     vec2.vr = 400
+    vec2.bDelete = false
+
     vec2.bShrink = false
     vec2.sxMax = 1.5
     vec2.syMax = 1.5
@@ -17,7 +19,7 @@ function Vector2:New(x, y)
     vec2.syMin = 1
     vec2.sx = vec2.sxMin
     vec2.sy = vec2.syMin
-    vec2.bDelete = false
+
     vec2.listEffect = {}
     vec2.listEffectName = {}
     vec2.listEffect.iMax = 0
@@ -25,6 +27,8 @@ function Vector2:New(x, y)
     vec2.listEffect.cdr = 0
     vec2.listEffect.cdrMax = 0
     vec2.listEffect.bActive = false
+    vec2.listEffect.bReady = true
+
     setmetatable(vec2, self)
     return vec2
 end
@@ -87,7 +91,7 @@ function Vector2:SetTempEffect(effect, dt)
         return
     end
 
-    if effect.bActive and effect.cdr == effect.cdrMax then
+    if effect.bActive and effect.bReady then
         effect.iCurr = effect.iCurr - dt
         if math.floor(effect.iCurr) < 0 then
             effect.bActive = false
@@ -95,10 +99,12 @@ function Vector2:SetTempEffect(effect, dt)
             effect.cdr = 0
         end
     else
+        effect.bActive = false
         if math.floor(effect.cdr) ~= effect.cdrMax then
+            effect.bReady = false
             effect.cdr = effect.cdr + dt
         else
-            effect.cdr = effect.cdrMax
+            effect.bReady = true
         end
     end
 end
@@ -216,6 +222,19 @@ function Vector2:IsOutScreen(pVec)
     end
 
     return false
+end
+
+function Vector2:NewSpriteSheet(imgPath, animList, tileSize)
+    if animList.iFrameMax == nil then return end
+    
+    local img = love.graphics.newImage(imgPath)
+    animList.imgSheet = img
+    animList.w = tileSize
+    animList.h = tileSize
+    for i = 1, animList.iFrameMax do
+        animList.frames[i] = love.graphics.newQuad((i-1)*tileSize, 0, tileSize,tileSize, img:getWidth(), img:getHeight())
+    end
+    return animList
 end
 
 function Vector2:Destroy(pIndex) -- NOT USED
