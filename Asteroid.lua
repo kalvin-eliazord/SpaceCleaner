@@ -71,23 +71,26 @@ end
 
 function Asteroid:Load()
     AsteroidInit()
-
-    maxSpawnCDR = 0.2
-    spawnCDR = maxSpawnCDR
+    Vec2:NewEffect(Asteroid, "NewAst", 0.01, 4)
+    Vec2:NewEffect(Asteroid, "PushAst", 5, 4)
 end
 
 function Asteroid:Update(dt)
-    spawnCDR = spawnCDR - dt
-    if spawnCDR < 0 then
+    Vec2:SetTempEffects(Asteroid, dt)
+    if Asteroid.listEffect["NewAst"].bReady then
+        Asteroid.listEffect["NewAst"].bActive = true
+    end
+    if Asteroid.listEffect["NewAst"].bActive then
         Asteroid:New()
-        spawnCDR = maxDashCDR
     end
     
     if Asteroid.list then
         for i = #Asteroid.list, 1, -1 do
             local asteroid = Asteroid.list[i]
 
-            -- Asteroid:SetShrink(asteroid, dt)
+            -- Push Asteroid Effect
+            if asteroid.listEffect["PushAst"] and asteroid.listEffect["PushAst"].bActive then
+            end
 
             -- Set Velocity
             asteroid.x = asteroid.x + asteroid.vx * dt
@@ -127,7 +130,6 @@ function Asteroid:Draw()
                 Asteroid.img:getWidth() / 2, Asteroid.img:getHeight() / 2)
         end
 
-     --   print("ast list:", #Asteroid.list)
     end
 end
 

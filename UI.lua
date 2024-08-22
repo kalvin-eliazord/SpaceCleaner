@@ -52,6 +52,8 @@ function GetAngle(pVec1, pVec2)
 end
 
 function UI:Update(dt)
+  --  Vec2:SetShrink(healthUI, 0.1,dt)
+
     if Enemy.list then
         for i, enem in ipairs(Enemy.list) do
             -- New Arrow
@@ -107,7 +109,7 @@ function UI:Update(dt)
                 enem.arrowUI.r = GetAngle(hero, enem)
 
                 -- Arrow Shrinking
-                UI:SetShrink(enem.arrowUI, dt)
+                UI:SetShrink(enem.arrowUI, 0.5,dt)
 
                 -- bDormant Check
                 local currDist = math.sqrt(deltaArrow.x ^ 2 + deltaArrow.y ^ 2)

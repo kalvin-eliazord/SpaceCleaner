@@ -33,7 +33,7 @@ function Enemy:Load()
 end
 
 function Enemy:IsCollideHero(pEnem)
-    if not pEnem or not heroImg then
+    if not pEnem then
         return
     end
 
@@ -42,7 +42,7 @@ function Enemy:IsCollideHero(pEnem)
     local heroImg = hero.img[hero.currState].frames[math.floor(iFrame)]
     local deltaX = hero.x - pEnem.x
     local deltaY = hero.y - pEnem.y
-    
+
     if math.abs(deltaX) < (hero.img[hero.currState].w + pEnem.img:getWidth()) - 20 and math.abs(deltaY) <
         (hero.img[hero.currState].h + pEnem.img:getHeight()) - 20 then
         return true
@@ -64,6 +64,7 @@ function Enemy:Update(dt)
     if Enemy.list then
         for i = #Enemy.list, 1, -1 do
             local enem = Enemy.list[i]
+            Enemy:NewEffect(enem, "DamageTaken", 1, 0)
 
             -- Waste Spawn by Enemy
             enem.wasteSpawn = enem.wasteSpawn - dt
@@ -79,10 +80,11 @@ function Enemy:Update(dt)
                 enem.hp = enem.hp - 1
                 Explosion:New(hero.x, hero.y, dt)
                 hero.listEffect["DamageTaken"].bActive = true
+                enem.listEffect["DamageTaken"].bActive = true
             end
 
             -- Enemy Shrinking
-            Enemy:SetShrink(enem, dt)
+            Enemy:SetShrink(enem, 1,dt)
 
             -- Enemy rotation
             enem.r = GetAngle(enem, hero)
@@ -92,6 +94,7 @@ function Enemy:Update(dt)
                 enemSpawnCDR = enemSpawnCDR - dt
                 if enemSpawnCDR <= 0 then
                     Laser.New(2, enem, hero)
+                    Vec2:NewParticle(vortex, "red", math.random(-20, 20), math.random(-20, 20), 0.01, dt)
                     enemSpawnCDR = maxSpawnCDR
                 end
 
@@ -119,13 +122,13 @@ function Enemy:Update(dt)
 
     end
 
-    -- Set Velocity of laser
+    -- Set Velocity of enemy laser
     if Laser.list then
         for i = #Laser.list, 1, -1 do
             local laser = Laser.list[i]
             if laser.type == 2 then -- enemy type
                 Laser.SetLaser(laser, dt)
-
+                Vec2:NewParticle(laser, "red", math.random(-0.1, 0.1), math.random(-0.1, 0.1), 0.0001, dt)
                 -- Enemy Laser to Hero explosion
                 if Enemy:IsCollideHero(laser) and not hero.bDodge then
                     laser.bDelete = true
@@ -147,8 +150,15 @@ end
 function Enemy:Draw()
     if Enemy.list then
         for i, enem in ipairs(Enemy.list) do
+
+            if enem.listEffect["DamageTaken"].bActive then
+                love.graphics.setColor(1, 0, 0)
+            end
+
             love.graphics.draw(enem.img, enem.x, enem.y, enem.r, enem.sx, enem.sy, enem.img:getWidth() / 2,
                 enem.img:getHeight() / 2)
+
+            love.graphics.setColor(1, 1, 1)
         end
     end
 end

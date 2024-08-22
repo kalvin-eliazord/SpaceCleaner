@@ -36,11 +36,10 @@ function Explosion:Update(dt)
     if Explosion.list then
         for k = #Explosion.list, 1, -1 do
             local explo = Explosion.list[k]
-            Vec2:SetShrink(explo, dt)
+            Vec2:SetShrink(explo, 1,dt)
             explo.indexImg = explo.indexImg + (dt * 4)
             if explo.indexImg >= 5 then
-                local part = Vec2:NewParticle(explo, "rect", math.random(-20, 20), math.random(-20, 20), dt)
-                part.bExplosion = true
+                local part = Vec2:NewParticle(explo, "yellow", math.random(-20, 20), math.random(-20, 20),math.random(1, 3), dt)
                 explo.indexImg = 5
                 table.remove(Explosion.list, k)
             end

@@ -13,6 +13,7 @@ local Sound = require("Sound")
 local Explosion = require("Explosion")
 local Map = require("Map")
 local Camera = require("lib/camera")
+local Vortex = require("Vortex")
 
 local Game = {}
 
@@ -49,6 +50,7 @@ function love.load()
     Sound.Load(Game.sounds)
     Map.Load(Game.screens)
     Hero:Load(Map.list)
+    Vortex:Load()
     Waste:Load()
     Laser:Load()
     Enemy:Load()
@@ -64,7 +66,7 @@ function love.update(dt)
 
         if Game.currScreen == "inGame" then
             Vec2:Update(dt)
-
+            Vortex:Update(dt)
             --  Sound.streamState = Game.currScreen
             Hero:Update(dt, cam)
             Enemy:Update(dt)
@@ -115,44 +117,42 @@ function love.keypressed(pKey)
         end
 
         if Vec2.bStart then
+            -- local currState = hero.img[hero.currState]
+
             -- ROBOT state
             if hero.bRobot then
                 if pKey == "space" then
-                -- Dodge process ?
-
+                    -- Fly process 
+                    Hero:ActivateAnimation(hero, "RobotFly")
                 elseif pKey == "a" then
                     -- Robot sword process
-                    hero.oldState = hero.currState
-                    hero.currState = "RobotSword"
-
+                    Hero:ActivateAnimation(hero, "RobotSword")
+                elseif pKey == "e" then
+                    -- Robot shoot process
+                    Hero:ActivateAnimation(hero, "RobotShoot")
                 elseif pKey == "z" then
                     -- Spaceship transformation process
-                    hero.bRobot = false
-                    hero.listEffect["Transform"].bActive = true
-                    hero.img["Transform"].iFrame = hero.img["Transform"].iFrameMax
-                    hero.currState = "Transform"
+                    if Hero:ActivateAnimation(hero, "Transform") then
+                        hero.bRobot = false
+                        hero.img["Transform"].iFrame = hero.img["Transform"].iFrameMax
+                        hero.img[hero.currState].bReverse = true
+                    end
                 end
             else
-            -- SPACESHIP state
+                -- SPACESHIP state
                 if pKey == "space" then
                     -- Dodge process
-                    hero.listEffect["Dodge"].bActive = true
-                    hero.bDodge = true
-                    hero.oldState = hero.currState
-                    hero.currState = "Dodge"
+                    if Hero:ActivateAnimation(hero, "Dodge") then
+                        hero.bDodge = true
+                    end
                 elseif pKey == "a" then
                     -- Dash process
-                    hero.listEffect["Dash"].bActive = true
-                    --        Hero.hero.iDash = Hero.hero.iDash + 1 NOT USED
-                    if hero.iDash >= 2 then
-                        hero.iDash = 0
-                        hero.bDash = true
-                    end
+                    Hero:ActivateAnimation(hero, "Dash")
                 elseif pKey == "z" then
                     -- Robot transformation process
-                    hero.bRobot = true
-                    hero.listEffect["Transform"].bActive = true
-                    hero.currState = "Transform"
+                    if Hero:ActivateAnimation(hero, "Transform") then
+                        hero.bRobot = true
+                    end
                 end
             end
         end
@@ -173,6 +173,7 @@ function love.draw()
     end
 
     Map.Draw(Game.currScreen)
+    Vortex:Draw()
     Asteroid:Draw()
     Waste:Draw()
 

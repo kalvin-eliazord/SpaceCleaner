@@ -52,7 +52,7 @@ end
 
 function Map.Update(dt)
     Stars:Update(dt)
-    Map:SetShrink(Map.list["title"], dt)
+    Map:SetShrink(Map.list["title"],1, dt)
    -- Map:SetShrink(Map.list["press_space"], dt) TODO
 end
 

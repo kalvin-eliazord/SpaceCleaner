@@ -29,14 +29,18 @@ function Stars:New(x, y)
 end
 
 function Stars:Load()
-    maxSpawnCDR = 1
-    spawnCDR = maxSpawnCDR
+    Vec2:NewEffect(Stars, "NewStars", 0.1, 0.1)
 end
 
 function Stars:Update(dt)
+    Stars.listEffect["NewStars"].bActive = true
+    Vec2:SetTempEffects(Stars, dt)
+
     -- Stars Spawn
-    spawnCDR = spawnCDR - dt
-    if spawnCDR <= 0 then
+    if Stars.listEffect["NewStars"].bReady then
+        Stars.listEffect["NewStars"].bActive = true
+    end
+    if Stars.listEffect["NewStars"].bActive then
         math.randomseed(os.time())
         local Map = require("Map").current
 
@@ -50,7 +54,6 @@ function Stars:Update(dt)
         end
 
         Stars:New(randX, randY)
-        spawnCDR = maxSpawnCDR
     end
 
     -- Stars process

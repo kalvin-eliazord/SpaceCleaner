@@ -36,6 +36,7 @@ function Waste:New(pX, pY)
     waste.sy = waste.syMax
     waste.sxMin = 0.01
     waste.syMin = 0.01
+    waste.bReady = false
     waste.vr = love.math.random(-9, 9)
 
     -- Type process
@@ -58,19 +59,19 @@ end
 
 function Waste:Load()
     WasteInit()
-
-    maxSpawnCDR = 0.2
-    spawnCDR = maxSpawnCDR
-    score = 0
+    Vec2:NewEffect(Waste, "NewWasteTitle", 0.01, 5)
+    Vec2:NewEffect(Waste, "NewWasteGame", 0.1, 4)
 end
 
 function Waste:Update(pGame, dt)
+    Vec2:SetTempEffects(Waste, dt)
     if pGame.currScreen == "title" then
-        spawnCDR = spawnCDR - dt
-        if spawnCDR < 0 then
+        if Waste.listEffect["NewWasteTitle"].bReady then
+            Waste.listEffect["NewWasteTitle"].bActive = true
+        end
+        if Waste.listEffect["NewWasteTitle"].bActive then
             local Map = require("Map").current.img
             Waste:New(math.random(10, Map:getWidth()), math.random(10, Map:getHeight()))
-            spawnCDR = maxDashCDR
         end
     end
 
@@ -114,16 +115,11 @@ end
 function Waste:Draw()
     if Waste.list then
         for i, waste in ipairs(Waste.list) do
-            --   love.graphics.draw(waste.img, waste.x, waste.y, waste.r, waste.sx + 0.2, waste.sy + 0.2,
-            --     waste.img:getWidth() / 2, waste.img:getHeight() / 2)
-            -- love.graphics.setColor(255, 255, 255)
-
-            love.graphics.draw(waste.img, waste.x, waste.y, waste.r, waste.sx, waste.sy, waste.img:getWidth() / 2,
+            love.graphics.draw(waste.img, waste.x, waste.y, waste.r, 1.5, 1.5, waste.img:getWidth() / 2,
                 waste.img:getHeight() / 2)
         end
 
         -- print("wasteList: ",#Waste.list)
-        --      love.graphics.print("Score: " .. score, w / 2, 10)
     end
 end
 
