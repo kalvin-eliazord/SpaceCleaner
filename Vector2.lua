@@ -92,7 +92,7 @@ function Vector2:SetTempEffects(pVec2, dt)
         if effect.bActive and effect.bReady then
             effect.iCurr = effect.iCurr - dt
             if effect.iCurr <= 0 then
-                --effect.bActive = false
+                effect.bActive = false
                 effect.bReady = false
                 effect.iCurr = effect.iMax
                 effect.cdr = 0

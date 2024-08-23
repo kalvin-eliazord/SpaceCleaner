@@ -69,6 +69,9 @@ function Sound.Load()
     for i=1, 6 do
         NewSound("laserShoot_"..i, 1, "static")
     end
+    for i=1, 2 do
+        NewSound("explosion_"..i, 1, "static")
+    end
     NewSound("ship_start", 0.5, "static")
     Sound.bStreamChanged = false
     -- InitSounds(pScreens)

@@ -1,6 +1,7 @@
 -- Imports
 local Vec2 = require("Vector2")
 local Camera = require("lib/camera")
+local Sound = require("Sound")
 
 local Explosion = {}
 Explosion.__index = Explosion
@@ -22,7 +23,7 @@ function Explosion:New(x, y)
     local explo = Vec2:New(x, y)
     explo.x = x
     explo.y = y
-
+    explo.bSound = false
     explo.sx = math.random(0.99, 1)
     explo.sy = math.random(0.99, 1)
     explo.img = Explosion.imgList
@@ -37,6 +38,10 @@ function Explosion:Update(dt)
         for k = #Explosion.list, 1, -1 do
             local explo = Explosion.list[k]
             Vec2:SetShrink(explo, 1,dt)
+            if not explo.bSound then
+                Sound.PlayStatic("explosion_"..math.random(1,2))
+                explo.bSound = true
+            end
             explo.indexImg = explo.indexImg + (dt * 4)
             if explo.indexImg >= 5 then
                 local part = Vec2:NewParticle(explo, "yellow", math.random(-20, 20), math.random(-20, 20),math.random(1, 3), dt)

@@ -329,19 +329,27 @@ function Hero:Update(dt, cam)
 
         -- New Laser
         local nearest = Vec2:GetNearest(Enemy.list, hero)
+
         heroSpawnCDR = heroSpawnCDR - dt
-        hero.listEffect["Shoot"].bActive = true 
-            -- print(hero.listEffect["Shoot"].iCurr)
-     --   if heroSpawnCDR <= 0 and nearest then
-             if math.floor(hero.listEffect["Shoot"].cdr) == 0 and nearest then
+   --     print(hero.listEffect["Shoot"].bReady)
+
+        if nearest and hero.listEffect["Shoot"].bReady then
+            hero.listEffect["Shoot"].bActive = true
+        end
+        -- print(hero.listEffect["Shoot"].iCurr)
+        --   if heroSpawnCDR <= 0 and nearest then
+        if hero.listEffect["Shoot"].bActive and nearest then
             Laser.New(1, hero, nearest)
-            Sound.PlayStatic("laserShoot_"..math.random(1,6))
+            Sound.PlayStatic("laserShoot_" .. math.random(1, 6))
             hero.listEffect["Shooting"].bActive = true
             Vec2:NewParticle(hero, "yellow", math.random(-0.5, 0.5), math.random(-0.5, 0.5), math.random(1, 3), dt)
             -- local test = cam:move(200, 400)
             -- test.x = test.x + 20
             heroSpawnCDR = maxSpawnCDR
-        end
+            hero.listEffect["Shoot"].bActive = false
+            hero.listEffect["Shoot"].bReady = false
+            hero.listEffect["Shoot"].cdr = 0
+         end
 
         -- Dodging animation
         if hero.listEffect["Dodge"].bActive then
