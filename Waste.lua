@@ -59,8 +59,8 @@ end
 
 function Waste:Load()
     WasteInit()
-    Vec2:NewEffect(Waste, "NewWasteTitle", 0.01, 5)
-    Vec2:NewEffect(Waste, "NewWasteGame", 0.1, 4)
+    Vec2:NewTempEffect(Waste, "NewWasteTitle", 0.01, 5)
+    Vec2:NewTempEffect(Waste, "NewWasteGame", 0.1, 4)
 end
 
 function Waste:Update(pGame, dt)

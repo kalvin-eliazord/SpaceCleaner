@@ -64,7 +64,7 @@ function Enemy:Update(dt)
     if Enemy.list then
         for i = #Enemy.list, 1, -1 do
             local enem = Enemy.list[i]
-            Enemy:NewEffect(enem, "DamageTaken", 1, 0)
+            Enemy:NewTempEffect(enem, "DamageTaken", 1, 0)
 
             -- Waste Spawn by Enemy
             enem.wasteSpawn = enem.wasteSpawn - dt

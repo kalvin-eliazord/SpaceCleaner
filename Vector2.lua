@@ -66,7 +66,7 @@ function Vector2:IsCollide(pVec1, pVec2)
     return false
 end
 
-function Vector2:NewEffect(pVec2, pEffect, pCurr, pCdrMax)
+function Vector2:NewTempEffect(pVec2, pEffect, pCurr, pCdrMax)
     if not pVec2.listEffectName then
         pVec2.listEffectName = {}
     end
@@ -92,7 +92,7 @@ function Vector2:SetTempEffects(pVec2, dt)
         if effect.bActive and effect.bReady then
             effect.iCurr = effect.iCurr - dt
             if effect.iCurr <= 0 then
-                effect.bActive = false
+                --effect.bActive = false
                 effect.bReady = false
                 effect.iCurr = effect.iMax
                 effect.cdr = 0

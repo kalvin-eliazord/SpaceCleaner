@@ -4,6 +4,7 @@ local Laser = require("Laser")
 local Enemy = require("Enemy")
 local Waste = require("Waste")
 local Asteroid = require("Asteroid")
+local Sound = require("Sound")
 
 local Hero = {}
 setmetatable(Hero, Vec2)
@@ -91,29 +92,25 @@ function Hero:Load(pMapList)
     MAP_WIDTH = pMapList["inGame"].img:getWidth()
     MAP_HEIGHT = pMapList["inGame"].img:getHeight()
 
-    -- sound TODO
-    startSound = love.audio.newSource("music/ship_start.mp3", "static")
-    startSound:setVolume(0.5)
-
     -- New Hero's SpaceShip
     Hero.hero = Hero:New(MAP_WIDTH / 2, MAP_HEIGHT)
     hero = Hero.hero
     hero.y = MAP_HEIGHT
 
     -- New Effects
-    Hero:NewEffect(hero, "StartGame", 2, 0)
-    Hero:NewEffect(hero, "SpeedMap", 1, 4)
-    Hero:NewEffect(hero, "Dash", 1, 4)
-    Hero:NewEffect(hero, "Shooting", 0.8, 0)
-    Hero:NewEffect(hero, "Dodge", 1, 4)
-    Hero:NewEffect(hero, "DamageTaken", 1, 0)
-    Hero:NewEffect(hero, "Shoot", 0.01, 3)
-    Hero:NewEffect(hero, "Transform", 1.2, 5)
-    Hero:NewEffect(hero, "Robot", 0, 0)
-    Hero:NewEffect(hero, "RobotFly", 1, 4)
-    Hero:NewEffect(hero, "RobotSword", 1, 1)
-    Hero:NewEffect(hero, "RobotSword2", 1, 1)
-    Hero:NewEffect(hero, "RobotShoot", 2, 4)
+    Vec2:NewTempEffect(hero, "StartGame", 2, 0)
+    Vec2:NewTempEffect(hero, "SpeedMap", 1, 4)
+    Vec2:NewTempEffect(hero, "Dash", 1, 4)
+    Vec2:NewTempEffect(hero, "Shooting", 0.8, 0)
+    Vec2:NewTempEffect(hero, "Dodge", 1, 4)
+    Vec2:NewTempEffect(hero, "DamageTaken", 1, 0)
+    Vec2:NewTempEffect(hero, "Shoot", 0.01, 3)
+    Vec2:NewTempEffect(hero, "Transform", 1.2, 5)
+    Vec2:NewTempEffect(hero, "Robot", 0, 0)
+    Vec2:NewTempEffect(hero, "RobotFly", 1, 4)
+    Vec2:NewTempEffect(hero, "RobotSword", 1, 1)
+    Vec2:NewTempEffect(hero, "RobotSword2", 1, 1)
+    Vec2:NewTempEffect(hero, "RobotShoot", 2, 4)
 
     hero.listEffect["StartGame"].bActive = true
 
@@ -317,11 +314,10 @@ function Hero:Update(dt, cam)
 
     -- Ship Start animation
     if hero.listEffect["StartGame"].bActive then
-        love.audio.play(startSound)
+        Sound.PlayStatic("ship_start")
         hero.y = hero.y - (dt * 100)
     else
-        if startSound:isPlaying() then
-            startSound:stop()
+        if Sound.StopStatic("ship_start") then
             Vec2.bStart = true
         end
 
@@ -334,11 +330,12 @@ function Hero:Update(dt, cam)
         -- New Laser
         local nearest = Vec2:GetNearest(Enemy.list, hero)
         heroSpawnCDR = heroSpawnCDR - dt
-        if heroSpawnCDR <= 0 and nearest then
-            --  hero.listEffect["Shoot"].bActive = true -- TODO TOFIX
+        hero.listEffect["Shoot"].bActive = true 
             -- print(hero.listEffect["Shoot"].iCurr)
-            -- if math.floor(hero.listEffect["Shoot"].cdr) <= 0 and nearest then
+     --   if heroSpawnCDR <= 0 and nearest then
+             if math.floor(hero.listEffect["Shoot"].cdr) == 0 and nearest then
             Laser.New(1, hero, nearest)
+            Sound.PlayStatic("laserShoot_"..math.random(1,6))
             hero.listEffect["Shooting"].bActive = true
             Vec2:NewParticle(hero, "yellow", math.random(-0.5, 0.5), math.random(-0.5, 0.5), math.random(1, 3), dt)
             -- local test = cam:move(200, 400)
@@ -483,7 +480,7 @@ function AsteroidCollision(dt)
                 asteroid.vy = asteroid.vy * -1
                 -- New Effect on ast
                 if not asteroid.listEffect["PushAst"] then
-                    Vec2:NewEffect(asteroid, "PushAst", 1, 0)
+                    Vec2:NewTempEffect(asteroid, "PushAst", 1, 0)
                 end
                 asteroid.listEffect["PushAst"].bActive = true
             end

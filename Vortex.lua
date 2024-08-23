@@ -30,7 +30,7 @@ function Vortex:New(x, y)
 end
 
 function Vortex:Load()
-    Vec2:NewEffect(Vortex, "NewVortex", 0.01, 20)
+    Vec2:NewTempEffect(Vortex, "NewVortex", 0.01, 20)
 end
 
 function Vortex:Update(dt)

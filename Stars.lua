@@ -29,7 +29,7 @@ function Stars:New(x, y)
 end
 
 function Stars:Load()
-    Vec2:NewEffect(Stars, "NewStars", 0.1, 0.1)
+    Vec2:NewTempEffect(Stars, "NewStars", 0.1, 0.1)
 end
 
 function Stars:Update(dt)

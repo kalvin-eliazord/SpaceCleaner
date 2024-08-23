@@ -27,10 +27,6 @@ function GameInit()
     -- game.screens[3] = "gameOver" TODO
     game.currScreen = game.screens[1]
 
-    game.sounds = {}
-    game.sounds[1] = "title"
-    game.sounds[2] = "inGame"
-
     game.gSizes = {}
     game.gSizes.w = 1024
     game.gSizes.h = 768
@@ -47,7 +43,7 @@ function love.load()
     love.window.setTitle(Game.title)
     love.window.setMode(Game.gSizes.w, Game.gSizes.h)
     UI:Load()
-    Sound.Load(Game.sounds)
+    Sound.Load()
     Map.Load(Game.screens)
     Hero:Load(Map.list)
     Vortex:Load()

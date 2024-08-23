@@ -71,8 +71,8 @@ end
 
 function Asteroid:Load()
     AsteroidInit()
-    Vec2:NewEffect(Asteroid, "NewAst", 0.01, 4)
-    Vec2:NewEffect(Asteroid, "PushAst", 5, 4)
+    Vec2:NewTempEffect(Asteroid, "NewAst", 0.01, 4)
+    Vec2:NewTempEffect(Asteroid, "PushAst", 5, 4)
 end
 
 function Asteroid:Update(dt)
