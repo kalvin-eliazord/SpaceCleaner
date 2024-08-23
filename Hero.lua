@@ -60,6 +60,9 @@ function Hero:New(x, y)
     animName = "RobotSword"
     hero.img[animName] = Hero:NewAnimation(hero.img, animName, 7, 7)
     hero.img[animName] = Vec2:NewFrameList(hero.img[animName], tileSize * 2)
+    animName = "RobotSword2"
+    hero.img[animName] = Hero:NewAnimation(hero.img, animName, 5, 5)
+    hero.img[animName] = Vec2:NewFrameList(hero.img[animName], tileSize * 2)
 
     -- Robot Fly animation
     animName = "RobotFly"
@@ -101,7 +104,7 @@ function Hero:Load(pMapList)
     Hero:NewEffect(hero, "StartGame", 2, 0)
     Hero:NewEffect(hero, "SpeedMap", 1, 4)
     Hero:NewEffect(hero, "Dash", 1, 4)
-    Hero:NewEffect(hero, "Shooting", 1, 0)
+    Hero:NewEffect(hero, "Shooting", 0.8, 0)
     Hero:NewEffect(hero, "Dodge", 1, 4)
     Hero:NewEffect(hero, "DamageTaken", 1, 0)
     Hero:NewEffect(hero, "Shoot", 0.01, 3)
@@ -109,6 +112,7 @@ function Hero:Load(pMapList)
     Hero:NewEffect(hero, "Robot", 0, 0)
     Hero:NewEffect(hero, "RobotFly", 1, 4)
     Hero:NewEffect(hero, "RobotSword", 1, 1)
+    Hero:NewEffect(hero, "RobotSword2", 1, 1)
     Hero:NewEffect(hero, "RobotShoot", 2, 4)
 
     hero.listEffect["StartGame"].bActive = true
@@ -156,7 +160,7 @@ end
 
 function Hero:UpdateAnimation(hero, dt)
     local currState = hero.img[hero.currState]
-    --  print("iFrame: ", currState.iFrame, " frameMax: ", currState.iFrameMax, " name: ", hero.currState)
+     -- print("iFrame: ", currState.iFrame, " frameMax: ", currState.iFrameMax, " name: ", hero.currState)
     if currState.iFrameMax ~= nil then
         if currState.bReverse then
             currState.iFrame = currState.iFrame - (dt * currState.frameV)
@@ -176,8 +180,8 @@ function Hero:UpdateAnimation(hero, dt)
 end
 
 function Hero:ActivateAnimation(hero, effectName)
+      --    print("effectName: ", effectName, " bReady: ", hero.listEffect[effectName].bReady)
     if hero.img[effectName] and hero.listEffect[effectName].bReady then
-        --  print("effectName: ", effectName, " bReady: ", hero.listEffect[effectName].bReady)
         hero.img[effectName].bFramesDone = false
         hero.listEffect[effectName].bActive = true
         hero.oldState = hero.currState
@@ -360,6 +364,7 @@ function Hero:Update(dt, cam)
         if hero.listEffect["SpeedMap"].bActive then
             hero.vx = hero.vx + dt
             hero.vy = hero.vy + dt
+            Vec2:NewParticle(hero, nil, math.random(-20, 20), math.random(-20, 20), 0.005, dt)
         end
 
         -- Transform Robot animation
@@ -370,8 +375,15 @@ function Hero:Update(dt, cam)
 
         -- Robot Sword animation
         if hero.listEffect["RobotSword"].bActive then
-            Vec2:NewParticle(hero, "green", math.random(-20, 20), math.random(-20, 20), 0.005, dt)
+            Vec2:NewParticle(hero, "green", math.random(-15, 15), math.random(-15, 15), 0.002, dt)
+            if hero.listEffect["RobotSword2"].bActive and math.floor(hero.img[hero.currState].iFrame) == 5 then
+                Hero:ActivateAnimation(hero, "RobotSword2")
+            end
             -- Attack with tp to enemy
+        end
+
+        if hero.currState == "RobotSword2" and hero.img["RobotSword2"].bFramesDone then
+            hero.img["RobotSword"].iFrame = 1 
         end
 
         -- Robot Shoot animation
@@ -388,11 +400,11 @@ function Hero:Update(dt, cam)
         -- Temp animation
         SetIdleAnimation()
 
-        -- Set Velocity of laser
+        -- Set Velocity of Hero laser
         if Laser.list then
             for i, laser in ipairs(Laser.list) do
                 if laser.type == 1 then -- hero type
-                Vec2:NewParticle(laser, "red", math.random(-0.1, 0.1), math.random(-0.1, 0.1), 0.0001, dt)
+                Vec2:NewParticle(laser, "yellow", math.random(-0.1, 0.1), math.random(-0.1, 0.1), 0.0001, dt)
 
                     Laser.SetGuidedLaser(laser, dt)
 

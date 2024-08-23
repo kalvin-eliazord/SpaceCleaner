@@ -126,7 +126,11 @@ function love.keypressed(pKey)
                     Hero:ActivateAnimation(hero, "RobotFly")
                 elseif pKey == "a" then
                     -- Robot sword process
-                    Hero:ActivateAnimation(hero, "RobotSword")
+                    if hero.currState == "RobotSword" then
+                        hero.listEffect["RobotSword2"].bActive = true
+                    else
+                        Hero:ActivateAnimation(hero, "RobotSword")
+                    end
                 elseif pKey == "e" then
                     -- Robot shoot process
                     Hero:ActivateAnimation(hero, "RobotShoot")
