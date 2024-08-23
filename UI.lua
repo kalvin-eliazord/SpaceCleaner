@@ -42,6 +42,8 @@ function UI:New(x, y, pImg, sx, sy)
 end
 
 function UI:Load()
+    local myFont = love.graphics.newFont("fonts/PixelOperator8-Bold.ttf", 20)
+    love.graphics.setFont(myFont)
     healthUI = UI:New(0, 0, "health", 0.1, 0.1)
 end
 
@@ -186,7 +188,7 @@ function UI:Draw()
     end
 
     -- Score UI 
-    love.graphics.print("Score:"..Hero.hero.score, 0, 200)
+    love.graphics.print("Score: "..Hero.hero.score, 430, 10)
 
 end
 

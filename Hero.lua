@@ -160,7 +160,7 @@ end
 
 function Hero:UpdateAnimation(hero, dt)
     local currState = hero.img[hero.currState]
-     -- print("iFrame: ", currState.iFrame, " frameMax: ", currState.iFrameMax, " name: ", hero.currState)
+    -- print("iFrame: ", currState.iFrame, " frameMax: ", currState.iFrameMax, " name: ", hero.currState)
     if currState.iFrameMax ~= nil then
         if currState.bReverse then
             currState.iFrame = currState.iFrame - (dt * currState.frameV)
@@ -180,7 +180,7 @@ function Hero:UpdateAnimation(hero, dt)
 end
 
 function Hero:ActivateAnimation(hero, effectName)
-      --    print("effectName: ", effectName, " bReady: ", hero.listEffect[effectName].bReady)
+    --    print("effectName: ", effectName, " bReady: ", hero.listEffect[effectName].bReady)
     if hero.img[effectName] and hero.listEffect[effectName].bReady then
         hero.img[effectName].bFramesDone = false
         hero.listEffect[effectName].bActive = true
@@ -370,11 +370,19 @@ function Hero:Update(dt, cam)
         -- Transform Robot animation
         if hero.listEffect["Transform"].bActive then
             Vec2:NewParticle(hero, nil, math.random(-20, 20), math.random(-20, 20), 0.005, dt)
+
             -- Be invicible
+            hero.bDodge = true
+            if hero.img["Transform"].bFramesDone then
+                hero.bDodge = false
+            end
         end
 
         -- Robot Sword animation
         if hero.listEffect["RobotSword"].bActive then
+            if hero.img["RobotSword"].bFramesDone then
+                --     hero.listEffect["RobotSword"].bActive = false
+            end
             Vec2:NewParticle(hero, "green", math.random(-15, 15), math.random(-15, 15), 0.002, dt)
             if hero.listEffect["RobotSword2"].bActive and math.floor(hero.img[hero.currState].iFrame) == 5 then
                 Hero:ActivateAnimation(hero, "RobotSword2")
@@ -383,7 +391,7 @@ function Hero:Update(dt, cam)
         end
 
         if hero.currState == "RobotSword2" and hero.img["RobotSword2"].bFramesDone then
-            hero.img["RobotSword"].iFrame = 1 
+            hero.img["RobotSword"].iFrame = 1
         end
 
         -- Robot Shoot animation
@@ -404,7 +412,7 @@ function Hero:Update(dt, cam)
         if Laser.list then
             for i, laser in ipairs(Laser.list) do
                 if laser.type == 1 then -- hero type
-                Vec2:NewParticle(laser, "yellow", math.random(-0.1, 0.1), math.random(-0.1, 0.1), 0.0001, dt)
+                    Vec2:NewParticle(laser, "yellow", math.random(-0.1, 0.1), math.random(-0.1, 0.1), 0.0001, dt)
 
                     Laser.SetGuidedLaser(laser, dt)
 
