@@ -19,6 +19,7 @@ function NewSound(pName, pVolume, pType)
         Sound.streamList[pName].source = love.audio.newSource("sounds/" .. pName .. ".mp3", pType)
         Sound.streamList[pName].volume = pVolume
     else
+        -- static sound
         Sound.staticList[pName] = {}
         Sound.staticList[pName].name = pName
         Sound.staticList[pName].source = love.audio.newSource("sounds/" .. pName .. ".mp3", pType)
@@ -49,8 +50,8 @@ end
 function Sound.PlayStatic(pStatic)
     local currStatic = Sound.staticList[pStatic]
     if currStatic.source then
-        love.audio.play(currStatic.source)
         currStatic.source:setVolume(currStatic.volume)
+        love.audio.play(currStatic.source)
     end
 end
 
@@ -70,9 +71,14 @@ function Sound.Load()
         NewSound("laserShoot_"..i, 1, "static")
     end
     for i=1, 2 do
-        NewSound("explosion_"..i, 1, "static")
+        NewSound("explosion_"..i, 0.5, "static")
     end
     NewSound("ship_start", 0.5, "static")
+    NewSound("transform2", 0.5, "static")
+    for i=1, 5 do
+        NewSound("waste_collect_"..i, 0.3, "static")
+    end
+    
     Sound.bStreamChanged = false
     -- InitSounds(pScreens)
 end

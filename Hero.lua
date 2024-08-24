@@ -75,6 +75,9 @@ function Hero:New(x, y)
     hero.img[animName] = Hero:NewAnimation(hero.img, animName, 7, 7)
     hero.img[animName] = Vec2:NewFrameList(hero.img[animName], tileSize * 2)
 
+    -- hero.img[animName] = Hero:NewAnimation(hero.img, animName, 4, 7)
+    --  hero.img[animName] = Vec2:NewFrameList(hero.img[animName], 18, 46.5)
+
     hero.hp = 3
     hero.vx = 0
     hero.vy = 0.2
@@ -309,47 +312,44 @@ function Hero:Update(dt, cam)
     -- Engine process
     engine.x = hero.x
     engine.y = hero.y
-    -- Vec2:NewParticle(engine, "red", 0, -hero.vy, 0.001)
     Vec2:SetShrink(engine, 0.9, dt)
 
     -- Ship Start animation
     if hero.listEffect["StartGame"].bActive then
         Sound.PlayStatic("ship_start")
         hero.y = hero.y - (dt * 100)
+        Vec2:NewParticle(engine, nil, 0, -hero.vy, 0.001)
+
     else
         if Sound.StopStatic("ship_start") then
             Vec2.bStart = true
         end
 
         Hero:UpdateAnimation(hero, dt)
-        SetHeroAngle(hero, dt)
+        if not hero.bSwordTp then
+            SetHeroAngle(hero, dt)
+        end
+
         SetHeroMaxSpeed(hero)
         SetVelocity(hero, dt)
         Hero:MapCollision(hero, dt)
 
         -- New Laser
         local nearest = Vec2:GetNearest(Enemy.list, hero)
-
-        heroSpawnCDR = heroSpawnCDR - dt
-   --     print(hero.listEffect["Shoot"].bReady)
-
-        if nearest and hero.listEffect["Shoot"].bReady then
+        if not hero.bRobot and nearest and hero.listEffect["Shoot"].bReady then
             hero.listEffect["Shoot"].bActive = true
         end
-        -- print(hero.listEffect["Shoot"].iCurr)
-        --   if heroSpawnCDR <= 0 and nearest then
         if hero.listEffect["Shoot"].bActive and nearest then
-            Laser.New(1, hero, nearest)
+            Laser:New(1, hero, nearest)
             Sound.PlayStatic("laserShoot_" .. math.random(1, 6))
             hero.listEffect["Shooting"].bActive = true
             Vec2:NewParticle(hero, "yellow", math.random(-0.5, 0.5), math.random(-0.5, 0.5), math.random(1, 3), dt)
             -- local test = cam:move(200, 400)
             -- test.x = test.x + 20
-            heroSpawnCDR = maxSpawnCDR
             hero.listEffect["Shoot"].bActive = false
             hero.listEffect["Shoot"].bReady = false
             hero.listEffect["Shoot"].cdr = 0
-         end
+        end
 
         -- Dodging animation
         if hero.listEffect["Dodge"].bActive then
@@ -374,8 +374,11 @@ function Hero:Update(dt, cam)
 
         -- Transform Robot animation
         if hero.listEffect["Transform"].bActive then
+            if hero.listEffect["Transform"].bSoundReady then
+                Sound.PlayStatic("transform2")
+                hero.listEffect["Transform"].bSoundReady = false
+            end
             Vec2:NewParticle(hero, nil, math.random(-20, 20), math.random(-20, 20), 0.005, dt)
-
             -- Be invicible
             hero.bDodge = true
             if hero.img["Transform"].bFramesDone then
@@ -386,22 +389,44 @@ function Hero:Update(dt, cam)
         -- Robot Sword animation
         if hero.listEffect["RobotSword"].bActive then
             if hero.img["RobotSword"].bFramesDone then
+                hero.bSwordTp = false
                 --     hero.listEffect["RobotSword"].bActive = false
             end
             Vec2:NewParticle(hero, "green", math.random(-15, 15), math.random(-15, 15), 0.002, dt)
+
+            -- Combo Sword
             if hero.listEffect["RobotSword2"].bActive and math.floor(hero.img[hero.currState].iFrame) == 5 then
                 Hero:ActivateAnimation(hero, "RobotSword2")
             end
+
             -- Attack with tp to enemy
+            if nearest then
+                if Vec2:IsDistInferior(hero, nearest, 400) then
+                    hero.bSwordTp = true
+                    local rand = math.random(1, 3)
+                    hero.r = Vec2:GetAngle(hero, nearest)
+                    Vec2:NewParticle(hero, "green", math.random(-15, 15), -hero.vy, 0.002, dt)
+                    Vec2:PursueTarget(hero, nearest, dt, 500)
+                    --    hero.x = nearest.x + (math.random(-20, 20))
+                    --  hero.y = nearest.y + (math.random(-20, 20))    
+                end
+            end
         end
 
         if hero.currState == "RobotSword2" and hero.img["RobotSword2"].bFramesDone then
+            hero.bSwordTp = false
             hero.img["RobotSword"].iFrame = 1
         end
 
         -- Robot Shoot animation
         if hero.listEffect["RobotShoot"].bActive then
             Vec2:NewParticle(hero, "yellow", math.random(-20, 20), math.random(-20, 20), 0.005, dt)
+            if hero.currState == "RobotShoot" and hero.img["RobotShoot"].bFramesDone then
+                if nearest then
+                    Laser:New(3, hero, nearest)
+                end
+
+            end
         end
 
         -- Robot Fly animation
@@ -422,7 +447,7 @@ function Hero:Update(dt, cam)
                     Laser.SetGuidedLaser(laser, dt)
 
                     -- Hero Laser collision w/ enemies
-                    if Hero:IsCollide(laser, laser.target) then
+                    if Vec2:IsCollide(laser, laser.target) then
                         laser.target.listEffect["DamageTaken"].bActive = true
                         laser.target.hp = laser.target.hp - 1
                         if laser.target.hp <= 0 then
@@ -461,12 +486,12 @@ function Hero:Update(dt, cam)
                     if waste.bSwallow then
                         waste.sx = waste.sx - (dt * 10)
                         waste.sy = waste.sy - (dt * 10)
-                        -- Sound Effect
-                    end
 
-                    if waste.bSwallow and Hero:IsCollideHero(waste) then
-                        hero.score = hero.score + 20
-                        waste.bDelete = true
+                        if Hero:IsCollideHero(waste) then
+                            hero.score = hero.score + 20
+                            Sound.PlayStatic("waste_collect_" .. math.random(1, 5))
+                            waste.bDelete = true
+                        end
                     end
                 end
             end
@@ -514,21 +539,26 @@ function Hero:Draw()
         love.graphics.setColor(1, 0, 0)
     end
 
+    local heroAng = hero.r
+    if not hero.bSwordTp then
+        heroAng = math.rad(hero.r)
+    end
+
     if not hero.listEffect["Dash"].bActive then
         local engineBoost = 1
         if hero.bRobot then
             engineBoost = 2
         end
-        love.graphics.draw(engine.img, engine.x, engine.y, math.rad(hero.r), engine.sx * engineBoost,
-            engine.sy * engineBoost, engine.img:getWidth() / 2, engine.img:getHeight() / 2)
+        love.graphics.draw(engine.img, engine.x, engine.y, heroAng, engine.sx * engineBoost, engine.sy * engineBoost,
+            engine.img:getWidth() / 2, engine.img:getHeight() / 2)
     end
 
     local currState = hero.img[hero.currState]
     local heroImg = currState.frames[math.floor(currState.iFrame)]
     if currState.iFrameMax ~= nil then
         if currState.imgSheet and heroImg then
-            love.graphics.draw(currState.imgSheet, heroImg, hero.x, hero.y, math.rad(hero.r), hero.sx, hero.sy,
-                currState.w / 2, currState.h / 2)
+            love.graphics.draw(currState.imgSheet, heroImg, hero.x, hero.y, heroAng, hero.sx, hero.sy, currState.w / 2,
+                currState.h / 2)
         end
     else
         love.graphics.draw(currState.imgSheet, hero.x, hero.y, math.rad(hero.r), hero.sx, hero.sy, currState.w / 2,

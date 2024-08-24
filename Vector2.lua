@@ -58,8 +58,8 @@ function Vector2:IsCollide(pVec1, pVec2)
     local deltaX = pVec1.x - pVec2.x
     local deltaY = pVec1.y - pVec2.y
 
-    if math.abs(deltaX) < (pVec1.img:getWidth() + pVec2.img:getWidth()) - 20 and math.abs(deltaY) <
-        (pVec1.img:getHeight() + pVec2.img:getHeight()) - 20 then
+    if math.abs(deltaX) < (pVec1.img:getWidth() + pVec2.img:getWidth()) and math.abs(deltaY) <
+        (pVec1.img:getHeight() + pVec2.img:getHeight()) then
         return true
     end
 
@@ -80,6 +80,7 @@ function Vector2:NewTempEffect(pVec2, pEffect, pCurr, pCdrMax)
     pVec2.listEffect[pEffect] = {}
     pVec2.listEffect[pEffect].iCurr = pCurr
     pVec2.listEffect[pEffect].iMax = pCurr
+    pVec2.listEffect[pEffect].bSoundReady = true
     pVec2.listEffect[pEffect].cdrMax = pCdrMax
     pVec2.listEffect[pEffect].cdr = pCdrMax
     pVec2.listEffect[pEffect].bReady = true
@@ -103,9 +104,13 @@ function Vector2:SetTempEffects(pVec2, dt)
                 effect.cdr = effect.cdr + dt
             else
                 effect.bReady = true
+                effect.bSoundReady = true
             end
         end
     end
+end
+
+function Vector2:StopEffect(pEffect)
 end
 
 function Vector2:PursueTarget(pSrc, pDst, dt, pSpeed)
@@ -113,8 +118,8 @@ function Vector2:PursueTarget(pSrc, pDst, dt, pSpeed)
         return math.atan2(y2 - y1, x2 - x1)
     end
 
-    local dist = math.sqrt((pSrc.x - pDst.x) ^ 2 + (pSrc.y - pDst.y) ^ 2)
     local toHeroAng = math.angle(pSrc.x, pSrc.y, pDst.x, pDst.y)
+  --local toHeroAng=  Vector2:GetAngle(pSrc, pDst)
     local speed = 0
 
     if pSpeed > 0 then
@@ -285,22 +290,27 @@ function Vector2:IsOutScreen(pVec)
     return false
 end
 
-function Vector2:NewFrameList(animList, tileSize)
+function Vector2:GetAngle(pSrc, pDst)
+    if pSrc and pDst then
+        return math.atan2(pDst.y - pSrc.y, pDst.x - pSrc.x)
+    end
+end
+
+function Vector2:NewFrameList(animList, tileWidth, tileHeight)
+    if tileHeight == nil then
+        tileHeight = tileWidth
+    end
     if animList.iFrameMax == nil then
         return
     end
     local img = animList.imgSheet
-    animList.w = tileSize
-    animList.h = tileSize
+    animList.w = tileWidth
+    animList.h = tileHeight
     for i = 1, animList.iFrameMax do
-        animList.frames[i] = love.graphics.newQuad((i - 1) * tileSize, 0, tileSize, tileSize, img:getWidth(),
+        animList.frames[i] = love.graphics.newQuad((i - 1) * tileWidth, 0, tileWidth, tileHeight, img:getWidth(),
             img:getHeight())
     end
     return animList
-end
-
-function Vector2:Destroy(pIndex) -- NOT USED
-    table.remove(self.list, pIndex)
 end
 
 function Vector2:Draw()

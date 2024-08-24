@@ -131,11 +131,13 @@ function love.keypressed(pKey)
                     -- Robot shoot process
                     Hero:ActivateAnimation(hero, "RobotShoot")
                 elseif pKey == "z" then
-                    -- Spaceship transformation process
-                    if Hero:ActivateAnimation(hero, "Transform") then
-                        hero.bRobot = false
-                        hero.img["Transform"].iFrame = hero.img["Transform"].iFrameMax
-                        hero.img[hero.currState].bReverse = true
+                    if hero.currState ~= "Transform" then
+                        -- Spaceship transformation process
+                        if Hero:ActivateAnimation(hero, "Transform") then
+                            hero.bRobot = false
+                            hero.img["Transform"].iFrame = hero.img["Transform"].iFrameMax
+                            hero.img[hero.currState].bReverse = true
+                        end
                     end
                 end
             else
@@ -150,8 +152,10 @@ function love.keypressed(pKey)
                     Hero:ActivateAnimation(hero, "Dash")
                 elseif pKey == "z" then
                     -- Robot transformation process
-                    if Hero:ActivateAnimation(hero, "Transform") then
-                        hero.bRobot = true
+                    if hero.currState ~= "Transform" then
+                        if Hero:ActivateAnimation(hero, "Transform") then
+                            hero.bRobot = true
+                        end
                     end
                 end
             end

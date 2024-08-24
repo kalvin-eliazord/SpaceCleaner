@@ -9,6 +9,8 @@ Enemy.__index = Enemy
 setmetatable(Enemy, {
     __index = Vec2
 })
+Enemy.maxSpawnCDR = 4
+Enemy.spawnCDR = Enemy.maxSpawnCDR
 
 function Enemy:New(x, y)
     if not Enemy.list then
@@ -20,16 +22,16 @@ function Enemy:New(x, y)
     enem.vx = math.random(-200, 200)
     enem.vy = math.random(-200, 200)
     enem.img = love.graphics.newImage("images/enemies/enemy" .. enem.type .. ".png")
-    enem.wasteSpawn = 1
     enem.wasteMaxSpawn = math.random(1, 5)
+    enem.wasteSpawn = enem.wasteMaxSpawn
+    enem.laserMaxSpawn = math.random(4, 6)
+    enem.laserSpawn = enem.laserMaxSpawn
     enem.bArrow = false
     setmetatable(enem, self)
     table.insert(Enemy.list, enem)
 end
 
 function Enemy:Load()
-    maxSpawnCDR = 4
-    spawnCDR = maxSpawnCDR
 end
 
 function Enemy:IsCollideHero(pEnem)
@@ -52,13 +54,13 @@ function Enemy:IsCollideHero(pEnem)
 end
 
 function Enemy:Update(dt)
-    spawnCDR = spawnCDR - dt
+    Enemy.spawnCDR = Enemy.spawnCDR - dt
 
     -- Enemy Spawn
-    if math.floor(spawnCDR) < 0 then
+    if Enemy.spawnCDR <= 0 then
         local Map = require("Map").current.img
         Enemy:New(math.random(20, Map:getWidth() - 100), math.random(20, Map:getHeight() - 300))
-        spawnCDR = maxSpawnCDR + math.random(4, 6)
+        Enemy.spawnCDR = Enemy.maxSpawnCDR -- + math.random(-4, 6)
     end
 
     if Enemy.list then
@@ -76,26 +78,27 @@ function Enemy:Update(dt)
             -- Enemy collision w/ Hero
             local hero = require("Hero").hero
             if Enemy:IsCollideHero(enem) and not hero.bDodge then
-                hero.hp = hero.hp - 1
+                if not hero.listEffect["RobotSword"].bActive then
+                    hero.hp = hero.hp - 1
+                    hero.listEffect["DamageTaken"].bActive = true
+                end
                 enem.hp = enem.hp - 1
-                Explosion:New(hero.x, hero.y, dt)
-                hero.listEffect["DamageTaken"].bActive = true
+                Explosion:New(enem.x, enem.y, dt)
                 enem.listEffect["DamageTaken"].bActive = true
             end
 
             -- Enemy Shrinking
-            Enemy:SetShrink(enem, 1,dt)
+            Enemy:SetShrink(enem, 1, dt)
 
             -- Enemy rotation
-            enem.r = GetAngle(enem, hero)
+            enem.r = Vec2:GetAngle(enem, hero)
 
             -- Enemy logic based on type
             if enem.type == 5 or enem.type == 2 then
-                enemSpawnCDR = enemSpawnCDR - dt
-                if enemSpawnCDR <= 0 then
-                    Laser.New(2, enem, hero)
-                    Vec2:NewParticle(vortex, "red", math.random(-20, 20), math.random(-20, 20), 0.01, dt)
-                    enemSpawnCDR = maxSpawnCDR
+                enem.laserSpawn = enem.laserSpawn - dt
+                if enem.laserSpawn <= 0 then
+                    Laser:New(2, enem, hero)
+                    enem.laserSpawn = enem.laserMaxSpawn
                 end
 
             elseif enem.type == 6 then
