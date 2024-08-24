@@ -13,8 +13,8 @@ function Laser:New(pType, pSrc, pDst)
     end
 
     local laser = Vec2:New(pSrc.x, pSrc.y)
-    -- laser.x = pSrc.x
-    -- laser.y = pSrc.y
+    laser.x = pSrc.x
+    laser.y = pSrc.y
     laser.r = pSrc.r
     laser.sx = 1
     laser.sy = 1
@@ -52,8 +52,9 @@ function Laser:NewAnimation(pVec2Img, pAnimName, pFrameMax, pFrameV)
 end
 
 function Laser.SetGuidedLaser(pLaser, dt)
-    --  if not pLaser.target then return end
-    -- local dist = math.sqrt((pLaser.x - pLaser.target.x) ^ 2 + (pLaser.y - pLaser.target.y) ^ 2)
+    if not pLaser.target then
+        return
+    end
     local toTargetAng = GetAngle(pLaser, pLaser.target)
 
     local heroSpeed = 400
@@ -88,23 +89,6 @@ function Laser.SetLaser(pLaser, dt)
 end
 
 function Laser.Load()
- 
-end
-
-function OnScreen(pNearest)
-    if not pNearest then
-        return false
-    end
-    if pNearest.x >= 0 and pNearest.x <= w and pNearest.y >= 0 and pNearest.y <= h then
-        return true
-    end
-    return false
-end
-
-function table.clear(t)
-    for i = #t, 1, -1 do
-        table.remove(t, i)
-    end
 end
 
 function Laser.Update(dt)
@@ -115,9 +99,13 @@ function Laser.Update(dt)
             if laser.vx == 0 or laser.vy == 0 then
                 laser.bDelete = true
             end
-            
+
             -- Robot Blast
             if laser.type == 3 then
+            end
+
+            if Vec2:IsOutScreen(laser) then
+                laser.bDelete = true
             end
 
             if laser.bDelete then

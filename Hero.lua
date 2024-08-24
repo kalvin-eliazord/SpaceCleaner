@@ -353,6 +353,10 @@ function Hero:Update(dt, cam)
 
         -- Dodging animation
         if hero.listEffect["Dodge"].bActive then
+            if hero.listEffect["Dodge"].bSoundReady then
+                Sound.PlayStatic("dodge")
+                hero.listEffect["Dodge"].bSoundReady = false
+            end
             Vec2:NewParticle(hero, nil, math.random(-20, 20), math.random(-20, 20), 0.005, dt)
             hero.sx = hero.sx + dt
             hero.sy = hero.sy + dt
@@ -386,31 +390,23 @@ function Hero:Update(dt, cam)
             end
         end
 
+        if hero.img["RobotSword"].bFramesDone then
+            hero.bSwordTp = false
+        end
+
         -- Robot Sword animation
         if hero.listEffect["RobotSword"].bActive then
-            if hero.img["RobotSword"].bFramesDone then
-                hero.bSwordTp = false
-                --     hero.listEffect["RobotSword"].bActive = false
-            end
             Vec2:NewParticle(hero, "green", math.random(-15, 15), math.random(-15, 15), 0.002, dt)
+            --Vec2:SetShrink(hero, 1, dt)
 
             -- Combo Sword
-            if hero.listEffect["RobotSword2"].bActive and math.floor(hero.img[hero.currState].iFrame) == 5 then
+            if hero.listEffect["RobotSword2"].bActive and math.floor(hero.img["RobotSword"].iFrame) == 5 then
                 Hero:ActivateAnimation(hero, "RobotSword2")
             end
 
             -- Attack with tp to enemy
-            if nearest then
-                if Vec2:IsDistInferior(hero, nearest, 400) then
-                    hero.bSwordTp = true
-                    local rand = math.random(1, 3)
-                    hero.r = Vec2:GetAngle(hero, nearest)
-                    Vec2:NewParticle(hero, "green", math.random(-15, 15), -hero.vy, 0.002, dt)
-                    Vec2:PursueTarget(hero, nearest, dt, 500)
-                    --    hero.x = nearest.x + (math.random(-20, 20))
-                    --  hero.y = nearest.y + (math.random(-20, 20))    
-                end
-            end
+            --hero.bSword = true
+            Vec2:NewParticle(hero, "green", math.random(-15, 15), -hero.vy, 0.002, dt)
         end
 
         if hero.currState == "RobotSword2" and hero.img["RobotSword2"].bFramesDone then
@@ -539,17 +535,12 @@ function Hero:Draw()
         love.graphics.setColor(1, 0, 0)
     end
 
-    local heroAng = hero.r
-    if not hero.bSwordTp then
-        heroAng = math.rad(hero.r)
-    end
-
     if not hero.listEffect["Dash"].bActive then
         local engineBoost = 1
         if hero.bRobot then
             engineBoost = 2
         end
-        love.graphics.draw(engine.img, engine.x, engine.y, heroAng, engine.sx * engineBoost, engine.sy * engineBoost,
+        love.graphics.draw(engine.img, engine.x, engine.y,  math.rad(hero.r), engine.sx * engineBoost, engine.sy * engineBoost,
             engine.img:getWidth() / 2, engine.img:getHeight() / 2)
     end
 
@@ -557,7 +548,7 @@ function Hero:Draw()
     local heroImg = currState.frames[math.floor(currState.iFrame)]
     if currState.iFrameMax ~= nil then
         if currState.imgSheet and heroImg then
-            love.graphics.draw(currState.imgSheet, heroImg, hero.x, hero.y, heroAng, hero.sx, hero.sy, currState.w / 2,
+            love.graphics.draw(currState.imgSheet, heroImg, hero.x, hero.y,  math.rad(hero.r), hero.sx, hero.sy, currState.w / 2,
                 currState.h / 2)
         end
     else

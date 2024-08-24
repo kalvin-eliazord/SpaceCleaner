@@ -89,7 +89,6 @@ end
 function Vector2:SetTempEffects(pVec2, dt)
     for i, effectName in pairs(pVec2.listEffectName) do
         local effect = pVec2.listEffect[effectName]
-
         if effect.bActive and effect.bReady then
             effect.iCurr = effect.iCurr - dt
             if effect.iCurr <= 0 then
@@ -114,6 +113,8 @@ function Vector2:StopEffect(pEffect)
 end
 
 function Vector2:PursueTarget(pSrc, pDst, dt, pSpeed)
+    if not pSrc or not pDst then return end 
+    
     function math.angle(x1, y1, x2, y2)
         return math.atan2(y2 - y1, x2 - x1)
     end

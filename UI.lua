@@ -183,13 +183,11 @@ function UI:Draw()
                 end
             end
             love.graphics.setColor(255, 255, 255)
-
         end
     end
 
     -- Score UI 
     love.graphics.print("Score: "..Hero.hero.score, 430, 10)
-
 end
 
 return UI

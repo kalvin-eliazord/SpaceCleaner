@@ -56,10 +56,28 @@ end
 function Enemy:Update(dt)
     Enemy.spawnCDR = Enemy.spawnCDR - dt
 
+    local hero = require("Hero").hero
+
     -- Enemy Spawn
     if Enemy.spawnCDR <= 0 then
         local Map = require("Map").current.img
-        Enemy:New(math.random(20, Map:getWidth() - 100), math.random(20, Map:getHeight() - 300))
+        local randPos = {}
+        randPos.x = math.random(20, Map:getWidth() - 100)
+        randPos.y = math.random(20, Map:getHeight() - 300)
+        local distFromHero = 200
+        if Vec2:IsDistInferior(hero, randPos, distFromHero) then
+            if randPos.x + distFromHero >= MAP_WIDTH then
+                randPos.x = randPos.x - distFromHero
+            else
+                randPos.x = randPos.x + distFromHero
+            end
+            if randPos.y + distFromHero >= MAP_HEIGHT then
+                randPos.y = randPos.y - distFromHero
+            else
+                randPos.y = randPos.y + distFromHero
+            end
+        end
+        Enemy:New(randPos.x, randPos.y)
         Enemy.spawnCDR = Enemy.maxSpawnCDR -- + math.random(-4, 6)
     end
 
@@ -76,7 +94,6 @@ function Enemy:Update(dt)
             end
 
             -- Enemy collision w/ Hero
-            local hero = require("Hero").hero
             if Enemy:IsCollideHero(enem) and not hero.bDodge then
                 if not hero.listEffect["RobotSword"].bActive then
                     hero.hp = hero.hp - 1
@@ -132,19 +149,18 @@ function Enemy:Update(dt)
             if laser.type == 2 then -- enemy type
                 Laser.SetLaser(laser, dt)
                 Vec2:NewParticle(laser, "red", math.random(-0.1, 0.1), math.random(-0.1, 0.1), 0.0001, dt)
-                -- Enemy Laser to Hero explosion
-                if Enemy:IsCollideHero(laser) and not hero.bDodge then
+
+                -- Enemy Laser to Hero
+                if Enemy:IsCollideHero(laser) and hero.listEffect["RobotSword"].bActive then
+                    laser.vy = laser.vy * -1
+                    laser.vx = laser.vx * -1
+                elseif Enemy:IsCollideHero(laser) and not hero.bDodge then
                     laser.bDelete = true
                     Explosion:New(hero.x + love.math.random(-2, 2), hero.y + love.math.random(-2, 2))
                     hero.hp = hero.hp - 1
                     hero.listEffect["DamageTaken"].bActive = true
                 end
-
-                if laser.bDelete then
-                    table.remove(Laser.list, i)
-                end
             end
-
         end
     end
 

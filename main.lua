@@ -123,8 +123,12 @@ function love.keypressed(pKey)
                 elseif pKey == "a" then
                     -- Robot sword process
                     if hero.currState == "RobotSword" then
+                        Sound.PlayStatic("RobotSword_"..math.random(1,2))
                         hero.listEffect["RobotSword2"].bActive = true
                     else
+                        if hero.listEffect["RobotSword"].bReady then
+                            Sound.PlayStatic("RobotSword_"..math.random(1,2))
+                        end
                         Hero:ActivateAnimation(hero, "RobotSword")
                     end
                 elseif pKey == "e" then
