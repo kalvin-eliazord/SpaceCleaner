@@ -40,43 +40,43 @@ function Hero:New(x, y)
     -- Dodge animation
     animName = "Dodge"
     hero.img[animName] = Hero:NewAnimation(hero.img, animName, 7, 5)
-    hero.img[animName] = Vec2:NewFrameList(hero.img[animName], tileSize)
+    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], tileSize)
 
     -- Tilt animation
     animName = "Tilt"
     hero.img[animName] = Hero:NewAnimation(hero.img, animName, 5, 6)
-    hero.img[animName] = Vec2:NewFrameList(hero.img[animName], tileSize)
+    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], tileSize)
 
     -- Transform animation
     animName = "Transform"
     hero.img[animName] = Hero:NewAnimation(hero.img, animName, 7, 7)
-    hero.img[animName] = Vec2:NewFrameList(hero.img[animName], tileSize * 2)
+    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], tileSize * 2)
 
     -- Robot Idle animation
     animName = "RobotIdle"
     hero.img[animName] = Hero:NewAnimation(hero.img, animName, 7, 7)
-    hero.img[animName] = Vec2:NewFrameList(hero.img[animName], tileSize * 2)
+    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], tileSize * 2)
 
     -- Robot Sword animation
     animName = "RobotSword"
     hero.img[animName] = Hero:NewAnimation(hero.img, animName, 7, 7)
-    hero.img[animName] = Vec2:NewFrameList(hero.img[animName], tileSize * 2)
+    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], tileSize * 2)
     animName = "RobotSword2"
     hero.img[animName] = Hero:NewAnimation(hero.img, animName, 5, 5)
-    hero.img[animName] = Vec2:NewFrameList(hero.img[animName], tileSize * 2)
+    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], tileSize * 2)
 
     -- Robot Fly animation
     animName = "RobotFly"
     hero.img[animName] = Hero:NewAnimation(hero.img, animName, 5, 7)
-    hero.img[animName] = Vec2:NewFrameList(hero.img[animName], tileSize * 2)
+    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], tileSize * 2)
 
     -- Robot Shoot animation
     animName = "RobotShoot"
     hero.img[animName] = Hero:NewAnimation(hero.img, animName, 7, 7)
-    hero.img[animName] = Vec2:NewFrameList(hero.img[animName], tileSize * 2)
+    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], tileSize * 2)
 
     -- hero.img[animName] = Hero:NewAnimation(hero.img, animName, 4, 7)
-    --  hero.img[animName] = Vec2:NewFrameList(hero.img[animName], 18, 46.5)
+    --  hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], 18, 46.5)
 
     hero.hp = 3
     hero.vx = 0
@@ -397,7 +397,7 @@ function Hero:Update(dt, cam)
         -- Robot Sword animation
         if hero.listEffect["RobotSword"].bActive then
             Vec2:NewParticle(hero, "green", math.random(-15, 15), math.random(-15, 15), 0.002, dt)
-            --Vec2:SetShrink(hero, 1, dt)
+            -- Vec2:SetShrink(hero, 1, dt)
 
             -- Combo Sword
             if hero.listEffect["RobotSword2"].bActive and math.floor(hero.img["RobotSword"].iFrame) == 5 then
@@ -405,7 +405,7 @@ function Hero:Update(dt, cam)
             end
 
             -- Attack with tp to enemy
-            --hero.bSword = true
+            -- hero.bSword = true
             Vec2:NewParticle(hero, "green", math.random(-15, 15), -hero.vy, 0.002, dt)
         end
 
@@ -503,10 +503,16 @@ function AsteroidCollision(dt)
         for i = #Asteroid.list, 1, -1 do
             local asteroid = Asteroid.list[i]
             if Hero:IsCollideHero(asteroid) then
-                asteroid.x = asteroid.x
-                asteroid.y = asteroid.y
-                asteroid.vx = asteroid.vx * -1
-                asteroid.vy = asteroid.vy * -1
+                if hero.listEffect["RobotSword"] or hero.listEffect["RobotSword2"] then
+                    asteroid.vx = asteroid.vx * -2
+                    asteroid.vy = asteroid.vy * -2
+                else
+                    asteroid.x = asteroid.x
+                    asteroid.y = asteroid.y
+                    asteroid.vx = asteroid.vx * -1
+                    asteroid.vy = asteroid.vy * -1
+                end
+
                 -- New Effect on ast
                 if not asteroid.listEffect["PushAst"] then
                     Vec2:NewTempEffect(asteroid, "PushAst", 1, 0)
@@ -540,16 +546,16 @@ function Hero:Draw()
         if hero.bRobot then
             engineBoost = 2
         end
-        love.graphics.draw(engine.img, engine.x, engine.y,  math.rad(hero.r), engine.sx * engineBoost, engine.sy * engineBoost,
-            engine.img:getWidth() / 2, engine.img:getHeight() / 2)
+        love.graphics.draw(engine.img, engine.x, engine.y, math.rad(hero.r), engine.sx * engineBoost,
+            engine.sy * engineBoost, engine.img:getWidth() / 2, engine.img:getHeight() / 2)
     end
 
     local currState = hero.img[hero.currState]
     local heroImg = currState.frames[math.floor(currState.iFrame)]
     if currState.iFrameMax ~= nil then
         if currState.imgSheet and heroImg then
-            love.graphics.draw(currState.imgSheet, heroImg, hero.x, hero.y,  math.rad(hero.r), hero.sx, hero.sy, currState.w / 2,
-                currState.h / 2)
+            love.graphics.draw(currState.imgSheet, heroImg, hero.x, hero.y, math.rad(hero.r), hero.sx, hero.sy,
+                currState.w / 2, currState.h / 2)
         end
     else
         love.graphics.draw(currState.imgSheet, hero.x, hero.y, math.rad(hero.r), hero.sx, hero.sy, currState.w / 2,

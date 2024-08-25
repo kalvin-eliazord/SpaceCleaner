@@ -30,7 +30,7 @@ function Laser:New(pType, pSrc, pDst)
         local animName = "RobotShootBlast"
         laser.img = {}
         laser.img[animName] = Laser:NewAnimation(laser.img, animName, 4, 7)
-        laser.img[animName] = Vec2:NewFrameList(laser.img[animName], 18, 46.5)
+        laser.img[animName] = Vec2:NewLineFrameList(laser.img[animName], 18, 46.5)
     else
         laser.img = love.graphics.newImage("images/lasers/laser" .. pType .. ".png")
         laser.imgGlow = love.graphics.newImage("images/lasers/laser" .. pType .. "_glow.png")

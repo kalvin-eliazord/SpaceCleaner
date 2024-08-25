@@ -21,12 +21,15 @@ function Enemy:New(x, y)
     enem.type = math.random(1, 6)
     enem.vx = math.random(-200, 200)
     enem.vy = math.random(-200, 200)
+    enem.sx = 0.1
+    enem.sy = 0.1
     enem.img = love.graphics.newImage("images/enemies/enemy" .. enem.type .. ".png")
     enem.wasteMaxSpawn = math.random(1, 5)
     enem.wasteSpawn = enem.wasteMaxSpawn
     enem.laserMaxSpawn = math.random(4, 6)
     enem.laserSpawn = enem.laserMaxSpawn
     enem.bArrow = false
+    enem.bReady = false
     setmetatable(enem, self)
     table.insert(Enemy.list, enem)
 end
@@ -58,86 +61,74 @@ function Enemy:Update(dt)
 
     local hero = require("Hero").hero
 
-    -- Enemy Spawn
-    if Enemy.spawnCDR <= 0 then
-        local Map = require("Map").current.img
-        local randPos = {}
-        randPos.x = math.random(20, Map:getWidth() - 100)
-        randPos.y = math.random(20, Map:getHeight() - 300)
-        local distFromHero = 200
-        if Vec2:IsDistInferior(hero, randPos, distFromHero) then
-            if randPos.x + distFromHero >= MAP_WIDTH then
-                randPos.x = randPos.x - distFromHero
-            else
-                randPos.x = randPos.x + distFromHero
-            end
-            if randPos.y + distFromHero >= MAP_HEIGHT then
-                randPos.y = randPos.y - distFromHero
-            else
-                randPos.y = randPos.y + distFromHero
-            end
-        end
-        Enemy:New(randPos.x, randPos.y)
-        Enemy.spawnCDR = Enemy.maxSpawnCDR -- + math.random(-4, 6)
-    end
-
     if Enemy.list then
         for i = #Enemy.list, 1, -1 do
             local enem = Enemy.list[i]
             Enemy:NewTempEffect(enem, "DamageTaken", 1, 0)
 
-            -- Waste Spawn by Enemy
-            enem.wasteSpawn = enem.wasteSpawn - dt
-            if enem.wasteSpawn <= 0 then
-                Waste:New(enem.x, enem.y)
-                enem.wasteSpawn = enem.wasteMaxSpawn
-            end
-
-            -- Enemy collision w/ Hero
-            if Enemy:IsCollideHero(enem) and not hero.bDodge then
-                if not hero.listEffect["RobotSword"].bActive then
-                    hero.hp = hero.hp - 1
-                    hero.listEffect["DamageTaken"].bActive = true
+            if not enem.bReady then
+                if math.floor(enem.sx) ~= 1 then
+                    enem.sx = enem.sx + dt
+                    enem.sy = enem.sy + dt
+                    Vec2:NewParticle(enem, "red",math.random(-20, 20), math.random(-20, 20), 0.005, dt )
+                else
+                    enem.bReady = true
                 end
-                enem.hp = enem.hp - 1
-                Explosion:New(enem.x, enem.y, dt)
-                enem.listEffect["DamageTaken"].bActive = true
-            end
-
-            -- Enemy Shrinking
-            Enemy:SetShrink(enem, 1, dt)
-
-            -- Enemy rotation
-            enem.r = Vec2:GetAngle(enem, hero)
-
-            -- Enemy logic based on type
-            if enem.type == 5 or enem.type == 2 then
-                enem.laserSpawn = enem.laserSpawn - dt
-                if enem.laserSpawn <= 0 then
-                    Laser:New(2, enem, hero)
-                    enem.laserSpawn = enem.laserMaxSpawn
+            else
+                -- Waste Spawn by Enemy
+                enem.wasteSpawn = enem.wasteSpawn - dt
+                if enem.wasteSpawn <= 0 then
+                    Waste:New(enem.x, enem.y)
+                    enem.wasteSpawn = enem.wasteMaxSpawn
                 end
 
-            elseif enem.type == 6 then
-                Enemy:PursueTarget(enem, hero, dt, 200)
-            elseif enem.type == 4 then
-                Enemy:PursueTarget(enem, hero, dt, 0)
-            end
-
-            Enemy:MapCollision(enem, dt)
-
-            -- New Explosion
-            if enem.hp <= 0 then
-                for j = 1, 3 do
-                    Explosion:New(enem.x + love.math.random(-15, 15), enem.y + love.math.random(-10, 10))
+                -- Enemy collision w/ Hero
+                if Enemy:IsCollideHero(enem) and not hero.bDodge then
+                    if not hero.listEffect["RobotSword"].bActive then
+                        hero.hp = hero.hp - 1
+                        hero.listEffect["DamageTaken"].bActive = true
+                    end
+                    enem.hp = enem.hp - 1
+                    Explosion:New(enem.x, enem.y, dt)
+                    enem.listEffect["DamageTaken"].bActive = true
                 end
-                enem.bDelete = true
+
+                -- Enemy Shrinking
+                Enemy:SetShrink(enem, 1, dt)
+
+                -- Enemy rotation
+                enem.r = Vec2:GetAngle(enem, hero)
+
+                -- Enemy logic based on type
+                if enem.type == 5 or enem.type == 2 then
+                    enem.laserSpawn = enem.laserSpawn - dt
+                    if enem.laserSpawn <= 0 then
+                        Laser:New(2, enem, hero)
+                        enem.laserSpawn = enem.laserMaxSpawn
+                    end
+
+                elseif enem.type == 6 then
+                    Enemy:PursueTarget(enem, hero, dt, 200)
+                elseif enem.type == 4 then
+                    Enemy:PursueTarget(enem, hero, dt, 0)
+                end
+
+                Enemy:MapCollision(enem, dt)
+
+                -- New Explosion
+                if enem.hp <= 0 then
+                    for j = 1, 3 do
+                        Explosion:New(enem.x + love.math.random(-15, 15), enem.y + love.math.random(-10, 10))
+                    end
+                    enem.bDelete = true
+                end
+
+                -- Delete Enemy
+                if enem.bDelete and not enem.bArrow then
+                    table.remove(Enemy.list, i)
+                end
             end
 
-            -- Delete Enemy
-            if enem.bDelete and not enem.bArrow then
-                table.remove(Enemy.list, i)
-            end
         end
 
     end

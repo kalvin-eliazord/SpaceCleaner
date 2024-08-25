@@ -1,5 +1,6 @@
 -- Imports
 local Vec2 = require("Vector2")
+local Enemy = require("Enemy")
 
 local Vortex = {}
 Vortex.__index = Vortex
@@ -17,13 +18,13 @@ function Vortex:New(x, y)
     vortex.currState = animName
     vortex.vx = 0
     vortex.vy = 0
-    vortex.sx = 0.1
-    vortex.sy = 0.1
+    vortex.sx = 0
+    vortex.sy = 0
     vortex.bReady = false
 
     -- Vortex Idle animation
-    vortex.img[animName] = Vec2:NewAnimation(vortex.img, animName, 6, 7)
-    vortex.img[animName] = Vec2:NewFrameList(vortex.img[animName], tileSize)
+    vortex.img[animName] = Vec2:NewAnimation(vortex.img, animName, 6, 15)
+    vortex.img[animName] = Vec2:NewLineFrameList(vortex.img[animName], tileSize)
 
     setmetatable(vortex, self)
     table.insert(Vortex.list, vortex)
@@ -62,34 +63,33 @@ function Vortex:Update(dt)
         for i = #Vortex.list, 1, -1 do
             local vortex = Vortex.list[i]
 
-            if not vortex.bReady and math.floor(vortex.sx) ~= 1 then
-                vortex.sx = vortex.sx + dt
-                vortex.sy = vortex.sy + dt
+            if not vortex.bReady then
+                if math.floor(vortex.sx) ~= 1 then
+                    vortex.sx = vortex.sx + dt
+                    vortex.sy = vortex.sy + dt
+                else
+                    vortex.bReady = true
+                end
+
             else
-                vortex.bReady = true
-            end
+                -- Enemy Spawn
+                if Enemy.spawnCDR <= 0 then
+                    local Map = require("Map").current.img
+                    Enemy:New(vortex.x + math.random(-20, 20), vortex.y+ math.random(-20, 20))
+                    Enemy.spawnCDR = Enemy.maxSpawnCDR
+                end
 
-            if not Vortex.listEffect["NewVortex"].bReady then
-                --     vortex.bDelete = true
-            end
+                -- Vortex animation
+                Vec2:SetShrink(vortex, 0.5, dt)
 
-            -- Vortex animation
-            if vortex.bReady then
-                Vec2:SetShrink(vortex,0.5, dt)
+                -- Delete Vortex
+                if vortex.bDelete then
+                    table.remove(Vortex.list, i)
+                end
             end
-         --   vortex.r = vortex.r + dt
+            vortex.r = vortex.r + dt
             Vec2:UpdateAnimation(vortex, dt)
-            local color = "green"
-            local nbColor = math.random(1, 2)
-            if nbColor == 1 then
-                color = "blue"
-            end
-            Vec2:NewParticle(vortex, color, math.random(-20, 20), math.random(-20, 20), 0.01,dt)
-
-            -- Delete Vortex
-            if vortex.bDelete then
-                table.remove(Vortex.list, i)
-            end
+  
         end
     end
 end
@@ -100,8 +100,8 @@ function Vortex:Draw()
             local currState = vortex.img[vortex.currState]
             local vortexImg = currState.frames[math.floor(currState.iFrame)]
             if currState.imgSheet and vortexImg then
-                love.graphics.draw(currState.imgSheet, vortexImg, vortex.x, vortex.y, vortex.r, vortex.sx*2, vortex.sy,
-                    currState.w / 2, currState.h / 2)
+                love.graphics.draw(currState.imgSheet, vortexImg, vortex.x, vortex.y, vortex.r, vortex.sx * 1.5,
+                    vortex.sy / 1.5, currState.w / 2, currState.h / 2)
             end
         end
     end

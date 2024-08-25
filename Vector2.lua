@@ -25,26 +25,22 @@ function Vector2:New(x, y)
     return vec2
 end
 
-function Vector2:SetShrink(pVec2, pDtV,dt)
+function Vector2:SetShrink(pVec2, pDtV, dt)
     -- Enlarge
     if not pVec2.bShrink then
         if pVec2.sx > pVec2.sxMax then
             pVec2.bShrink = true
         end
-        pVec2.sx = pVec2.sx + (dt*pDtV)
-        pVec2.sy = pVec2.sy + (dt*pDtV)
+        pVec2.sx = pVec2.sx + (dt * pDtV)
+        pVec2.sy = pVec2.sy + (dt * pDtV)
     else
-    -- Shrink
+        -- Shrink
         if pVec2.sx < pVec2.sxMin then
             pVec2.bShrink = false
         end
-        pVec2.sx = pVec2.sx - (dt*pDtV)
-        pVec2.sy = pVec2.sy - (dt*pDtV)
+        pVec2.sx = pVec2.sx - (dt * pDtV)
+        pVec2.sy = pVec2.sy - (dt * pDtV)
     end
-end
-
-function Vector2:SetImage(pFolder, pImg) -- USE THAT
-    self.img = love.graphics.newImage(pFolder .. pImg)
 end
 
 function Vector2:IsCollide(pVec1, pVec2)
@@ -113,14 +109,16 @@ function Vector2:StopEffect(pEffect)
 end
 
 function Vector2:PursueTarget(pSrc, pDst, dt, pSpeed)
-    if not pSrc or not pDst then return end 
-    
+    if not pSrc or not pDst then
+        return
+    end
+
     function math.angle(x1, y1, x2, y2)
         return math.atan2(y2 - y1, x2 - x1)
     end
 
     local toHeroAng = math.angle(pSrc.x, pSrc.y, pDst.x, pDst.y)
-  --local toHeroAng=  Vector2:GetAngle(pSrc, pDst)
+    -- local toHeroAng=  Vector2:GetAngle(pSrc, pDst)
     local speed = 0
 
     if pSpeed > 0 then
@@ -139,7 +137,9 @@ function Vector2:PursueTarget(pSrc, pDst, dt, pSpeed)
 end
 
 function Vector2:SetVelocity(pVec, dt)
-    if not pVec then return end
+    if not pVec then
+        return
+    end
     pVec.x = pVec.x + pVec.vx + dt
     pVec.y = pVec.y + pVec.vy + dt
 end
@@ -202,22 +202,22 @@ function Vector2:MapCollision(pVec2, dt)
     if pVec2.x < 0 then
         pVec2.x = Map:getWidth() - 100
         for i = 1, iMax do
-            Vector2:NewParticle(pVec2, nil,0, math.random(-20, 20), math.random(1,3),dt)
+            Vector2:NewParticle(pVec2, nil, 0, math.random(-20, 20), math.random(1, 3), dt)
         end
     elseif pVec2.x > Map:getWidth() then
         pVec2.x = 10
         for i = 1, iMax do
-            Vector2:NewParticle(pVec2,nil, 0, math.random(-20, 20), math.random(1,3),dt)
+            Vector2:NewParticle(pVec2, nil, 0, math.random(-20, 20), math.random(1, 3), dt)
         end
     elseif pVec2.y < 0 then
         pVec2.y = Map:getHeight() - 90
         for i = 1, iMax do
-            Vector2:NewParticle(pVec2, nil,math.random(-20, 20), 0,math.random(1,3), dt)
+            Vector2:NewParticle(pVec2, nil, math.random(-20, 20), 0, math.random(1, 3), dt)
         end
     elseif pVec2.y > Map:getHeight() then
         pVec2.y = 10
         for i = 1, iMax do
-            Vector2:NewParticle(pVec2,nil, math.random(-20, 20), 0,math.random(1,3), dt)
+            Vector2:NewParticle(pVec2, nil, math.random(-20, 20), 0, math.random(1, 3), dt)
         end
     end
 end
@@ -235,20 +235,23 @@ function Vector2:NewAnimation(pVec2Img, pAnimName, pFrameMax, pFrameV)
 end
 
 function Vector2:UpdateAnimation(pVec2, dt)
+    if not pVec2.currState then
+        return
+    end
     local currState = pVec2.img[pVec2.currState]
-    if currState.iFrameMax ~= nil then
+    if currState and currState.iFrameMax ~= nil then
         if currState.bReverse then
             currState.iFrame = currState.iFrame - (dt * currState.frameV)
             if math.floor(currState.iFrame) == 1 then
-                --currState.bFramesDone = true
-                --currState.bReverse = false
+                -- currState.bFramesDone = true
+                -- currState.bReverse = false
                 currState.iFrame = 7
             end
         else
             currState.iFrame = currState.iFrame + (dt * currState.frameV)
             if math.floor(currState.iFrame) == currState.iFrameMax then
                 currState.iFrame = 1
-                --currState.bFramesDone = true
+                -- currState.bFramesDone = true
             end
         end
     end
@@ -268,15 +271,16 @@ function Vector2:GetNearest(pListDst, pSrc)
     end
     local nearest = false
     local oldDist = 99999
-    for i, curr in ipairs(pListDst) do
-        local currDist = math.sqrt((pSrc.x - curr.x) ^ 2 + (pSrc.y - curr.y) ^ 2)
-        -- Shoot enemy only when they are visible
-        if currDist < 400 then
-            if currDist < oldDist then
+    for i, currNearest in ipairs(pListDst) do
+        if currNearest.bReady then
+            local currDist = math.sqrt((pSrc.x - currNearest.x) ^ 2 + (pSrc.y - currNearest.y) ^ 2)
+            -- Shoot enemy only when they are visible
+            if currDist < 400 and currDist < oldDist then
                 oldDist = currDist
-                nearest = curr
+                nearest = currNearest
             end
         end
+
     end
 
     return nearest
@@ -297,7 +301,7 @@ function Vector2:GetAngle(pSrc, pDst)
     end
 end
 
-function Vector2:NewFrameList(animList, tileWidth, tileHeight)
+function Vector2:NewLineFrameList(animList, tileWidth, tileHeight)
     if tileHeight == nil then
         tileHeight = tileWidth
     end
@@ -314,21 +318,44 @@ function Vector2:NewFrameList(animList, tileWidth, tileHeight)
     return animList
 end
 
+function Vector2:NewFrameList(animList, tileWidth, tileHeight)
+    if tileHeight == nil then
+        tileHeight = tileWidth
+    end
+    if animList.iFrameMax == nil or animList.rowMax == nil then
+        print("animList iFrameMax or roMax MISSING")
+        return
+    end
+
+    local img = animList.imgSheet
+    animList.w = tileWidth
+    animList.h = tileHeight
+    for j = 1, animList.rowMax do
+        for i = 1, animList.iFrameMax do
+            animList.frames[j][i] = love.graphics.newQuad((i - 1) * tileWidth, (j - 1) * tileHeight, tileWidth,
+                tileHeight, img:getWidth(), img:getHeight())
+            if j == animList.rowMax and animList.bLastRowDifferent and i == animList.iLastColMax then
+                return animList
+            end
+        end
+    end
+    return animList
+end
+
 function Vector2:Draw()
     if Vector2.particleList then
         for i, particle in ipairs(Vector2.particleList) do
-              --  if particle.bExplosion then
-                if particle.color == "yellow" then
-                    love.graphics.setColor(1, 1, 0)
-                elseif particle.color == "blue" then
-                    love.graphics.setColor(0, 1, 1)
-                elseif particle.color == "green" then
-                    love.graphics.setColor(64/255, 30, 1)
-                elseif particle.color == "red" then
-                    love.graphics.setColor(1,0, 0)
-                end
+            if particle.color == "yellow" then
+                love.graphics.setColor(1, 1, 0)
+            elseif particle.color == "blue" then
+                love.graphics.setColor(0, 1, 1)
+            elseif particle.color == "green" then
+                love.graphics.setColor(64 / 255, 30, 1)
+            elseif particle.color == "red" then
+                love.graphics.setColor(1, 0, 0)
+            end
 
-                love.graphics.rectangle("fill", particle.x, particle.y, particle.w, particle.h)
+            love.graphics.rectangle("fill", particle.x, particle.y, particle.w, particle.h)
             love.graphics.setColor(255, 255, 255)
         end
     end
