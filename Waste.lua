@@ -47,18 +47,8 @@ function Waste:New(pX, pY)
     table.insert(Waste.list, waste)
 end
 
-function WasteInit()
-    if not Waste.imgList then
-        Waste.imgList = {}
-    end
-
-    for i = 1, 9 do
-        Waste.imgList[i] = love.graphics.newImage("images/wastes/waste (" .. i .. ").png")
-    end
-end
-
 function Waste:Load()
-    WasteInit()
+    Vec2:NewImgList(Waste, "wastes/waste", 9)
     Vec2:NewTempEffect(Waste, "NewWasteTitle", 0.01, 5)
     Vec2:NewTempEffect(Waste, "NewWasteGame", 0.1, 4)
 end
@@ -100,6 +90,13 @@ function Waste:Update(pGame, dt)
 
             waste.r = waste.r + (waste.vr * dt)
 
+            -- Swallow animation
+            if waste.bSwallow then
+                -- waste Shrinking
+                waste.sx = waste.sx - (dt * 10)
+                waste.sy = waste.sy - (dt * 10)
+            end
+
             if Waste:IsOutScreen(waste) then
                 waste.bDelete = true
             end
@@ -110,6 +107,20 @@ function Waste:Update(pGame, dt)
             end
         end
     end
+end
+
+function Waste.swallow(pSrc, waste)
+    -- Waste cleaning process
+    if Vec2:IsDistInferior(waste, pSrc, waste.dist) then
+        Vec2:PursueTarget(waste, Hero.hero, dt, 250)
+        waste.bSwallow = true
+        if Hero:IsCollideHero(waste) then
+            hero.score = hero.score + 20
+            Sound.PlayStatic("waste_collect_" .. math.random(1, 5))
+            waste.bDelete = true
+        end
+    end
+
 end
 
 function Waste:Draw()

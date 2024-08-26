@@ -7,7 +7,10 @@ local Asteroid = require("Asteroid")
 local Sound = require("Sound")
 
 local Hero = {}
-setmetatable(Hero, Vec2)
+Hero.__index = Hero
+setmetatable(Hero, {
+    __index = Vec2
+})
 local DustList = {}
 local tileSize = 32
 
@@ -21,59 +24,53 @@ function Hero:New(x, y)
 
     -- Idle animation
     local animName = "Idle"
-    hero.img[animName] = Hero:NewAnimation(hero.img, animName, nil, nil)
-    hero.img[animName].w = tileSize
-    hero.img[animName].h = tileSize
+    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, nil, nil, tileSize, tileSize)
 
     -- Dash animation
     local animName = "Dash"
-    hero.img[animName] = Hero:NewAnimation(hero.img, animName, nil, nil)
-    hero.img[animName].w = tileSize
-    hero.img[animName].h = tileSize
+    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, nil, nil, tileSize, tileSize)
 
     -- Yellow Idle animation
     animName = "IdleYellow"
-    hero.img[animName] = Hero:NewAnimation(hero.img, animName, nil, nil)
-    hero.img[animName].w = tileSize
-    hero.img[animName].h = tileSize
+    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, nil, nil, tileSize, tileSize)
 
     -- Dodge animation
     animName = "Dodge"
-    hero.img[animName] = Hero:NewAnimation(hero.img, animName, 7, 5)
+    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, 7, 5, tileSize, tileSize)
     hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], tileSize)
 
     -- Tilt animation
     animName = "Tilt"
-    hero.img[animName] = Hero:NewAnimation(hero.img, animName, 5, 6)
+    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, 5, 6, tileSize, tileSize)
     hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], tileSize)
 
     -- Transform animation
     animName = "Transform"
-    hero.img[animName] = Hero:NewAnimation(hero.img, animName, 7, 7)
-    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], tileSize * 2)
+    hero.img[animName] = Hero:NewAnimation(hero.img,"hero", animName, 7, 7, tileSize*2, tileSize*2)
+    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
     -- Robot Idle animation
     animName = "RobotIdle"
-    hero.img[animName] = Hero:NewAnimation(hero.img, animName, 7, 7)
-    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], tileSize * 2)
+    hero.img[animName] = Hero:NewAnimation(hero.img, "hero",animName, 7, 7,  tileSize*2, tileSize*2)
+    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
     -- Robot Sword animation
     animName = "RobotSword"
-    hero.img[animName] = Hero:NewAnimation(hero.img, animName, 7, 7)
-    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], tileSize * 2)
+    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, 7, 7, tileSize*2, tileSize*2)
+    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
     animName = "RobotSword2"
-    hero.img[animName] = Hero:NewAnimation(hero.img, animName, 5, 5)
-    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], tileSize * 2)
+    hero.img[animName] = Hero:NewAnimation(hero.img,"hero", animName, 5, 5, tileSize*2, tileSize*2)
+    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
     -- Robot Fly animation
     animName = "RobotFly"
-    hero.img[animName] = Hero:NewAnimation(hero.img, animName, 5, 7)
-    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], tileSize * 2)
+    hero.img[animName] = Hero:NewAnimation(hero.img, "hero",animName, 5, 7, tileSize*2, tileSize*2)
+    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
     -- Robot Shoot animation
     animName = "RobotShoot"
-    hero.img[animName] = Hero:NewAnimation(hero.img, animName, 7, 7)
-    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], tileSize * 2)
+    hero.img[animName] = Hero:NewAnimation(hero.img,"hero", animName, 7, 7, tileSize*2, tileSize*2)
+    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
     -- hero.img[animName] = Hero:NewAnimation(hero.img, animName, 4, 7)
     --  hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], 18, 46.5)
@@ -119,18 +116,6 @@ function Hero:Load(pMapList)
 
     -- New SpaceShip's Engine
     engine = Hero:NewEngine(hero.x, hero.y)
-end
-
-function Hero:NewAnimation(pHeroImg, pAnimName, pFrameMax, pFrameV)
-    pHeroImg[pAnimName] = {}
-    pHeroImg[pAnimName].iFrame = 1
-    pHeroImg[pAnimName].bFramesDone = false
-    pHeroImg[pAnimName].iFrameMax = pFrameMax
-    pHeroImg[pAnimName].imgSheet = love.graphics.newImage("images/hero/" .. pAnimName .. ".png")
-    pHeroImg[pAnimName].frames = {}
-    pHeroImg[pAnimName].frameV = pFrameV
-    pHeroImg[pAnimName].bReverse = false
-    return pHeroImg[pAnimName]
 end
 
 function Hero:NewEngine(x, y)
@@ -466,29 +451,6 @@ function Hero:Update(dt, cam)
                 dust.timer = dust.timer - dt
                 if dust.timer <= 0 then
                     table.remove(DustList, i)
-                end
-            end
-        end
-
-        -- Waste cleaning process
-        if Waste.list then
-            for i = #Waste.list, 1, -1 do
-                local waste = Waste.list[i]
-                if Vec2:IsDistInferior(waste, hero, waste.dist) then
-                    Vec2:PursueTarget(waste, Hero.hero, dt, 250)
-                    waste.bSwallow = true
-
-                    -- Swallow animation
-                    if waste.bSwallow then
-                        waste.sx = waste.sx - (dt * 10)
-                        waste.sy = waste.sy - (dt * 10)
-
-                        if Hero:IsCollideHero(waste) then
-                            hero.score = hero.score + 20
-                            Sound.PlayStatic("waste_collect_" .. math.random(1, 5))
-                            waste.bDelete = true
-                        end
-                    end
                 end
             end
         end

@@ -12,12 +12,6 @@ setmetatable(Explosion, {
 function Explosion:New(x, y)
     if not Explosion.list then
         Explosion.list = {}
-
-        -- Explosion Img Init
-        Explosion.imgList = {}
-        for i = 1, 5 do
-            Explosion.imgList[i] = love.graphics.newImage("images/explosions/explosion" .. i .. ".png")
-        end
     end
 
     local explo = Vec2:New(x, y)
@@ -26,10 +20,14 @@ function Explosion:New(x, y)
     explo.bSound = false
     explo.sx = math.random(0.99, 1)
     explo.sy = math.random(0.99, 1)
-    explo.img = Explosion.imgList
+    explo.img = Explosion.imgList[1]
     explo.indexImg = 1
     setmetatable(explo, self)
     table.insert(Explosion.list, explo)
+end
+
+function Explosion:Load()
+    Vec2:NewImgList(Explosion, "explosions/explosion", 5)
 end
 
 function Explosion:Update(dt)
@@ -57,8 +55,8 @@ function Explosion:Draw()
     if Explosion.list then
         for k, explo in ipairs(Explosion.list) do
             local index = math.floor(explo.indexImg)
-            love.graphics.draw(explo.img[index], explo.x, explo.y, 0, explo.sx, explo.sy,
-                explo.img[index]:getWidth() / 2, explo.img[index]:getHeight() / 2)
+            love.graphics.draw(explo.imgList[index], explo.x, explo.y, 0, explo.sx, explo.sy,
+                explo.imgList[index]:getWidth() / 2, explo.imgList[index]:getHeight() / 2)
         end
     end
 end

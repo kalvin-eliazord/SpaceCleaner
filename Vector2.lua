@@ -18,6 +18,7 @@ function Vector2:New(x, y)
     vec2.syMax = 1.5
     vec2.sxMin = 1
     vec2.syMin = 1
+    vec2.bReady = false
     vec2.sx = vec2.sxMin
     vec2.sy = vec2.syMin
 
@@ -222,16 +223,39 @@ function Vector2:MapCollision(pVec2, dt)
     end
 end
 
-function Vector2:NewAnimation(pVec2Img, pAnimName, pFrameMax, pFrameV)
+function Vector2:NewAnimation(pVec2Img, pFolder, pAnimName, pFrameMax, pFrameV, pTileWitdh, pTileHeight)
     pVec2Img[pAnimName] = {}
     pVec2Img[pAnimName].iFrame = 1
     pVec2Img[pAnimName].bFramesDone = false
+    pVec2Img[pAnimName].w = pTileWitdh
+    pVec2Img[pAnimName].h = pTileHeight
     pVec2Img[pAnimName].iFrameMax = pFrameMax
-    pVec2Img[pAnimName].imgSheet = love.graphics.newImage("images/" .. pAnimName .. ".png")
+    pVec2Img[pAnimName].imgSheet = love.graphics.newImage("images/" .. pFolder .. "/" .. pAnimName .. ".png")
     pVec2Img[pAnimName].frames = {}
     pVec2Img[pAnimName].frameV = pFrameV
     pVec2Img[pAnimName].bReverse = false
     return pVec2Img[pAnimName]
+end
+
+function Vector2:NewImgList(pVec2, pFolder, iMax)
+    if not pVec2.imgList then
+        pVec2.imgList = {}
+    end
+    pVec2.imgImax = iMax
+    for i = 1, iMax do
+        pVec2.imgList[i] = love.graphics.newImage("images/" .. pFolder .. "_" .. i .. ".png")
+    end
+end
+
+function Vector2:GetRandPosAroundPoint(pVec2)
+    if not pVec2 then
+        print("pVec2 nil")
+        return
+    end
+    local randPos = {}
+    randPos.x = pVec2.x + math.random(-200, 200) 
+    randPos.y = pVec2.y + math.random(-200, 200) 
+    return randPos
 end
 
 function Vector2:UpdateAnimation(pVec2, dt)
@@ -301,18 +325,13 @@ function Vector2:GetAngle(pSrc, pDst)
     end
 end
 
-function Vector2:NewLineFrameList(animList, tileWidth, tileHeight)
-    if tileHeight == nil then
-        tileHeight = tileWidth
-    end
+function Vector2:NewLineFrameList(animList)
     if animList.iFrameMax == nil then
         return
     end
     local img = animList.imgSheet
-    animList.w = tileWidth
-    animList.h = tileHeight
     for i = 1, animList.iFrameMax do
-        animList.frames[i] = love.graphics.newQuad((i - 1) * tileWidth, 0, tileWidth, tileHeight, img:getWidth(),
+        animList.frames[i] = love.graphics.newQuad((i - 1) * animList.w, 0, animList.w, animList.h, img:getWidth(),
             img:getHeight())
     end
     return animList

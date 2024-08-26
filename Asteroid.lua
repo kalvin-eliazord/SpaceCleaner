@@ -17,7 +17,7 @@ function Asteroid:New()
     math.randomseed(os.time())
     local asteroid = Vec2:New(math.random(10, Map:getWidth()), math.random(10, Map:getHeight()))
     asteroid.r = 0
-
+    
     -- asteroid direction based on coordinates
     if asteroid.x < Map:getWidth() / 2 then
         asteroid.vx = love.math.random(0, 200)
@@ -39,38 +39,15 @@ function Asteroid:New()
     asteroid.syMin = 0.01
     asteroid.vr = love.math.random(-9, 9)
 
-    -- Type process
-    local type = love.math.random(1, 5)
-    asteroid.img = Asteroid.imgList[type]
-
-    if type == 1 then
-        Asteroid.dist = 90
-    elseif type == 2 then
-        asteroid.dist = 70
-    elseif type == 3 then
-        asteroid.dist = 90
-    elseif type == 4 then
-        asteroid.dist = 100
-    else
-        asteroid.dist = 150
-    end
+    -- Img Type 
+    asteroid.img = Asteroid.imgList[love.math.random(1, Asteroid.imgImax)]
 
     setmetatable(asteroid, self)
     table.insert(Asteroid.list, asteroid)
 end
 
-function AsteroidInit()
-    if not Asteroid.imgList then
-        Asteroid.imgList = {}
-    end
-
-    for i = 1, 5 do
-        Asteroid.imgList[i] = love.graphics.newImage("images/asteroids/ast" .. i .. ".png")
-    end
-end
-
 function Asteroid:Load()
-    AsteroidInit()
+    Vec2:NewImgList(Asteroid, "asteroids/ast", 5)
     Vec2:NewTempEffect(Asteroid, "NewAst", 0.01, 4)
     Vec2:NewTempEffect(Asteroid, "PushAst", 5, 4)
 end

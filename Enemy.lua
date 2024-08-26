@@ -18,12 +18,12 @@ function Enemy:New(x, y)
     end
 
     local enem = Vec2:New(x, y)
-    enem.type = math.random(1, 6)
+    enem.type = math.random(1, Enemy.imgImax)
     enem.vx = math.random(-200, 200)
     enem.vy = math.random(-200, 200)
     enem.sx = 0.1
     enem.sy = 0.1
-    enem.img = love.graphics.newImage("images/enemies/enemy" .. enem.type .. ".png")
+    enem.img = Enemy.imgList[enem.type]
     enem.wasteMaxSpawn = math.random(1, 5)
     enem.wasteSpawn = enem.wasteMaxSpawn
     enem.laserMaxSpawn = math.random(4, 6)
@@ -35,6 +35,7 @@ function Enemy:New(x, y)
 end
 
 function Enemy:Load()
+    Vec2:NewImgList(Enemy, "enemies/enemy", 6)
 end
 
 function Enemy:IsCollideHero(pEnem)

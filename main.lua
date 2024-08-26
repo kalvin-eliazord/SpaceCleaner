@@ -14,6 +14,8 @@ local Explosion = require("Explosion")
 local Map = require("Map")
 local Camera = require("lib/camera")
 local Vortex = require("Vortex")
+local Cleaner = require("Cleaner")
+local Stars = require("Stars")
 
 local Game = {}
 
@@ -43,14 +45,17 @@ function love.load()
     love.window.setTitle(Game.title)
     love.window.setMode(Game.gSizes.w, Game.gSizes.h)
     UI:Load()
-    Sound.Load()
     Map.Load(Game.screens)
+    Explosion:Load()
     Hero:Load(Map.list)
+    Sound.Load()
     Vortex:Load()
     Waste:Load()
     Laser:Load()
     Enemy:Load()
     Asteroid:Load()
+    Cleaner:Load()
+    Stars:Load()
 end
 
 function love.update(dt)
@@ -59,6 +64,7 @@ function love.update(dt)
         Map.Update(dt)
         Waste:Update(Game, dt)
         Asteroid:Update(dt)
+        Stars:Update(dt)
 
         if Game.currScreen == "inGame" then
             Vec2:Update(dt)
@@ -68,6 +74,7 @@ function love.update(dt)
             Enemy:Update(dt)
             UI:Update(dt)
             Explosion:Update(dt)
+            Cleaner:Update(dt)
             cam:lookAt(Hero.hero.x, Hero.hero.y)
 
             -- Cam collisions
@@ -115,6 +122,10 @@ function love.keypressed(pKey)
         if Vec2.bStart then
             -- local currState = hero.img[hero.currState]
 
+            if pKey == "r" then
+                Cleaner:New(hero.x + math.random(-20, 20), hero.y + math.random(-20, 20))
+            end
+
             -- ROBOT state
             if hero.bRobot then
                 if pKey == "space" then
@@ -123,11 +134,11 @@ function love.keypressed(pKey)
                 elseif pKey == "a" then
                     -- Robot sword process
                     if hero.currState == "RobotSword" then
-                        Sound.PlayStatic("RobotSword_"..math.random(1,2))
+                        Sound.PlayStatic("RobotSword_" .. math.random(1, 2))
                         hero.listEffect["RobotSword2"].bActive = true
                     else
                         if hero.listEffect["RobotSword"].bReady then
-                            Sound.PlayStatic("RobotSword_"..math.random(1,2))
+                            Sound.PlayStatic("RobotSword_" .. math.random(1, 2))
                         end
                         Hero:ActivateAnimation(hero, "RobotSword")
                     end
@@ -163,6 +174,7 @@ function love.keypressed(pKey)
                     end
                 end
             end
+
         end
 
     else
@@ -181,6 +193,7 @@ function love.draw()
     end
 
     Map.Draw(Game.currScreen)
+    Stars:Draw()
     Vortex:Draw()
     Asteroid:Draw()
     Waste:Draw()
@@ -191,6 +204,7 @@ function love.draw()
         Explosion:Draw()
         Vec2:Draw()
         Hero:Draw()
+        Cleaner:Draw()
     end
 
     if Game.currScreen == "inGame" then

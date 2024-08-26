@@ -29,33 +29,21 @@ function Laser:New(pType, pSrc, pDst)
         -- Blast laser animation
         local animName = "RobotShootBlast"
         laser.img = {}
-        laser.img[animName] = Laser:NewAnimation(laser.img, animName, 4, 7)
-        laser.img[animName] = Vec2:NewLineFrameList(laser.img[animName], 18, 46.5)
+        laser.img[animName] = Vec2:NewAnimation(laser.img, "laser", animName, 4, 7, 51, 18)
+        laser.img[animName] = Vec2:NewLineFrameList(laser.img[animName])
     else
-        laser.img = love.graphics.newImage("images/lasers/laser" .. pType .. ".png")
-        laser.imgGlow = love.graphics.newImage("images/lasers/laser" .. pType .. "_glow.png")
+        laser.img = Laser.imgList[pType]
     end
+
     setmetatable(laser, self)
     table.insert(Laser.list, laser)
-end
-
-function Laser:NewAnimation(pVec2Img, pAnimName, pFrameMax, pFrameV)
-    pVec2Img[pAnimName] = {}
-    pVec2Img[pAnimName].iFrame = 1
-    pVec2Img[pAnimName].bFramesDone = false
-    pVec2Img[pAnimName].iFrameMax = pFrameMax
-    pVec2Img[pAnimName].imgSheet = love.graphics.newImage("images/lasers/" .. pAnimName .. ".png")
-    pVec2Img[pAnimName].frames = {}
-    pVec2Img[pAnimName].frameV = pFrameV
-    pVec2Img[pAnimName].bReverse = false
-    return pVec2Img[pAnimName]
 end
 
 function Laser.SetGuidedLaser(pLaser, dt)
     if not pLaser.target then
         return
     end
-    local toTargetAng = GetAngle(pLaser, pLaser.target)
+    local toTargetAng = Vec2:GetAngle(pLaser, pLaser.target)
 
     local heroSpeed = 400
     local angX = math.cos(toTargetAng)
@@ -89,6 +77,7 @@ function Laser.SetLaser(pLaser, dt)
 end
 
 function Laser.Load()
+    Vec2:NewImgList(Laser, "lasers/laser", 2)
 end
 
 function Laser.Update(dt)
@@ -138,9 +127,7 @@ function Laser.Draw()
     if Laser.list then
         for i, laser in ipairs(Laser.list) do
             --  love.graphics.setColor(255, 255, 0, 10)
-            if laser.type == 1 then
-                love.graphics.draw(laser.imgGlow, laser.x, laser.y, laser.r, laser.sx, laser.sy)
-            elseif laser.type == 3 then
+            if laser.type == 3 then
                 local laserState = laser.img["RobotShootBlast"]
                 local laserImg = laserState.frames[math.floor(laserState.iFrame)]
                 if laserState.imgSheet and laserImg then
@@ -149,7 +136,6 @@ function Laser.Draw()
                 end
             else
                 love.graphics.draw(laser.img, laser.x, laser.y, laser.r, laser.sx, laser.sy)
-
             end
             love.graphics.setColor(255, 255, 255)
         end

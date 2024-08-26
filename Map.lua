@@ -1,6 +1,5 @@
 -- Imports
 local Vec2 = require("Vector2")
-local Stars = require("Stars")
 
 local Map = {}
 Map.__index = Map
@@ -47,11 +46,9 @@ function Map.Load(pMaps)
     Map.list["press_space"].img = love.graphics.newImage("images/maps/press_space.png")
     Map.current = Map.list["menu"]
     Map.current.name = "menu"
-    Stars:Load()
 end
 
 function Map.Update(dt)
-    Stars:Update(dt)
     Map:SetShrink(Map.list["title"],1, dt)
    -- Map:SetShrink(Map.list["press_space"], dt) TODO
 end
@@ -81,8 +78,6 @@ function Map.Draw(pMap)
         Map.current.name = pMap
         love.graphics.draw(Map.list[pMap].img, Map.list[pMap].x, Map.list[pMap].y)
     end
-
-    Stars:Draw()
 end
 
 return Map

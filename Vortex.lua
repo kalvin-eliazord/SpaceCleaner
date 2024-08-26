@@ -23,8 +23,8 @@ function Vortex:New(x, y)
     vortex.bReady = false
 
     -- Vortex Idle animation
-    vortex.img[animName] = Vec2:NewAnimation(vortex.img, animName, 6, 15)
-    vortex.img[animName] = Vec2:NewLineFrameList(vortex.img[animName], tileSize)
+    vortex.img[animName] = Vec2:NewAnimation(vortex.img,"vortex",animName, 6, 15, tileSize, tileSize)
+    vortex.img[animName] = Vec2:NewLineFrameList(vortex.img[animName])
 
     setmetatable(vortex, self)
     table.insert(Vortex.list, vortex)
