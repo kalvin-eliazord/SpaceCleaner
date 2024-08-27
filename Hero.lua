@@ -46,30 +46,30 @@ function Hero:New(x, y)
 
     -- Transform animation
     animName = "Transform"
-    hero.img[animName] = Hero:NewAnimation(hero.img,"hero", animName, 7, 7, tileSize*2, tileSize*2)
+    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, 7, 7, tileSize * 2, tileSize * 2)
     hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
     -- Robot Idle animation
     animName = "RobotIdle"
-    hero.img[animName] = Hero:NewAnimation(hero.img, "hero",animName, 7, 7,  tileSize*2, tileSize*2)
+    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, 7, 7, tileSize * 2, tileSize * 2)
     hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
     -- Robot Sword animation
     animName = "RobotSword"
-    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, 7, 7, tileSize*2, tileSize*2)
+    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, 7, 7, tileSize * 2, tileSize * 2)
     hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
     animName = "RobotSword2"
-    hero.img[animName] = Hero:NewAnimation(hero.img,"hero", animName, 5, 5, tileSize*2, tileSize*2)
+    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, 5, 5, tileSize * 2, tileSize * 2)
     hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
     -- Robot Fly animation
     animName = "RobotFly"
-    hero.img[animName] = Hero:NewAnimation(hero.img, "hero",animName, 5, 7, tileSize*2, tileSize*2)
+    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, 5, 7, tileSize * 2, tileSize * 2)
     hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
     -- Robot Shoot animation
     animName = "RobotShoot"
-    hero.img[animName] = Hero:NewAnimation(hero.img,"hero", animName, 7, 7, tileSize*2, tileSize*2)
+    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, 7, 7, tileSize * 2, tileSize * 2)
     hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
     -- hero.img[animName] = Hero:NewAnimation(hero.img, animName, 4, 7)
@@ -455,6 +455,12 @@ function Hero:Update(dt, cam)
             end
         end
 
+        -- Waste process
+        if Waste.list then
+            for i, waste in ipairs(Waste.list) do
+                Waste.swallow(hero, waste, dt)
+            end
+        end
         -- Asteroid cleaning process
         AsteroidCollision(dt)
     end
@@ -464,7 +470,7 @@ function AsteroidCollision(dt)
     if Asteroid.list then
         for i = #Asteroid.list, 1, -1 do
             local asteroid = Asteroid.list[i]
-            if Hero:IsCollideHero(asteroid) then
+            if Vec2:IsCollide(hero, asteroid) then
                 if hero.listEffect["RobotSword"] or hero.listEffect["RobotSword2"] then
                     asteroid.vx = asteroid.vx * -2
                     asteroid.vy = asteroid.vy * -2

@@ -8,7 +8,7 @@ Explosion.__index = Explosion
 setmetatable(Explosion, {
     __index = Vec2
 })
-
+local tileSize = 64
 function Explosion:New(x, y)
     if not Explosion.list then
         Explosion.list = {}
@@ -20,14 +20,18 @@ function Explosion:New(x, y)
     explo.bSound = false
     explo.sx = math.random(0.99, 1)
     explo.sy = math.random(0.99, 1)
-    explo.img = Explosion.imgList[1]
-    explo.indexImg = 1
+
+    -- Img 
+    local animName = "explosion_sheets"
+    explo.currState = animName
+    explo.img[animName] = Vec2:NewAnimation(explo.img, "explosions", animName, 5, 5, tileSize, tileSize)
+    explo.img[animName] = Vec2:NewLineFrameList(explo.img[animName])
+
     setmetatable(explo, self)
     table.insert(Explosion.list, explo)
 end
 
 function Explosion:Load()
-    Vec2:NewImgList(Explosion, "explosions/explosion", 5)
 end
 
 function Explosion:Update(dt)
@@ -35,15 +39,15 @@ function Explosion:Update(dt)
     if Explosion.list then
         for k = #Explosion.list, 1, -1 do
             local explo = Explosion.list[k]
-            Vec2:SetShrink(explo, 1,dt)
+            Vec2:SetShrink(explo, 1, dt)
             if not explo.bSound then
-                Sound.PlayStatic("explosion_"..math.random(1,2))
+                Sound.PlayStatic("explosion_" .. math.random(1, 2))
                 explo.bSound = true
             end
-            explo.indexImg = explo.indexImg + (dt * 4)
-            if explo.indexImg >= 5 then
-                local part = Vec2:NewParticle(explo, "yellow", math.random(-20, 20), math.random(-20, 20),math.random(1, 3), dt)
-                explo.indexImg = 5
+            Vec2:UpdateAnimation(explo, dt)
+            local currState = explo.img[explo.currState]
+            if currState.iFrame >= 5 then
+                Vec2:NewParticle(explo, "yellow", math.random(-20, 20), math.random(-20, 20), math.random(1, 3), dt)
                 table.remove(Explosion.list, k)
             end
         end
@@ -54,9 +58,12 @@ end
 function Explosion:Draw()
     if Explosion.list then
         for k, explo in ipairs(Explosion.list) do
-            local index = math.floor(explo.indexImg)
-            love.graphics.draw(explo.imgList[index], explo.x, explo.y, 0, explo.sx, explo.sy,
-                explo.imgList[index]:getWidth() / 2, explo.imgList[index]:getHeight() / 2)
+            local currState = explo.img[explo.currState]
+            local exploImg = currState.frames[math.floor(currState.iFrame)]
+            if currState.imgSheet and exploImg then
+                love.graphics.draw(currState.imgSheet, exploImg, exploImg.x, exploImg.y, exploImg.r, exploImg.sx,
+                    exploImg.sy, currState.w / 2, currState.h / 2)
+            end
         end
     end
 end

@@ -1,5 +1,6 @@
 -- Imports
 local Vec2 = require("Vector2")
+local Sound = require("Sound")
 
 local Waste = {}
 Waste.__index = Waste
@@ -41,7 +42,9 @@ function Waste:New(pX, pY)
 
     -- Type process
     local type = love.math.random(1, 9)
-    waste.img = Waste.imgList[type]
+    waste.currState = "waste_" .. type
+    waste.img = {}
+    waste.img[waste.currState] = Waste.imgList[type]
     waste.dist = 150
 
     table.insert(Waste.list, waste)
@@ -109,13 +112,13 @@ function Waste:Update(pGame, dt)
     end
 end
 
-function Waste.swallow(pSrc, waste)
+function Waste.swallow(pSrc, waste, dt)
     -- Waste cleaning process
-    if Vec2:IsDistInferior(waste, pSrc, waste.dist) then
-        Vec2:PursueTarget(waste, Hero.hero, dt, 250)
+    if Vec2:IsDistInferior(pSrc, waste, waste.dist) then
+        Vec2:PursueTarget(waste, pSrc, dt, 250)
         waste.bSwallow = true
-        if Hero:IsCollideHero(waste) then
-            hero.score = hero.score + 20
+        if Vec2:IsCollide(pSrc, waste) then
+            --     hero.score = hero.score + 20
             Sound.PlayStatic("waste_collect_" .. math.random(1, 5))
             waste.bDelete = true
         end
@@ -126,8 +129,10 @@ end
 function Waste:Draw()
     if Waste.list then
         for i, waste in ipairs(Waste.list) do
-            love.graphics.draw(waste.img, waste.x, waste.y, waste.r, 1.5, 1.5, waste.img:getWidth() / 2,
-                waste.img:getHeight() / 2)
+            local currState = waste.img[waste.currState]
+            if currState then
+                love.graphics.draw(currState.img, waste.x, waste.y, waste.r, 1.5, 1.5, currState.w / 2, currState.h / 2)
+            end
         end
 
         -- print("wasteList: ",#Waste.list)

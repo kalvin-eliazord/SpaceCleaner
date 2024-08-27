@@ -17,7 +17,7 @@ function Asteroid:New()
     math.randomseed(os.time())
     local asteroid = Vec2:New(math.random(10, Map:getWidth()), math.random(10, Map:getHeight()))
     asteroid.r = 0
-    
+
     -- asteroid direction based on coordinates
     if asteroid.x < Map:getWidth() / 2 then
         asteroid.vx = love.math.random(0, 200)
@@ -32,15 +32,18 @@ function Asteroid:New()
     end
 
     asteroid.sxMax = 0.01
+    asteroid.bReady = false
     asteroid.syMax = 0.01
     asteroid.sx = asteroid.sxMax
     asteroid.sy = asteroid.syMax
     asteroid.sxMin = 0.01
     asteroid.syMin = 0.01
     asteroid.vr = love.math.random(-9, 9)
-
+    local randNb = math.random(1, Asteroid.imgImax)
+    asteroid.currState = "ast_" .. randNb
     -- Img Type 
-    asteroid.img = Asteroid.imgList[love.math.random(1, Asteroid.imgImax)]
+    asteroid.img = {}
+    asteroid.img[asteroid.currState] = Asteroid.imgList[randNb]
 
     setmetatable(asteroid, self)
     table.insert(Asteroid.list, asteroid)
@@ -60,7 +63,7 @@ function Asteroid:Update(dt)
     if Asteroid.listEffect["NewAst"].bActive then
         Asteroid:New()
     end
-    
+
     if Asteroid.list then
         for i = #Asteroid.list, 1, -1 do
             local asteroid = Asteroid.list[i]
@@ -69,24 +72,21 @@ function Asteroid:Update(dt)
             if asteroid.listEffect["PushAst"] and asteroid.listEffect["PushAst"].bActive then
             end
 
+            if not asteroid.bReady then
+                if math.floor(asteroid.sx) ~= 1 then
+                    asteroid.sx = asteroid.sx + dt
+                    asteroid.sy = asteroid.sy + dt
+                else
+                    asteroid.bReady = true
+                end
+            end
+
             -- Set Velocity
             asteroid.x = asteroid.x + asteroid.vx * dt
             asteroid.y = asteroid.y + asteroid.vy * dt
-
-            if asteroid.sx < 1 then
-                asteroid.sx = asteroid.sx + (dt * 50)
-                asteroid.sy = asteroid.sy + (dt * 50)
-            end
-
-            if asteroid.sx > 1.5 then
-                asteroid.sx = asteroid.sx - dt
-                asteroid.sy = asteroid.sy - dt
-            else
-                asteroid.sx = asteroid.sx + dt
-                asteroid.sy = asteroid.sy + dt
-            end
-
             asteroid.r = asteroid.r + (asteroid.vr * dt)
+
+
 
             if Asteroid:IsOutScreen(asteroid) then
                 asteroid.bDelete = true
@@ -102,11 +102,11 @@ end
 
 function Asteroid:Draw()
     if Asteroid.list then
-        for i, Asteroid in ipairs(Asteroid.list) do
-            love.graphics.draw(Asteroid.img, Asteroid.x, Asteroid.y, Asteroid.r, Asteroid.sx, Asteroid.sy,
-                Asteroid.img:getWidth() / 2, Asteroid.img:getHeight() / 2)
+        for i, asteroid in ipairs(Asteroid.list) do
+            local currState = asteroid.img[asteroid.currState]
+            love.graphics.draw(currState.img, asteroid.x, asteroid.y, asteroid.r, asteroid.sx, asteroid.sy,
+            currState.w / 2, currState.h / 2)
         end
-
     end
 end
 

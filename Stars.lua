@@ -27,7 +27,6 @@ function Stars:New(x, y, pStarColor)
     Stars.imgList[animName] = Vec2:NewLineFrameList(Stars.imgList[animName], tileSize)
 
     star.img = Stars.imgList[math.random(1, 6)]
-    star.indexImg = 1
     setmetatable(star, self)
     table.insert(Stars.list, star)
 end

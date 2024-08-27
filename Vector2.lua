@@ -51,12 +51,14 @@ function Vector2:IsCollide(pVec1, pVec2)
     if pVec1 == pVec2 then
         return false
     end
+    local currState1 = pVec1.img[pVec1.currState]
+    local currState2 = pVec2.img[pVec2.currState]
 
     local deltaX = pVec1.x - pVec2.x
     local deltaY = pVec1.y - pVec2.y
 
-    if math.abs(deltaX) < (pVec1.img:getWidth() + pVec2.img:getWidth()) and math.abs(deltaY) <
-        (pVec1.img:getHeight() + pVec2.img:getHeight()) then
+    if math.abs(deltaX) < (currState1.w + currState2.w) and math.abs(deltaY) <
+        (currState1.h + currState2.h) then
         return true
     end
 
@@ -243,7 +245,10 @@ function Vector2:NewImgList(pVec2, pFolder, iMax)
     end
     pVec2.imgImax = iMax
     for i = 1, iMax do
-        pVec2.imgList[i] = love.graphics.newImage("images/" .. pFolder .. "_" .. i .. ".png")
+        pVec2.imgList[i] = {}
+        pVec2.imgList[i].img = love.graphics.newImage("images/" .. pFolder .. "_" .. i .. ".png")
+        pVec2.imgList[i].w = pVec2.imgList[i].img:getWidth()
+        pVec2.imgList[i].h = pVec2.imgList[i].img:getHeight()
     end
 end
 

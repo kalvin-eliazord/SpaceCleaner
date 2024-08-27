@@ -19,11 +19,13 @@ function Enemy:New(x, y)
 
     local enem = Vec2:New(x, y)
     enem.type = math.random(1, Enemy.imgImax)
+    enem.currState = "enemy_"..enem.type
     enem.vx = math.random(-200, 200)
     enem.vy = math.random(-200, 200)
     enem.sx = 0.1
     enem.sy = 0.1
-    enem.img = Enemy.imgList[enem.type]
+    enem.img = {}
+    enem.img[enem.currState] = Enemy.imgList[enem.type]
     enem.wasteMaxSpawn = math.random(1, 5)
     enem.wasteSpawn = enem.wasteMaxSpawn
     enem.laserMaxSpawn = math.random(4, 6)
@@ -36,25 +38,6 @@ end
 
 function Enemy:Load()
     Vec2:NewImgList(Enemy, "enemies/enemy", 6)
-end
-
-function Enemy:IsCollideHero(pEnem)
-    if not pEnem then
-        return
-    end
-
-    local hero = require("Hero").hero
-    local iFrame = hero.img[hero.currState].iFrame
-    local heroImg = hero.img[hero.currState].frames[math.floor(iFrame)]
-    local deltaX = hero.x - pEnem.x
-    local deltaY = hero.y - pEnem.y
-
-    if math.abs(deltaX) < (hero.img[hero.currState].w + pEnem.img:getWidth()) - 20 and math.abs(deltaY) <
-        (hero.img[hero.currState].h + pEnem.img:getHeight()) - 20 then
-        return true
-    end
-
-    return false
 end
 
 function Enemy:Update(dt)
@@ -84,7 +67,7 @@ function Enemy:Update(dt)
                 end
 
                 -- Enemy collision w/ Hero
-                if Enemy:IsCollideHero(enem) and not hero.bDodge then
+                if Vec2:IsCollide(enem, hero) and not hero.bDodge then
                     if not hero.listEffect["RobotSword"].bActive then
                         hero.hp = hero.hp - 1
                         hero.listEffect["DamageTaken"].bActive = true
@@ -143,12 +126,12 @@ function Enemy:Update(dt)
                 Vec2:NewParticle(laser, "red", math.random(-0.1, 0.1), math.random(-0.1, 0.1), 0.0001, dt)
 
                 -- Enemy Laser to Hero
-                if Enemy:IsCollideHero(laser) and hero.listEffect["RobotSword"].bActive then
+                if Enemy:IsCollide(laser, hero) and hero.listEffect["RobotSword"].bActive then
                     laser.vy = laser.vy * -1
                     laser.vx = laser.vx * -1
-                elseif Enemy:IsCollideHero(laser) and not hero.bDodge then
+                elseif Enemy:IsCollide(laser, hero) and not hero.bDodge then
                     laser.bDelete = true
-                    Explosion:New(hero.x + love.math.random(-2, 2), hero.y + love.math.random(-2, 2))
+                    Explosion:New(hero.x + math.random(-2, 2), hero.y + math.random(-2, 2))
                     hero.hp = hero.hp - 1
                     hero.listEffect["DamageTaken"].bActive = true
                 end
@@ -166,8 +149,9 @@ function Enemy:Draw()
                 love.graphics.setColor(1, 0, 0)
             end
 
-            love.graphics.draw(enem.img, enem.x, enem.y, enem.r, enem.sx, enem.sy, enem.img:getWidth() / 2,
-                enem.img:getHeight() / 2)
+            local currState = enem.img[enem.currState]
+            love.graphics.draw(currState.img, enem.x, enem.y, enem.r, enem.sx, enem.sy, currState.w / 2,
+            currState.h / 2)
 
             love.graphics.setColor(1, 1, 1)
         end

@@ -25,16 +25,21 @@ function Laser:New(pType, pSrc, pDst)
     laser.bDist = false
     laser.bShine = false
 
+    local animName = nil
     if pType == 3 then
         -- Blast laser animation
-        local animName = "RobotShootBlast"
+        animName = "RobotShootBlast"
         laser.img = {}
         laser.img[animName] = Vec2:NewAnimation(laser.img, "laser", animName, 4, 7, 51, 18)
         laser.img[animName] = Vec2:NewLineFrameList(laser.img[animName])
     else
-        laser.img = Laser.imgList[pType]
-    end
+        animName = "laser_" .. pType
+        laser.img = {}
+        laser.img[animName] = Laser.imgList[pType]
 
+    end
+    laser.currState = animName
+    
     setmetatable(laser, self)
     table.insert(Laser.list, laser)
 end
@@ -135,7 +140,8 @@ function Laser.Draw()
                         laser.sy, laserState.w / 2, laserState.h / 2)
                 end
             else
-                love.graphics.draw(laser.img, laser.x, laser.y, laser.r, laser.sx, laser.sy)
+                local laserState = laser.img[laser.currState]
+                love.graphics.draw(laserState.img, laser.x, laser.y, laser.r, laser.sx, laser.sy, laserState.w /2, laserState.h /2)
             end
             love.graphics.setColor(255, 255, 255)
         end
