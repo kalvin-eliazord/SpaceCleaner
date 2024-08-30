@@ -126,10 +126,10 @@ function Enemy:Update(dt)
                 Vec2:NewParticle(laser, "red", math.random(-0.1, 0.1), math.random(-0.1, 0.1), 0.0001, dt)
 
                 -- Enemy Laser to Hero
-                if Enemy:IsCollide(laser, hero) and hero.listEffect["RobotSword"].bActive then
+                if Vec2:IsCollide(laser, hero) and hero.listEffect["RobotSword"].bActive then
                     laser.vy = laser.vy * -1
                     laser.vx = laser.vx * -1
-                elseif Enemy:IsCollide(laser, hero) and not hero.bDodge then
+                elseif Vec2:IsCollide(laser, hero) and not hero.bDodge then
                     laser.bDelete = true
                     Explosion:New(hero.x + math.random(-2, 2), hero.y + math.random(-2, 2))
                     hero.hp = hero.hp - 1

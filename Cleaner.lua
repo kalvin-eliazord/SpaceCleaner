@@ -24,7 +24,7 @@ function Cleaner:New(x, y)
     cleaner.sy = 0
 
     -- Cleaner animation
-    cleaner.img[animName] = Vec2:NewAnimation(cleaner.img, "hero", animName, nil, nil, tileSize, tileSize)
+    cleaner.img[animName] = Vec2:InitAnimList(cleaner.img, "hero", animName, nil, nil, tileSize, tileSize)
 
     setmetatable(cleaner, self)
     table.insert(Cleaner.list, cleaner)

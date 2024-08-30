@@ -30,7 +30,7 @@ function Laser:New(pType, pSrc, pDst)
         -- Blast laser animation
         animName = "RobotShootBlast"
         laser.img = {}
-        laser.img[animName] = Vec2:NewAnimation(laser.img, "laser", animName, 4, 7, 51, 18)
+        laser.img[animName] = Vec2:InitAnimList(laser.img, "laser", animName, 4, 7, 51, 18)
         laser.img[animName] = Vec2:NewLineFrameList(laser.img[animName])
     else
         animName = "laser_" .. pType

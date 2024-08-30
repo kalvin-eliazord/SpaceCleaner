@@ -24,55 +24,55 @@ function Hero:New(x, y)
 
     -- Idle animation
     local animName = "Idle"
-    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, nil, nil, tileSize, tileSize)
+    hero.img[animName] = Hero:InitAnimList(hero.img, "hero", animName, nil, nil, tileSize, tileSize)
 
     -- Dash animation
     local animName = "Dash"
-    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, nil, nil, tileSize, tileSize)
+    hero.img[animName] = Hero:InitAnimList(hero.img, "hero", animName, nil, nil, tileSize, tileSize)
 
     -- Yellow Idle animation
     animName = "IdleYellow"
-    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, nil, nil, tileSize, tileSize)
+    hero.img[animName] = Hero:InitAnimList(hero.img, "hero", animName, nil, nil, tileSize, tileSize)
 
     -- Dodge animation
     animName = "Dodge"
-    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, 7, 5, tileSize, tileSize)
-    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], tileSize)
+    hero.img[animName] = Hero:InitAnimList(hero.img, "hero", animName, 7, 5, tileSize, tileSize)
+    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
     -- Tilt animation
     animName = "Tilt"
-    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, 5, 6, tileSize, tileSize)
-    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], tileSize)
+    hero.img[animName] = Hero:InitAnimList(hero.img, "hero", animName, 5, 6, tileSize, tileSize)
+    hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
     -- Transform animation
     animName = "Transform"
-    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, 7, 7, tileSize * 2, tileSize * 2)
+    hero.img[animName] = Hero:InitAnimList(hero.img, "hero", animName, 7, 7, tileSize * 2, tileSize * 2)
     hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
     -- Robot Idle animation
     animName = "RobotIdle"
-    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, 7, 7, tileSize * 2, tileSize * 2)
+    hero.img[animName] = Hero:InitAnimList(hero.img, "hero", animName, 7, 7, tileSize * 2, tileSize * 2)
     hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
     -- Robot Sword animation
     animName = "RobotSword"
-    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, 7, 7, tileSize * 2, tileSize * 2)
+    hero.img[animName] = Hero:InitAnimList(hero.img, "hero", animName, 7, 7, tileSize * 2, tileSize * 2)
     hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
     animName = "RobotSword2"
-    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, 5, 5, tileSize * 2, tileSize * 2)
+    hero.img[animName] = Hero:InitAnimList(hero.img, "hero", animName, 5, 5, tileSize * 2, tileSize * 2)
     hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
     -- Robot Fly animation
     animName = "RobotFly"
-    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, 5, 7, tileSize * 2, tileSize * 2)
+    hero.img[animName] = Hero:InitAnimList(hero.img, "hero", animName, 5, 7, tileSize * 2, tileSize * 2)
     hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
     -- Robot Shoot animation
     animName = "RobotShoot"
-    hero.img[animName] = Hero:NewAnimation(hero.img, "hero", animName, 7, 7, tileSize * 2, tileSize * 2)
+    hero.img[animName] = Hero:InitAnimList(hero.img, "hero", animName, 7, 7, tileSize * 2, tileSize * 2)
     hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
-    -- hero.img[animName] = Hero:NewAnimation(hero.img, animName, 4, 7)
+    -- hero.img[animName] = Hero:InitAnimList(hero.img, animName, 4, 7)
     --  hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], 18, 46.5)
 
     hero.hp = 3
@@ -262,22 +262,6 @@ function SetVelocity(hero, dt)
 
 end
 
-function Hero:IsCollideHero(pVec2)
-    if not pVec2 or not hero then
-        return
-    end
-
-    local currState = hero.img[hero.currState]
-    local deltaX = hero.x - pVec2.x
-    local deltaY = hero.y - pVec2.y
-    if math.abs(deltaX) < (currState.w + pVec2.img:getWidth()) - 20 and math.abs(deltaY) <
-        (currState.h + pVec2.img:getHeight()) - 20 then
-        return true
-    end
-
-    return false
-end
-
 function SetIdleAnimation()
     if hero.bRobot then
         if hero.currState ~= "RobotIdle" and hero.img[hero.currState].bFramesDone then
@@ -343,15 +327,15 @@ function Hero:Update(dt, cam)
                 hero.listEffect["Dodge"].bSoundReady = false
             end
             Vec2:NewParticle(hero, nil, math.random(-20, 20), math.random(-20, 20), 0.005, dt)
-            hero.sx = hero.sx + dt
-            hero.sy = hero.sy + dt
+            hero.sx = hero.sx + (dt*2)
+            hero.sy = hero.sy + (dt*2)
         else
             if hero.currState == "Dodge" and hero.img["Dodge"].bFramesDone then
                 hero.bDodge = false
             end
             if hero.sx > 1 then
-                hero.sx = hero.sx - dt
-                hero.sy = hero.sy - dt
+                hero.sx = hero.sx - (dt*2)
+                hero.sy = hero.sy - (dt*2)
             end
         end
 

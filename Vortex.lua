@@ -14,7 +14,6 @@ function Vortex:New(x, y)
     end
 
     local vortex = Vec2:New(x, y)
-    local animName = "VortexIdle2"
     vortex.vx = 0
     vortex.vy = 0
     vortex.sx = 0
@@ -22,8 +21,9 @@ function Vortex:New(x, y)
     vortex.bReady = false
 
     -- Vortex Idle animation
+    local animName = "VortexIdle2"
     vortex.currState = animName
-    vortex.img[animName] = Vec2:NewAnimation(vortex.img,"vortex",animName, 6, 15, tileSize, tileSize)
+    vortex.img[animName] = Vec2:InitAnimList(vortex.img,"vortex",animName, 6, 15, tileSize, tileSize)
     vortex.img[animName] = Vec2:NewLineFrameList(vortex.img[animName])
 
     setmetatable(vortex, self)

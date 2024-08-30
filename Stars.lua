@@ -23,7 +23,7 @@ function Stars:New(x, y, pStarColor)
     star.sy = 2
     star.bFirst = true
     -- Img Type 
-    Stars.imgList[animName] = Vec2:NewAnimation(Stars.imgList, "stars", animName, 5, 5, tileSize, tileSize)
+    Stars.imgList[animName] = Vec2:InitAnimList(Stars.imgList, "stars", animName, 5, 5, tileSize, tileSize)
     Stars.imgList[animName] = Vec2:NewLineFrameList(Stars.imgList[animName], tileSize)
 
     star.img = Stars.imgList[math.random(1, 6)]

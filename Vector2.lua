@@ -225,7 +225,7 @@ function Vector2:MapCollision(pVec2, dt)
     end
 end
 
-function Vector2:NewAnimation(pVec2Img, pFolder, pAnimName, pFrameMax, pFrameV, pTileWitdh, pTileHeight)
+function Vector2:InitAnimList(pVec2Img, pFolder, pAnimName, pFrameMax, pFrameV, pTileWitdh, pTileHeight)
     pVec2Img[pAnimName] = {}
     pVec2Img[pAnimName].iFrame = 1
     pVec2Img[pAnimName].bFramesDone = false
