@@ -227,15 +227,18 @@ end
 
 function Vector2:InitAnimList(pVec2Img, pFolder, pAnimName, pFrameMax, pFrameV, pTileWitdh, pTileHeight)
     pVec2Img[pAnimName] = {}
+    -- Animation Frame 
     pVec2Img[pAnimName].iFrame = 1
     pVec2Img[pAnimName].bFramesDone = false
-    pVec2Img[pAnimName].w = pTileWitdh
-    pVec2Img[pAnimName].h = pTileHeight
     pVec2Img[pAnimName].iFrameMax = pFrameMax
-    pVec2Img[pAnimName].imgSheet = love.graphics.newImage("images/" .. pFolder .. "/" .. pAnimName .. ".png")
     pVec2Img[pAnimName].frames = {}
     pVec2Img[pAnimName].frameV = pFrameV
     pVec2Img[pAnimName].bReverse = false
+    -- Image setup
+    pVec2Img[pAnimName].w = pTileWitdh
+    pVec2Img[pAnimName].h = pTileHeight
+    pVec2Img[pAnimName].imgSheet = love.graphics.newImage("images/" .. pFolder .. "/" .. pAnimName .. ".png")
+
     return pVec2Img[pAnimName]
 end
 
@@ -254,12 +257,15 @@ end
 
 function Vector2:GetRandPosAroundPoint(pVec2)
     if not pVec2 then
-        print("pVec2 nil")
+        print("Can't get the position of the pVec2")
         return
     end
-    local randPos = {}
-    randPos.x = pVec2.x + math.random(-200, 200) 
-    randPos.y = pVec2.y + math.random(-200, 200) 
+    local rangeX = 500
+    local rangeY = 500
+
+    randPos = {}
+    randPos.x = pVec2.x + math.random(-rangeX, rangeX) 
+    randPos.y = pVec2.y + math.random(-rangeY, rangeY) 
     return randPos
 end
 
