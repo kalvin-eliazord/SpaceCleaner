@@ -327,15 +327,15 @@ function Hero:Update(dt, cam)
                 hero.listEffect["Dodge"].bSoundReady = false
             end
             Vec2:NewParticle(hero, nil, math.random(-20, 20), math.random(-20, 20), 0.005, dt)
-            hero.sx = hero.sx + (dt*2)
-            hero.sy = hero.sy + (dt*2)
+            hero.sx = hero.sx + (dt * 2)
+            hero.sy = hero.sy + (dt * 2)
         else
             if hero.currState == "Dodge" and hero.img["Dodge"].bFramesDone then
                 hero.bDodge = false
             end
             if hero.sx > 1 then
-                hero.sx = hero.sx - (dt*2)
-                hero.sy = hero.sy - (dt*2)
+                hero.sx = hero.sx - (dt * 2)
+                hero.sy = hero.sy - (dt * 2)
             end
         end
 
@@ -456,13 +456,15 @@ function AsteroidCollision(dt)
             local asteroid = Asteroid.list[i]
             if Vec2:IsCollide(hero, asteroid) then
                 if hero.listEffect["RobotSword"] or hero.listEffect["RobotSword2"] then
-                    asteroid.vx = asteroid.vx * -2
-                    asteroid.vy = asteroid.vy * -2
-                else
-                    asteroid.x = asteroid.x
-                    asteroid.y = asteroid.y
+                    local currState = hero.img[hero.currState]
+                    asteroid.x = asteroid.x + (currState.w * dt * 4)
+                    asteroid.y = asteroid.y + (currState.h * dt * 4)
                     asteroid.vx = asteroid.vx * -1
                     asteroid.vy = asteroid.vy * -1
+                else
+
+                    -- asteroid.vx = asteroid.vx * -1
+                    --  asteroid.vy = asteroid.vy * -1
                 end
 
                 -- New Effect on ast
