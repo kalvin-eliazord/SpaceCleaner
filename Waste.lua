@@ -31,13 +31,13 @@ function Waste:New(pX, pY)
         waste.vy = love.math.random(-200, 0)
     end
 
+    
     waste.sxMax = 0.01
     waste.syMax = 0.01
     waste.sx = waste.sxMax
     waste.sy = waste.syMax
     waste.sxMin = 0.01
     waste.syMin = 0.01
-    waste.bReady = false
     waste.vr = love.math.random(-9, 9)
 
     -- Type process
@@ -72,7 +72,7 @@ function Waste:Update(pGame, dt)
         for i = #Waste.list, 1, -1 do
             local waste = Waste.list[i]
 
-            -- Waste:SetShrink(waste, dt) need to fix
+            Waste:SetShrink(waste, 8,dt) -- need to fix
 
             -- Set Velocity
             waste.x = waste.x + waste.vx * dt

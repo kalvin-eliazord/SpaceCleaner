@@ -31,13 +31,9 @@ function Asteroid:New()
         asteroid.vy = love.math.random(-200, 0)
     end
 
-    asteroid.sxMax = 0.01
     asteroid.bReady = false
-    asteroid.syMax = 0.01
-    asteroid.sx = asteroid.sxMax
-    asteroid.sy = asteroid.syMax
-    asteroid.sxMin = 0.01
-    asteroid.syMin = 0.01
+    asteroid.sx = 0.01
+    asteroid.sy = 0.01
     asteroid.vr = love.math.random(-9, 9)
     local randNb = math.random(1, Asteroid.imgImax)
     asteroid.currState = "ast_" .. randNb
@@ -85,8 +81,6 @@ function Asteroid:Update(dt)
             asteroid.x = asteroid.x + asteroid.vx * dt
             asteroid.y = asteroid.y + asteroid.vy * dt
             asteroid.r = asteroid.r + (asteroid.vr * dt)
-
-
 
             if Asteroid:IsOutScreen(asteroid) then
                 asteroid.bDelete = true

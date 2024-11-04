@@ -455,25 +455,12 @@ function AsteroidCollision(dt)
         for i = #Asteroid.list, 1, -1 do
             local asteroid = Asteroid.list[i]
             if Vec2:IsCollide(hero, asteroid) then
-                if hero.listEffect["RobotSword"] or hero.listEffect["RobotSword2"] then
-                    local currState = hero.img[hero.currState]
-                    asteroid.x = asteroid.x + (currState.w * dt * 4)
-                    asteroid.y = asteroid.y + (currState.h * dt * 4)
-                    asteroid.vx = asteroid.vx * -1
-                    asteroid.vy = asteroid.vy * -1
-                else
-
-                    -- asteroid.vx = asteroid.vx * -1
-                    --  asteroid.vy = asteroid.vy * -1
-                end
-
-                -- New Effect on ast
-                if not asteroid.listEffect["PushAst"] then
-                    Vec2:NewTempEffect(asteroid, "PushAst", 1, 0)
-                end
-                asteroid.listEffect["PushAst"].bActive = true
+                local currState = hero.img[hero.currState]
+                asteroid.x = asteroid.x + (currState.w * dt * 8)
+                asteroid.y = asteroid.y + (currState.h * dt * 8)
+                asteroid.vx = asteroid.vx * -1
+                asteroid.vy = asteroid.vy * -1
             end
-            -- Vec2:PursueTarget(asteroid, Hero.hero, dt, 250) push it into enemies
         end
     end
 end

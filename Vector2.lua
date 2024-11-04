@@ -16,8 +16,8 @@ function Vector2:New(x, y)
     vec2.bShrink = false
     vec2.sxMax = 1.5
     vec2.syMax = 1.5
-    vec2.sxMin = 1
-    vec2.syMin = 1
+    vec2.sxMin = 0.5
+    vec2.syMin = 0.5
     vec2.bReady = false
     vec2.sx = vec2.sxMin
     vec2.sy = vec2.syMin
@@ -29,18 +29,18 @@ end
 function Vector2:SetShrink(pVec2, pDtV, dt)
     -- Enlarge
     if not pVec2.bShrink then
+        pVec2.sx = pVec2.sx + (dt * pDtV)
+        pVec2.sy = pVec2.sy + (dt * pDtV)
         if pVec2.sx > pVec2.sxMax then
             pVec2.bShrink = true
         end
-        pVec2.sx = pVec2.sx + (dt * pDtV)
-        pVec2.sy = pVec2.sy + (dt * pDtV)
     else
         -- Shrink
+        pVec2.sx = pVec2.sx - (dt * pDtV)
+        pVec2.sy = pVec2.sy - (dt * pDtV)
         if pVec2.sx < pVec2.sxMin then
             pVec2.bShrink = false
         end
-        pVec2.sx = pVec2.sx - (dt * pDtV)
-        pVec2.sy = pVec2.sy - (dt * pDtV)
     end
 end
 
