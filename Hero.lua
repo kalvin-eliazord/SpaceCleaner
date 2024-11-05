@@ -72,9 +72,6 @@ function Hero:New(x, y)
     hero.img[animName] = Hero:InitAnimList(hero.img, "hero", animName, 7, 7, tileSize * 2, tileSize * 2)
     hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
-    -- hero.img[animName] = Hero:InitAnimList(hero.img, animName, 4, 7)
-    --  hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName], 18, 46.5)
-
     hero.hp = 3
     hero.vx = 0
     hero.vy = 0.2
@@ -130,7 +127,7 @@ function Hero:NewEngine(x, y)
     return engine
 end
 
-function NewDust(x, y, r)
+function NewEngineDust(x, y, r)
     local dust = {}
     dust.x = x
     dust.y = y
@@ -256,7 +253,7 @@ function SetVelocity(hero, dt)
     if hero.listEffect["Dash"].bActive then
         local iRand = math.random(2, 3)
         for i = 1, iRand do
-            NewDust(hero.x + math.random(-6, 6), hero.y, hero.r)
+            NewEngineDust(hero.x + math.random(-6, 6), hero.y, hero.r)
         end
     end
 
