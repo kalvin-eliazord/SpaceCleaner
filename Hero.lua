@@ -72,11 +72,13 @@ function Hero:New(x, y)
     hero.img[animName] = Hero:InitAnimList(hero.img, "hero", animName, 7, 7, tileSize * 2, tileSize * 2)
     hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
-    hero.hp = 3
+    hero.hp = 3 
     hero.vx = 0
     hero.vy = 0.2
     hero.vMax = 0.5
     hero.r = -90
+    hero.sx = 1 
+    hero.sy = 1 
     hero.sxMax = 1.5
     hero.syMax = 1.5
     hero.score = 0
@@ -142,14 +144,13 @@ end
 
 function Hero:UpdateAnimation(hero, dt)
     local currState = hero.img[hero.currState]
-    -- print("iFrame: ", currState.iFrame, " frameMax: ", currState.iFrameMax, " name: ", hero.currState)
+     print("sx: ", hero.sx, " sy: ",  hero.sy, " name: ", hero.currState)
     if currState.iFrameMax ~= nil then
         if currState.bReverse then
             currState.iFrame = currState.iFrame - (dt * currState.frameV)
             if math.floor(currState.iFrame) == 1 then
                 currState.bFramesDone = true
                 currState.bReverse = false
-                -- currState.iFrame = 7
             end
         else
             currState.iFrame = currState.iFrame + (dt * currState.frameV)
