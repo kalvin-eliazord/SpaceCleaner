@@ -22,6 +22,8 @@ function Enemy:New(x, y)
     enem.currState = "enemy_"..enem.type
     enem.vx = math.random(-200, 200)
     enem.vy = math.random(-200, 200)
+    enem.sxMin = 0.8
+    enem.syMin = 0.8
     enem.sx = 0.1
     enem.sy = 0.1
     enem.img = {}
@@ -78,7 +80,7 @@ function Enemy:Update(dt)
                 end
 
                 -- Enemy Shrinking
-                Enemy:SetShrink(enem, 1, dt)
+                Vec2:SetShrink(enem, 1, dt)
 
                 -- Enemy rotation
                 enem.r = Vec2:GetAngle(enem, hero)
@@ -121,7 +123,7 @@ function Enemy:Update(dt)
     if Laser.list then
         for i = #Laser.list, 1, -1 do
             local laser = Laser.list[i]
-            if laser.type == 2 then -- enemy type
+            if laser.type == 2 then -- enemy laser type
                 Laser.SetLaser(laser, dt)
                 Vec2:NewParticle(laser, "red", math.random(-0.1, 0.1), math.random(-0.1, 0.1), 0.0001, dt)
 

@@ -19,6 +19,7 @@ function Vortex:New(x, y)
     vortex.sx = 0
     vortex.sy = 0
     vortex.bReady = false
+    Vec2:NewTempEffect(vortex, "DamageTaken", 1, 0)
 
     -- Vortex Idle animation
     local animName = "VortexIdle2"
@@ -81,6 +82,10 @@ function Vortex:Update(dt)
 
                 -- Vortex animation
                 Vec2:SetShrink(vortex, 0.5, dt)
+
+                if vortex.hp < 1 then
+                    vortex.bDelete = true
+                end
 
                 -- Delete Vortex
                 if vortex.bDelete then

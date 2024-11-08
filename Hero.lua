@@ -5,6 +5,7 @@ local Enemy = require("Enemy")
 local Waste = require("Waste")
 local Asteroid = require("Asteroid")
 local Sound = require("Sound")
+local Vortex = require("Vortex")
 
 local Hero = {}
 Hero.__index = Hero
@@ -72,13 +73,13 @@ function Hero:New(x, y)
     hero.img[animName] = Hero:InitAnimList(hero.img, "hero", animName, 7, 7, tileSize * 2, tileSize * 2)
     hero.img[animName] = Vec2:NewLineFrameList(hero.img[animName])
 
-    hero.hp = 3 
+    hero.hp = 3
     hero.vx = 0
     hero.vy = 0.2
     hero.vMax = 0.5
     hero.r = -90
-    hero.sx = 1 
-    hero.sy = 1 
+    hero.sx = 1
+    hero.sy = 1
     hero.sxMax = 1.5
     hero.syMax = 1.5
     hero.score = 0
@@ -144,7 +145,7 @@ end
 
 function Hero:UpdateAnimation(hero, dt)
     local currState = hero.img[hero.currState]
-     print("sx: ", hero.sx, " sy: ",  hero.sy, " name: ", hero.currState)
+   -- print("bDodge: ", hero.bDodge, " name: ", hero.currState)
     if currState.iFrameMax ~= nil then
         if currState.bReverse then
             currState.iFrame = currState.iFrame - (dt * currState.frameV)
@@ -293,9 +294,7 @@ function Hero:Update(dt, cam)
         end
 
         Hero:UpdateAnimation(hero, dt)
-        if not hero.bSwordTp then
-            SetHeroAngle(hero, dt)
-        end
+
 
         SetHeroMaxSpeed(hero)
         SetVelocity(hero, dt)
@@ -311,7 +310,7 @@ function Hero:Update(dt, cam)
             Sound.PlayStatic("laserShoot_" .. math.random(1, 6))
             hero.listEffect["Shooting"].bActive = true
             Vec2:NewParticle(hero, "yellow", math.random(-0.5, 0.5), math.random(-0.5, 0.5), math.random(1, 3), dt)
-            -- local test = cam:move(200, 400)
+            cam:move(-500, 0)
             -- test.x = test.x + 20
             hero.listEffect["Shoot"].bActive = false
             hero.listEffect["Shoot"].bReady = false
@@ -357,27 +356,20 @@ function Hero:Update(dt, cam)
             end
         end
 
-        if hero.img["RobotSword"].bFramesDone then
-            hero.bSwordTp = false
-        end
-
         -- Robot Sword animation
         if hero.listEffect["RobotSword"].bActive then
             Vec2:NewParticle(hero, "green", math.random(-15, 15), math.random(-15, 15), 0.002, dt)
-            -- Vec2:SetShrink(hero, 1, dt)
 
             -- Combo Sword
             if hero.listEffect["RobotSword2"].bActive and math.floor(hero.img["RobotSword"].iFrame) == 5 then
                 Hero:ActivateAnimation(hero, "RobotSword2")
             end
 
-            -- Attack with tp to enemy
             -- hero.bSword = true
             Vec2:NewParticle(hero, "green", math.random(-15, 15), -hero.vy, 0.002, dt)
         end
 
         if hero.currState == "RobotSword2" and hero.img["RobotSword2"].bFramesDone then
-            hero.bSwordTp = false
             hero.img["RobotSword"].iFrame = 1
         end
 
@@ -445,6 +437,22 @@ function Hero:Update(dt, cam)
         end
         -- Asteroid cleaning process
         AsteroidCollision(dt)
+
+        -- Vortex collision robot sword
+        RobotSwordCollisionVortex(dt)
+    end
+end
+
+function RobotSwordCollisionVortex(dt)
+    if Vortex.list then
+        for i = #Vortex.list, 1, -1 do
+            local vortex = Vortex.list[i]
+            local currState = hero.img[hero.currState]
+            if Vec2:IsCollide(hero, vortex) and currState == "RobotSword" or currState == "RobotSword2" then
+                vortex.hp = vortex.hp - 1
+                vortex.listEffect["DamageTaken"].bActive = true
+            end
+        end
     end
 end
 
@@ -454,10 +462,13 @@ function AsteroidCollision(dt)
             local asteroid = Asteroid.list[i]
             if Vec2:IsCollide(hero, asteroid) then
                 local currState = hero.img[hero.currState]
-                asteroid.x = asteroid.x + (currState.w * dt * 8)
-                asteroid.y = asteroid.y + (currState.h * dt * 8)
-                asteroid.vx = asteroid.vx * -1
-                asteroid.vy = asteroid.vy * -1
+
+                hero.x = hero.x
+                hero.y = hero.y
+                --  asteroid.x = asteroid.x + (currState.w * dt * 8)
+                --    asteroid.y = asteroid.y + (currState.h * dt * 8)
+                --     asteroid.vx = asteroid.vx * -1
+                --      asteroid.vy = asteroid.vy * -1
             end
         end
     end
