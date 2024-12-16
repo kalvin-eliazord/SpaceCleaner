@@ -145,7 +145,7 @@ end
 
 function Hero:UpdateAnimation(hero, dt)
     local currState = hero.img[hero.currState]
-   -- print("bDodge: ", hero.bDodge, " name: ", hero.currState)
+   -- print(" currState: ", hero.currState)
     if currState.iFrameMax ~= nil then
         if currState.bReverse then
             currState.iFrame = currState.iFrame - (dt * currState.frameV)
@@ -295,7 +295,6 @@ function Hero:Update(dt, cam)
 
         Hero:UpdateAnimation(hero, dt)
 
-
         SetHeroMaxSpeed(hero)
         SetVelocity(hero, dt)
         Hero:MapCollision(hero, dt)
@@ -345,13 +344,16 @@ function Hero:Update(dt, cam)
         -- Transform Robot animation
         if hero.listEffect["Transform"].bActive then
             if hero.listEffect["Transform"].bSoundReady then
+                Vec2:NewParticle(hero, nil, math.random(-20, 20), math.random(-20, 20), 0.005, dt)
                 Sound.PlayStatic("transform2")
                 hero.listEffect["Transform"].bSoundReady = false
             end
-            Vec2:NewParticle(hero, nil, math.random(-20, 20), math.random(-20, 20), 0.005, dt)
-            -- Be invicible
-            hero.bDodge = true
-            if hero.img["Transform"].bFramesDone then
+        end
+
+        if hero.currState == "Transform" then
+            if not hero.img["Transform"].bFramesDone then
+                hero.bDodge = true
+            else
                 hero.bDodge = false
             end
         end
@@ -392,6 +394,7 @@ function Hero:Update(dt, cam)
 
         -- Temp animation
         SetIdleAnimation()
+        SetHeroAngle(hero, dt)
 
         -- Set Velocity of Hero laser
         if Laser.list then
@@ -461,10 +464,12 @@ function AsteroidCollision(dt)
         for i = #Asteroid.list, 1, -1 do
             local asteroid = Asteroid.list[i]
             if Vec2:IsCollide(hero, asteroid) then
-                local currState = hero.img[hero.currState]
+                --  local currState = hero.img[hero.currState]
 
-                hero.x = hero.x
-                hero.y = hero.y
+                hero.vx = 0
+                hero.vy = 0
+                Vec2:NewParticle(hero, "white", math.random(-0.5, 0.5), math.random(-0.5, 0.5), 0.0001, dt)
+
                 --  asteroid.x = asteroid.x + (currState.w * dt * 8)
                 --    asteroid.y = asteroid.y + (currState.h * dt * 8)
                 --     asteroid.vx = asteroid.vx * -1

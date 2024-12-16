@@ -70,7 +70,8 @@ function Enemy:Update(dt)
 
                 -- Enemy collision w/ Hero
                 if Vec2:IsCollide(enem, hero) and not hero.bDodge then
-                    if not hero.listEffect["RobotSword"].bActive then
+                    if not hero.currState == "RobotSword" 
+                    or not hero.currState == "RobotSword2" then
                         hero.hp = hero.hp - 1
                         hero.listEffect["DamageTaken"].bActive = true
                     end
