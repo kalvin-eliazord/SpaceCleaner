@@ -53,7 +53,10 @@ end
 
 function Asteroid:Update(dt)
     Vec2:SetTempEffects(Asteroid, dt)
+
     if Asteroid.listEffect["NewAst"].bReady then
+        -- make asteroids spawn less by changing cdr of the temp effecgt
+        Vec2:NewTempEffect(Asteroid, "NewAst", 0.01, math.random(20,30))
         Asteroid.listEffect["NewAst"].bActive = true
     end
     if Asteroid.listEffect["NewAst"].bActive then
@@ -73,6 +76,8 @@ function Asteroid:Update(dt)
                     asteroid.sx = asteroid.sx + dt
                     asteroid.sy = asteroid.sy + dt
                 else
+                    asteroid.sx = 1
+                    asteroid.sy = 1
                     asteroid.bReady = true
                 end
             end

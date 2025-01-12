@@ -24,13 +24,13 @@ function Laser:New(pType, pSrc, pDst)
     laser.type = pType
     laser.bDist = false
     laser.bShine = false
-
     local animName = nil
-    if pType == 3 then
+
+    if laser.type == 3 then
         -- Blast laser animation
         animName = "RobotShootBlast"
         laser.img = {}
-        laser.img[animName] = Vec2:InitAnimList(laser.img, "laser", animName, 4, 7, 51, 18)
+        laser.img[animName] = Vec2:InitAnimList(laser.img, "lasers", animName, 4, 2, 46.5, 18)
         laser.img[animName] = Vec2:NewLineFrameList(laser.img[animName])
     else
         animName = "laser_" .. pType
@@ -133,12 +133,13 @@ function Laser.Draw()
         for i, laser in ipairs(Laser.list) do
             --  love.graphics.setColor(255, 255, 0, 10)
             if laser.type == 3 then
+                print("yes??") -- does not enter into this branch ??(why)
                 local laserState = laser.img["RobotShootBlast"]
                 local laserImg = laserState.frames[math.floor(laserState.iFrame)]
-                if laserState.imgSheet and laserImg then
+                --if laserState.imgSheet and laserImg then
                     love.graphics.draw(laserState.imgSheet, laserImg, laser.x, laser.y, math.rad(laser.r), laser.sx,
                         laser.sy, laserState.w / 2, laserState.h / 2)
-                end
+                --end
             else
                 local laserState = laser.img[laser.currState]
                 love.graphics.draw(laserState.img, laser.x, laser.y, laser.r, laser.sx, laser.sy, laserState.w /2, laserState.h /2)

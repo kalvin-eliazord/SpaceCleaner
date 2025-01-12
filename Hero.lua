@@ -145,7 +145,6 @@ end
 
 function Hero:UpdateAnimation(hero, dt)
     local currState = hero.img[hero.currState]
-   -- print(" currState: ", hero.currState)
     if currState.iFrameMax ~= nil then
         if currState.bReverse then
             currState.iFrame = currState.iFrame - (dt * currState.frameV)
@@ -164,7 +163,7 @@ function Hero:UpdateAnimation(hero, dt)
 end
 
 function Hero:ActivateAnimation(hero, effectName)
-    --    print("effectName: ", effectName, " bReady: ", hero.listEffect[effectName].bReady)
+    --  print("effectName: ", effectName, " bReady: ", hero.listEffect[effectName].bReady)
     if hero.img[effectName] and hero.listEffect[effectName].bReady then
         hero.img[effectName].bFramesDone = false
         hero.listEffect[effectName].bActive = true
@@ -243,13 +242,17 @@ function SetHeroMaxSpeed(hero)
 end
 
 function SetVelocity(hero, dt)
-    local shipAngRad = math.rad(hero.r)
-    local angX = math.cos(shipAngRad)
-    local angY = math.sin(shipAngRad)
-    hero.vx = hero.vx + angX * (dt * 100)
-    hero.vy = hero.vy + angY * (dt * 100)
+    if hero.currState == "RobotSword" or hero.currState == "RobotSword2" or hero.currState == "RobotShoot" then
+        -- robot stop
+    else
+        local shipAngRad = math.rad(hero.r)
+        local angX = math.cos(shipAngRad)
+        local angY = math.sin(shipAngRad)
+        hero.vx = hero.vx + angX * (dt * 100)
+        hero.vy = hero.vy + angY * (dt * 100)
 
-    Hero:SetVelocity(hero, dt)
+        Vec2:SetVelocity(hero, dt)
+    end
 
     -- Engine Particles
     if hero.listEffect["Dash"].bActive then
@@ -258,9 +261,9 @@ function SetVelocity(hero, dt)
             NewEngineDust(hero.x + math.random(-6, 6), hero.y, hero.r)
         end
     end
-
 end
 
+-- Based on the hero mode we putting the Idle animation
 function SetIdleAnimation()
     if hero.bRobot then
         if hero.currState ~= "RobotIdle" and hero.img[hero.currState].bFramesDone then
@@ -273,7 +276,112 @@ function SetIdleAnimation()
     end
 end
 
-function Hero:Update(dt, cam)
+function SetLaser(pNearest, pDt)
+    if not hero.bRobot and nearest and hero.listEffect["Shoot"].bReady then
+        hero.listEffect["Shoot"].bActive = true
+    end
+    if hero.listEffect["Shoot"].bActive and pNearest then
+        Laser:New(1, hero, pNearest)
+        Sound.PlayStatic("laserShoot_" .. math.random(1, 6))
+        hero.listEffect["Shooting"].bActive = true
+        Vec2:NewParticle(hero, "yellow", math.random(-0.5, 0.5), math.random(-0.5, 0.5), math.random(1, 3), pDt)
+        cam:move(-500, 0)
+        -- test.x = test.x + 20
+        hero.listEffect["Shoot"].bActive = false
+        hero.listEffect["Shoot"].bReady = false
+        hero.listEffect["Shoot"].cdr = 0
+    end
+end
+
+function SetDodgingAnimation(pDt)
+    if hero.listEffect["Dodge"].bActive then
+        if hero.listEffect["Dodge"].bSoundReady then
+            Sound.PlayStatic("dodge")
+            hero.listEffect["Dodge"].bSoundReady = false
+        end
+        Vec2:NewParticle(hero, nil, math.random(-20, 20), math.random(-20, 20), 0.005, pDt)
+        hero.sx = hero.sx + (pDt * 2)
+        hero.sy = hero.sy + (pDt * 2)
+    else
+        if hero.currState == "Dodge" and hero.img["Dodge"].bFramesDone then
+            hero.bDodge = false
+        end
+        if hero.sx > 1 then
+            hero.sx = hero.sx - (pDt * 2)
+            hero.sy = hero.sy - (pDt * 2)
+        end
+    end
+end
+
+function UpdateRobotAnimation(pDt)
+    if hero.listEffect["RobotSword"].bActive then
+        Vec2:NewParticle(hero, "green", math.random(-15, 15), math.random(-15, 15), 0.002, pDt)
+
+        -- Combo Sword
+        if hero.listEffect["RobotSword2"].bActive and math.floor(hero.img["RobotSword"].iFrame) == 5 then
+            Hero:ActivateAnimation(hero, "RobotSword2")
+        end
+
+        -- hero.bSword = true
+        Vec2:NewParticle(hero, "green", math.random(-15, 15), -hero.vy, 0.002, pDt)
+    end
+
+    if hero.currState == "RobotSword2" and hero.img["RobotSword2"].bFramesDone then
+        hero.img["RobotSword"].iFrame = 1
+    end
+
+    -- Robot Shoot animation
+    if hero.listEffect["RobotShoot"].bActive then
+        Vec2:NewParticle(hero, "yellow", math.random(-20, 20), math.random(-20, 20), 0.005, pDt)
+    end
+
+    -- Robot Fly animation
+    if hero.listEffect["RobotFly"].bActive then
+        -- Dash
+        hero.listEffect["Dash"].bActive = true
+    end
+
+end
+
+function UpdateLaserHero(pDt)
+    if Laser.list then
+        for i, laser in ipairs(Laser.list) do
+            if laser.type == 1 then -- hero type
+                Vec2:NewParticle(laser, "yellow", math.random(-0.1, 0.1), math.random(-0.1, 0.1), 0.0001, dt)
+
+                Laser.SetGuidedLaser(laser, pDt)
+
+                -- Hero Laser collision w/ enemies
+                if Vec2:IsCollide(laser, laser.target) then
+                    laser.target.listEffect["DamageTaken"].bActive = true
+                    laser.target.hp = laser.target.hp - 1
+                    if laser.target.hp <= 0 then
+                        hero.score = hero.score + 10
+                    end
+                    laser.bDelete = true
+                end
+            end
+        end
+    end
+end
+
+function GetDustList(dt)
+    if #DustList > 0 then
+        for i = #DustList, 1, -1 do
+            local dust = DustList[i]
+            local iRand = math.random(-1, 1)
+            dust.x = dust.x + ((hero.vx + iRand) * -1) + dt
+            dust.y = dust.y + (hero.vy * -2) + dt
+            dust.r = dust.r + dt
+            dust.timer = dust.timer - dt
+            if dust.timer <= 0 then
+                table.remove(DustList, i)
+            end
+        end
+    end
+end
+
+function Hero:Update(dt, cam, pGameStart)
     -- Hero Effect process
     Vec2:SetTempEffects(hero, dt)
 
@@ -290,7 +398,7 @@ function Hero:Update(dt, cam)
 
     else
         if Sound.StopStatic("ship_start") then
-            Vec2.bStart = true
+            pGameStart = true
         end
 
         Hero:UpdateAnimation(hero, dt)
@@ -299,41 +407,12 @@ function Hero:Update(dt, cam)
         SetVelocity(hero, dt)
         Hero:MapCollision(hero, dt)
 
-        -- New Laser
+        -- New Hero Laser based on the nearest enemy 
         local nearest = Vec2:GetNearest(Enemy.list, hero)
-        if not hero.bRobot and nearest and hero.listEffect["Shoot"].bReady then
-            hero.listEffect["Shoot"].bActive = true
-        end
-        if hero.listEffect["Shoot"].bActive and nearest then
-            Laser:New(1, hero, nearest)
-            Sound.PlayStatic("laserShoot_" .. math.random(1, 6))
-            hero.listEffect["Shooting"].bActive = true
-            Vec2:NewParticle(hero, "yellow", math.random(-0.5, 0.5), math.random(-0.5, 0.5), math.random(1, 3), dt)
-            cam:move(-500, 0)
-            -- test.x = test.x + 20
-            hero.listEffect["Shoot"].bActive = false
-            hero.listEffect["Shoot"].bReady = false
-            hero.listEffect["Shoot"].cdr = 0
-        end
+        SetLaser(nearest, dt)
 
         -- Dodging animation
-        if hero.listEffect["Dodge"].bActive then
-            if hero.listEffect["Dodge"].bSoundReady then
-                Sound.PlayStatic("dodge")
-                hero.listEffect["Dodge"].bSoundReady = false
-            end
-            Vec2:NewParticle(hero, nil, math.random(-20, 20), math.random(-20, 20), 0.005, dt)
-            hero.sx = hero.sx + (dt * 2)
-            hero.sy = hero.sy + (dt * 2)
-        else
-            if hero.currState == "Dodge" and hero.img["Dodge"].bFramesDone then
-                hero.bDodge = false
-            end
-            if hero.sx > 1 then
-                hero.sx = hero.sx - (dt * 2)
-                hero.sy = hero.sy - (dt * 2)
-            end
-        end
+        SetDodgingAnimation(dt)
 
         if hero.listEffect["SpeedMap"].bActive then
             hero.vx = hero.vx + dt
@@ -359,78 +438,17 @@ function Hero:Update(dt, cam)
         end
 
         -- Robot Sword animation
-        if hero.listEffect["RobotSword"].bActive then
-            Vec2:NewParticle(hero, "green", math.random(-15, 15), math.random(-15, 15), 0.002, dt)
-
-            -- Combo Sword
-            if hero.listEffect["RobotSword2"].bActive and math.floor(hero.img["RobotSword"].iFrame) == 5 then
-                Hero:ActivateAnimation(hero, "RobotSword2")
-            end
-
-            -- hero.bSword = true
-            Vec2:NewParticle(hero, "green", math.random(-15, 15), -hero.vy, 0.002, dt)
-        end
-
-        if hero.currState == "RobotSword2" and hero.img["RobotSword2"].bFramesDone then
-            hero.img["RobotSword"].iFrame = 1
-        end
-
-        -- Robot Shoot animation
-        if hero.listEffect["RobotShoot"].bActive then
-            Vec2:NewParticle(hero, "yellow", math.random(-20, 20), math.random(-20, 20), 0.005, dt)
-            if hero.currState == "RobotShoot" and hero.img["RobotShoot"].bFramesDone then
-                if nearest then
-                    Laser:New(3, hero, nearest)
-                end
-
-            end
-        end
-
-        -- Robot Fly animation
-        if hero.listEffect["RobotFly"].bActive then
-            -- Dash
-            hero.listEffect["Dash"].bActive = true
-        end
+       UpdateRobotAnimation(dt)
 
         -- Temp animation
-        SetIdleAnimation()
+        SetIdleAnimation(dt)
         SetHeroAngle(hero, dt)
 
         -- Set Velocity of Hero laser
-        if Laser.list then
-            for i, laser in ipairs(Laser.list) do
-                if laser.type == 1 then -- hero type
-                    Vec2:NewParticle(laser, "yellow", math.random(-0.1, 0.1), math.random(-0.1, 0.1), 0.0001, dt)
+        UpdateLaserHero(dt)
 
-                    Laser.SetGuidedLaser(laser, dt)
-
-                    -- Hero Laser collision w/ enemies
-                    if Vec2:IsCollide(laser, laser.target) then
-                        laser.target.listEffect["DamageTaken"].bActive = true
-                        laser.target.hp = laser.target.hp - 1
-                        if laser.target.hp <= 0 then
-                            hero.score = hero.score + 10
-                        end
-                        laser.bDelete = true
-                    end
-                end
-            end
-        end
-
-        -- Speed boost animation
-        if #DustList > 0 then
-            for i = #DustList, 1, -1 do
-                local dust = DustList[i]
-                local iRand = math.random(-1, 1)
-                dust.x = dust.x + ((hero.vx + iRand) * -1) + dt
-                dust.y = dust.y + (hero.vy * -2) + dt
-                dust.r = dust.r + dt
-                dust.timer = dust.timer - dt
-                if dust.timer <= 0 then
-                    table.remove(DustList, i)
-                end
-            end
-        end
+        -- Dust Speed boost animation
+        GetDustList(dt)
 
         -- Waste process
         if Waste.list then
@@ -443,17 +461,24 @@ function Hero:Update(dt, cam)
 
         -- Vortex collision robot sword
         RobotSwordCollisionVortex(dt)
+
     end
 end
 
-function RobotSwordCollisionVortex(dt)
+function RobotSwordCollisionVortex(pDamage, dt)
     if Vortex.list then
         for i = #Vortex.list, 1, -1 do
             local vortex = Vortex.list[i]
             local currState = hero.img[hero.currState]
-            if Vec2:IsCollide(hero, vortex) and currState == "RobotSword" or currState == "RobotSword2" then
-                vortex.hp = vortex.hp - 1
-                vortex.listEffect["DamageTaken"].bActive = true
+            if hero.currState == "RobotSword" then
+                if currState and Vec2:IsCollide(hero, vortex) and currState.iFrame == 3 then
+                    vortex.bHit = true
+                end
+            end
+            if hero.currState == "RobotSword2" and currState.iFrame == 2 then
+                if currState and Vec2:IsCollide(hero, vortex) and currState.iFrame == 1 then
+                    vortex.bHit = true
+                end
             end
         end
     end
@@ -464,22 +489,16 @@ function AsteroidCollision(dt)
         for i = #Asteroid.list, 1, -1 do
             local asteroid = Asteroid.list[i]
             if Vec2:IsCollide(hero, asteroid) then
-                --  local currState = hero.img[hero.currState]
-
                 hero.vx = 0
                 hero.vy = 0
                 Vec2:NewParticle(hero, "white", math.random(-0.5, 0.5), math.random(-0.5, 0.5), 0.0001, dt)
-
-                --  asteroid.x = asteroid.x + (currState.w * dt * 8)
-                --    asteroid.y = asteroid.y + (currState.h * dt * 8)
-                --     asteroid.vx = asteroid.vx * -1
-                --      asteroid.vy = asteroid.vy * -1
             end
         end
     end
 end
 
 function Hero:Draw()
+    -- Dust
     if DustList then
         for i, dust in ipairs(DustList) do
             love.graphics.draw(dust.img, dust.x, dust.y, dust.r, dust.sx, dust.sy, dust.img:getWidth() / 2,
@@ -487,15 +506,18 @@ function Hero:Draw()
         end
     end
 
+    -- Yellow halo when shooting
     if hero.listEffect["Shooting"].bActive and hero.currState == "Idle" then
         love.graphics.draw(hero.img["IdleYellow"].imgSheet, hero.x, hero.y, math.rad(hero.r), hero.sx, hero.sy,
             hero.img["IdleYellow"].w / 2, hero.img["IdleYellow"].h / 2)
     end
 
+    -- Turn red when taking damage
     if hero.listEffect["DamageTaken"].bActive then
         love.graphics.setColor(1, 0, 0)
     end
 
+    
     if not hero.listEffect["Dash"].bActive then
         local engineBoost = 1
         if hero.bRobot then

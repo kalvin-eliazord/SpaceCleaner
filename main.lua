@@ -1,7 +1,7 @@
 io.stdout:setvbuf('no')
 love.graphics.setDefaultFilter("nearest")
 
--- Imports
+-- Imports file
 local Hero = require("Hero")
 local Asteroid = require("Asteroid")
 local UI = require("UI")
@@ -19,6 +19,7 @@ local Stars = require("Stars")
 
 local Game = {}
 
+-- World data init
 function GameInit()
     local game = {}
 
@@ -96,7 +97,7 @@ function love.update(dt)
 
             Laser:Update(dt)
         elseif Game.currScreen == "title" then
-            --  Waste:Update(dt)  make it dissapear in inGame? TODO ?
+            --  Waste:Update(dt)  make it disapear in inGame? TODO ?
         end
     end
 end
@@ -108,7 +109,7 @@ function love.keypressed(pKey)
         love.window.setFullscreen(fullscreen, "exclusive")
     end
 
-    -- IN GAME
+    -- Keys IN GAME
     if Game.currScreen == "inGame" then
         -- Pause the game
         if pKey == "p" then
@@ -119,7 +120,7 @@ function love.keypressed(pKey)
             end
         end
 
-        if Vec2.bStart then
+        if bGameStart then
             -- local currState = hero.img[hero.currState]
 
             if pKey == "r" then
@@ -143,8 +144,12 @@ function love.keypressed(pKey)
                         Hero:ActivateAnimation(hero, "RobotSword")
                     end
                 elseif pKey == "e" then
-                    -- Robot shoot process
-                    Hero:ActivateAnimation(hero, "RobotShoot")
+                    local nearest = Vec2:GetNearest(Enemy.list, hero)
+                    if nearest then
+                        -- Robot shoot process
+                        Hero:ActivateAnimation(hero, "RobotShoot")
+                        Laser:New(3, hero, nearest)
+                    end
                 elseif pKey == "z" then
                     if hero.currState ~= "Transform" then
                         -- Spaceship transformation process

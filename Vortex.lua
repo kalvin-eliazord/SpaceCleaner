@@ -14,17 +14,18 @@ function Vortex:New(x, y)
     end
 
     local vortex = Vec2:New(x, y)
+    vortex.bHit = false
     vortex.vx = 0
     vortex.vy = 0
     vortex.sx = 0
     vortex.sy = 0
     vortex.bReady = false
     Vec2:NewTempEffect(vortex, "DamageTaken", 1, 0)
-
+    vortex.hp = 3
     -- Vortex Idle animation
     local animName = "VortexIdle2"
     vortex.currState = animName
-    vortex.img[animName] = Vec2:InitAnimList(vortex.img,"vortex",animName, 6, 15, tileSize, tileSize)
+    vortex.img[animName] = Vec2:InitAnimList(vortex.img, "vortex", animName, 6, 15, tileSize, tileSize)
     vortex.img[animName] = Vec2:NewLineFrameList(vortex.img[animName])
 
     setmetatable(vortex, self)
@@ -55,6 +56,17 @@ function Vortex:Update(dt)
         if Map.name ~= "menu" then
             randX = hero.x + math.random(-300, 300)
             randY = hero.y + math.random(-300, 300)
+
+            local testX = math.abs(randX) - Map.img:getWidth() 
+            if testX < 100 then 
+                randX = randX - 300
+            end
+
+            local testY = math.abs(randY) - Map.img:getHeight() 
+            if testY < 100 then 
+                randY = randY - 300
+            end
+
             Vortex:New(randX, randY)
         end
     end
@@ -73,10 +85,17 @@ function Vortex:Update(dt)
                 end
 
             else
+
+                if vortex.bHit then
+                    vortex.hp = vortex.hp -1
+                    vortex.listEffect["DamageTaken"].bActive = true
+                    vortex.bHit = false
+                end
+
                 -- Enemy Spawn
                 if Enemy.spawnCDR <= 0 then
                     local Map = require("Map").current.img
-                    Enemy:New(vortex.x + math.random(-20, 20), vortex.y+ math.random(-20, 20))
+                    Enemy:New(vortex.x + math.random(-20, 20), vortex.y + math.random(-20, 20))
                     Enemy.spawnCDR = Enemy.maxSpawnCDR
                 end
 
@@ -94,9 +113,9 @@ function Vortex:Update(dt)
             end
             vortex.r = vortex.r + dt
             Vec2:UpdateAnimation(vortex, dt)
-  
+
         end
-    end
+    end 
 end
 
 function Vortex:Draw()
@@ -105,8 +124,14 @@ function Vortex:Draw()
             local currState = vortex.img[vortex.currState]
             local vortexImg = currState.frames[math.floor(currState.iFrame)]
             if currState.imgSheet and vortexImg then
+                -- vortex get red when taken damage
+                if vortex.listEffect["DamageTaken"].bActive then
+                    love.graphics.setColor(1, 0, 0)
+                end
                 love.graphics.draw(currState.imgSheet, vortexImg, vortex.x, vortex.y, vortex.r, vortex.sx * 1.5,
                     vortex.sy / 1.5, currState.w / 2, currState.h / 2)
+
+                love.graphics.setColor(255, 255, 255)
             end
         end
     end
